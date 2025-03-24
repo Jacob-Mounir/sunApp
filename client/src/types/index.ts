@@ -55,6 +55,11 @@ export interface MapPin {
 }
 
 // Type for filter state
-export type FilterState = {
-  [key: string]: boolean;
+export interface FilterState {
+  all: boolean;
+  restaurant: boolean;
+  cafe: boolean;
+  bar: boolean;
+  park: boolean;
+  [key: string]: boolean; // Allow other filter types
 };

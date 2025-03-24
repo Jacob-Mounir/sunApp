@@ -29,6 +29,10 @@ export default function Home() {
     park: false,
   });
   
+  // Special filters
+  const [showSunnyOnly, setShowSunnyOnly] = useState(false);
+  const [showHeatersOnly, setShowHeatersOnly] = useState(false);
+  
   // Search state
   const [searchTerm, setSearchTerm] = useState('');
   
@@ -52,24 +56,63 @@ export default function Home() {
     location.longitude
   );
 
-  // Filter venues based on search term and filters
+  // Helper function to check if a venue is currently sunny based on time and weather
+  const isVenueSunny = (venue: Venue) => {
+    if (!venue.hasSunnySpot) return false;
+    if (!weatherData) return true; // Default to true if no weather data
+    
+    // Check if the current weather is sunny
+    const isSunny = weatherData.weatherCondition?.toLowerCase().includes('clear') || 
+                    weatherData.weatherCondition?.toLowerCase().includes('sun');
+    
+    if (!isSunny) return false;
+    
+    // Check if current time is within sun hours
+    if (venue.sunHoursStart && venue.sunHoursEnd) {
+      const now = new Date();
+      const currentHour = now.getHours();
+      const currentMinute = now.getMinutes();
+      const currentTime = currentHour + currentMinute / 60;
+      
+      const [startHour, startMinute] = venue.sunHoursStart.split(':').map(Number);
+      const [endHour, endMinute] = venue.sunHoursEnd.split(':').map(Number);
+      
+      const startTime = startHour + startMinute / 60;
+      const endTime = endHour + endMinute / 60;
+      
+      return currentTime >= startTime && currentTime <= endTime;
+    }
+    
+    return true; // Default to true if no sun hours specified
+  };
+  
+  // Filter venues based on search term, filters, and special conditions
   const filteredVenues = venues.filter(venue => {
     // Filter by search term
     if (searchTerm && !venue.name.toLowerCase().includes(searchTerm.toLowerCase())) {
       return false;
     }
     
-    // If "all" filter is active, include all venues
-    if (filters.all) {
-      return true;
+    // Filter by venue type
+    if (!filters.all && venue.venueType && !(venue.venueType in filters) || !filters[venue.venueType as keyof FilterState]) {
+      return false;
     }
     
-    // Check if the venue type is selected
-    return filters[venue.venueType];
+    // Filter by sunny spots
+    if (showSunnyOnly && !isVenueSunny(venue)) {
+      return false;
+    }
+    
+    // Filter by heaters
+    if (showHeatersOnly && !venue.hasHeaters) {
+      return false;
+    }
+    
+    return true;
   });
 
   // Handle filter changes
-  const handleFilterChange = (filter: string) => {
+  const handleFilterChange = (filter: keyof FilterState) => {
     if (filter === 'all') {
       // If "all" is clicked, make only "all" active
       setFilters({
@@ -96,6 +139,10 @@ export default function Home() {
       setFilters(newFilters);
     }
   };
+
+  // Toggle special filters
+  const toggleSunnyFilter = () => setShowSunnyOnly(!showSunnyOnly);
+  const toggleHeatersFilter = () => setShowHeatersOnly(!showHeatersOnly);
 
   // Get active venue type for API query
   function getActiveVenueType(): string | undefined {
