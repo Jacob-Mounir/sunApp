@@ -5,6 +5,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { isSunnyWeather } from '@/hooks/useWeather';
 import { UserIcon, Utensils, Coffee, Beer, TreePine, Sun } from 'lucide-react';
+import { addCustomMapStyles, createSunnyTileLayer } from './SunnyMapStyle';
 
 interface MapViewProps {
   venues: Venue[];
@@ -28,11 +29,11 @@ export function MapView({ venues, userLocation, weatherData, onVenueSelect }: Ma
         15
       );
       
-      // Add tile layer
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '© OpenStreetMap contributors'
-      }).addTo(map);
+      // Add our custom sunny-themed tile layer
+      createSunnyTileLayer().addTo(map);
+      
+      // Apply custom styling to match the provided style array
+      addCustomMapStyles(map);
       
       mapRef.current = map;
     }
@@ -54,9 +55,9 @@ export function MapView({ venues, userLocation, weatherData, onVenueSelect }: Ma
       if (userMarker.current) {
         userMarker.current.setLatLng([userLocation.latitude, userLocation.longitude]);
       } else {
-        // Create user marker
+        // Create user marker with orange/amber styling to match our theme
         const userIcon = L.divIcon({
-          html: `<div class="w-6 h-6 rounded-full bg-blue-500 shadow-md flex items-center justify-center border-2 border-white pulse-animation">
+          html: `<div class="w-6 h-6 rounded-full bg-amber-500 shadow-md flex items-center justify-center border-2 border-white pulse-animation">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                     <circle cx="12" cy="7" r="4"></circle>
@@ -72,7 +73,7 @@ export function MapView({ venues, userLocation, weatherData, onVenueSelect }: Ma
           { icon: userIcon }
         ).addTo(mapRef.current);
         
-        // Add pulse animation style
+        // Add pulse animation style with amber/orange colors
         const style = document.createElement('style');
         style.textContent = `
           .pulse-animation {
@@ -86,7 +87,7 @@ export function MapView({ venues, userLocation, weatherData, onVenueSelect }: Ma
             top: 0;
             left: 0;
             border-radius: 50%;
-            background-color: rgba(59, 130, 246, 0.4);
+            background-color: rgba(245, 158, 11, 0.4); /* amber-500 with opacity */
             z-index: -1;
             animation: pulse 2s infinite;
           }
@@ -103,6 +104,11 @@ export function MapView({ venues, userLocation, weatherData, onVenueSelect }: Ma
               transform: scale(1.5);
               opacity: 0;
             }
+          }
+          
+          /* Add glow effect for sunny markers */
+          .glow-effect {
+            box-shadow: 0 0 8px 2px rgba(245, 158, 11, 0.6);
           }
         `;
         document.head.appendChild(style);
@@ -163,15 +169,15 @@ export function MapView({ venues, userLocation, weatherData, onVenueSelect }: Ma
                       </svg>`;
       }
       
-      // Get sunshine indicator
+      // Get sunshine indicator - using more vibrant orange/amber colors to match our theme
       const sunshineIndicator = venue.hasSunnySpot && isSunny 
-        ? '<div class="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full border border-white"></div>'
-        : '<div class="absolute -top-1 -right-1 w-3 h-3 bg-yellow-300 rounded-full border border-white"></div>';
+        ? '<div class="absolute -top-1 -right-1 w-3 h-3 bg-amber-500 rounded-full border border-white glow-effect"></div>'
+        : '<div class="absolute -top-1 -right-1 w-3 h-3 bg-amber-300 rounded-full border border-white"></div>';
       
-      // Create custom icon
+      // Create custom icon with orange/amber styling to match our map style
       const venueIcon = L.divIcon({
         html: `<div class="relative">
-                <div class="w-6 h-6 rounded-full bg-white shadow-md flex items-center justify-center border-2 border-primary cursor-pointer text-primary">
+                <div class="w-6 h-6 rounded-full bg-white shadow-md flex items-center justify-center border-2 border-amber-500 cursor-pointer text-amber-600">
                   ${iconHtml}
                 </div>
                 ${sunshineIndicator}
