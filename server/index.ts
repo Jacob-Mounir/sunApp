@@ -1,6 +1,7 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import importSwedishLocations from "./importLocations";
 
 const app = express();
 app.use(express.json());
@@ -66,5 +67,10 @@ app.use((req, res, next) => {
     reusePort: true,
   }, () => {
     log(`serving on port ${port}`);
+    
+    // Import Swedish locations data
+    importSwedishLocations()
+      .then(() => log('Swedish locations import complete or skipped'))
+      .catch(err => log(`Error importing Swedish locations: ${err.message}`));
   });
 })();
