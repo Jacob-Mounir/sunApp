@@ -110,8 +110,8 @@ export function SelectedLocationCard({ venue, weatherData, onClose }: SelectedLo
             className="w-full h-36 object-cover"
           />
         ) : (
-          <div className="w-full h-36 bg-gray-200 flex items-center justify-center">
-            <span className="text-gray-400 text-lg">No image available</span>
+          <div className="w-full h-36 bg-gradient-to-r from-blue-100 to-purple-100 flex items-center justify-center">
+            <span className="text-gray-600 text-lg font-medium">{venue.name}</span>
           </div>
         )}
         <button 
@@ -129,15 +129,36 @@ export function SelectedLocationCard({ venue, weatherData, onClose }: SelectedLo
           <Sun className="h-3 w-3 mr-1" />
           {isSunny ? 'Sunny now' : 'Partial sun'}
         </div>
+        
+        {/* Heaters indicator if available */}
+        {venue.hasHeaters !== undefined && (
+          <div className={`
+            absolute bottom-2 right-2 text-xs font-bold px-2 py-1 rounded-full flex items-center
+            ${venue.hasHeaters ? 'bg-red-400 text-white' : 'bg-gray-300 text-gray-700'}
+          `}>
+            <Thermometer className="h-3 w-3 mr-1" />
+            {venue.hasHeaters ? 'Outdoor heating' : 'No heating'}
+          </div>
+        )}
       </div>
       
       <div className="p-4">
         <div className="flex justify-between items-start">
           <div>
             <h3 className="font-semibold text-lg">{venue.name}</h3>
-            <p className="text-sm text-gray-600 mt-1">
-              {getVenueTypeIcon()} {getVenueTypeLabel()}
-            </p>
+            <div className="flex items-center mt-1">
+              <p className="text-sm text-gray-600">
+                {getVenueTypeIcon()} {getVenueTypeLabel()}
+              </p>
+              
+              {venue.city && (
+                <p className="text-sm text-gray-600 ml-3 flex items-center">
+                  <Home className="h-3 w-3 mr-1" />
+                  {venue.city}
+                  {venue.area && `, ${venue.area}`}
+                </p>
+              )}
+            </div>
           </div>
           {venue.rating && (
             <div className="flex items-center bg-gray-100 px-2 py-1 rounded">
@@ -160,8 +181,17 @@ export function SelectedLocationCard({ venue, weatherData, onClose }: SelectedLo
           </p>
           <p className="text-sm text-gray-600 mt-1 flex items-center">
             <Clock className="h-3 w-3 mr-1" />
-            {getSunHours()}
+            <span className="font-medium">Sun hours:</span> {getSunHours()}
           </p>
+          
+          {venue.website && (
+            <p className="text-sm text-gray-600 mt-1 flex items-center underline">
+              <Globe className="h-3 w-3 mr-1" />
+              <a href={venue.website} target="_blank" rel="noopener noreferrer">
+                Visit website
+              </a>
+            </p>
+          )}
         </div>
         
         <div className="mt-4 flex space-x-2">
@@ -178,6 +208,15 @@ export function SelectedLocationCard({ venue, weatherData, onClose }: SelectedLo
             <Bookmark className="h-4 w-4 mr-1" /> Save
           </button>
         </div>
+        
+        {venue.website && (
+          <button 
+            className="w-full mt-2 bg-white border border-gray-200 text-dark py-2 px-4 rounded-lg text-center font-medium text-sm flex items-center justify-center"
+            onClick={openWebsite}
+          >
+            <Globe className="h-4 w-4 mr-1" /> Visit Website
+          </button>
+        )}
       </div>
     </div>
   );

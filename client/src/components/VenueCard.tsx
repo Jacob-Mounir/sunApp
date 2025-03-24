@@ -1,5 +1,5 @@
 import { Venue } from '@/types';
-import { Utensils, Coffee, Beer, TreePine, Star, MapPin, Sun, CloudSun } from 'lucide-react';
+import { Utensils, Coffee, Beer, TreePine, Star, MapPin, Sun, CloudSun, Clock, Thermometer, Home } from 'lucide-react';
 
 interface VenueCardProps {
   venue: Venue;
@@ -76,10 +76,19 @@ export function VenueCard({ venue, isSunny, onClick }: VenueCardProps) {
           <div className="flex justify-between items-start">
             <div>
               <h3 className="font-semibold">{venue.name}</h3>
-              <p className="text-sm text-gray-500 flex items-center">
-                {getVenueIcon()}
-                {getVenueTypeLabel()}
-              </p>
+              <div className="flex flex-wrap items-center gap-1">
+                <p className="text-sm text-gray-500 flex items-center">
+                  {getVenueIcon()}
+                  {getVenueTypeLabel()}
+                </p>
+                
+                {venue.city && (
+                  <p className="text-sm text-gray-500 flex items-center ml-2">
+                    <Home className="h-3 w-3 mr-1" />
+                    {venue.area || venue.city}
+                  </p>
+                )}
+              </div>
             </div>
             {venue.rating && (
               <div className="bg-gray-100 px-2 py-1 rounded text-xs font-medium flex items-center">
@@ -94,7 +103,15 @@ export function VenueCard({ venue, isSunny, onClick }: VenueCardProps) {
               <MapPin className="h-3 w-3 mr-1" /> 
               {formatDistance(venue.distance)}
             </p>
-            <div className="mt-2 flex items-center">
+            
+            {venue.sunHoursStart && venue.sunHoursEnd && (
+              <p className="text-sm text-gray-600 flex items-center mt-1">
+                <Clock className="h-3 w-3 mr-1" /> 
+                Sun: {venue.sunHoursStart} - {venue.sunHoursEnd}
+              </p>
+            )}
+            
+            <div className="mt-2 flex flex-wrap items-center gap-2">
               <span className={`
                 inline-flex items-center text-xs font-medium px-2 py-1 rounded-full
                 ${isSunny 
@@ -106,6 +123,18 @@ export function VenueCard({ venue, isSunny, onClick }: VenueCardProps) {
                   : <CloudSun className="h-3 w-3 mr-1" />}
                 {venue.sunnySpotDescription || (isSunny ? 'Sunny now' : 'Partial sun')}
               </span>
+              
+              {venue.hasHeaters !== undefined && (
+                <span className={`
+                  inline-flex items-center text-xs font-medium px-2 py-1 rounded-full
+                  ${venue.hasHeaters 
+                    ? 'bg-red-100 text-red-700' 
+                    : 'bg-gray-100 text-gray-700'}
+                `}>
+                  <Thermometer className="h-3 w-3 mr-1" />
+                  {venue.hasHeaters ? 'Heaters' : 'No heaters'}
+                </span>
+              )}
             </div>
           </div>
         </div>

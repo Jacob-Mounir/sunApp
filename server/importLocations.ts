@@ -60,15 +60,23 @@ function parseAddressJson(addressStr: string): {
   city: string;
 } {
   try {
-    // The CSV contains JSON-like strings that need proper formatting
-    const cleanAddressStr = addressStr.replace(/""""/, '"').replace(/""""/g, '"');
-    const addressObj = JSON.parse(cleanAddressStr);
+    // The record is split by commas in the parseCSVLine function, but the address part may be complex
+    // Let's extract the key parts using regex rather than trying to parse it as JSON
+    const latitudeMatch = addressStr.match(/latitude[:=](\d+\.\d+)/);
+    const longitudeMatch = addressStr.match(/longitude[:=](\d+\.\d+)/);
+    const cityMatch = addressStr.match(/city[:=]"?([^,"]+)"?/);
+    const formattedMatch = addressStr.match(/formatted[:=]"?([^"]+)"?/);
+    
+    const latitude = latitudeMatch ? parseFloat(latitudeMatch[1]) : 57.70887; // Default Gothenburg
+    const longitude = longitudeMatch ? parseFloat(longitudeMatch[1]) : 11.97456;
+    const city = cityMatch ? cityMatch[1] : "Göteborg";
+    const formatted = formattedMatch ? formattedMatch[1] : "Unknown address";
     
     return {
-      formatted: addressObj.formatted,
-      latitude: addressObj.location.latitude,
-      longitude: addressObj.location.longitude,
-      city: addressObj.city
+      formatted,
+      latitude,
+      longitude,
+      city
     };
   } catch (error) {
     console.error("Error parsing address:", error);
