@@ -135,7 +135,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             console.error(`Weather API responded with: ${weatherResponse.status} ${weatherResponse.statusText}`);
             // If there's an existing cached data, use it even if it's stale rather than failing
             if (weatherData) {
-              return weatherData;
+              return res.json(weatherData);
             }
             throw new Error(`Weather API error: ${weatherResponse.statusText}`);
           }
@@ -158,7 +158,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.error("Error fetching weather data:", error);
           // If there's existing cached data, return it even if it's stale
           if (weatherData) {
-            return weatherData;
+            return res.json(weatherData);
           }
           // Otherwise re-throw to be handled by the outer catch block
           throw error;

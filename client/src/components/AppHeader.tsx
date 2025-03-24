@@ -1,5 +1,6 @@
 import { useWeather, isSunnyWeather } from '@/hooks/useWeather';
-import { Sun, Cloud, CloudSun } from 'lucide-react';
+import { Sun, Cloud, CloudSun, LogIn } from 'lucide-react';
+import { Link } from 'wouter';
 
 interface AppHeaderProps {
   latitude: number;
@@ -34,12 +35,19 @@ export function AppHeader({ latitude, longitude }: AppHeaderProps) {
           <h1 className="text-xl font-bold">SunSpotter</h1>
         </div>
         
-        {/* Weather Status */}
-        <div className="flex items-center">
-          <span className="mr-2 text-sm font-medium">
-            {weather?.temperature ? `${Math.round(weather.temperature)}°C` : '--°C'}
-          </span>
-          {renderWeatherIcon()}
+        <div className="flex items-center gap-4">
+          {/* Weather Status */}
+          <div className="flex items-center">
+            <span className="mr-2 text-sm font-medium">
+              {weather?.temperature ? `${Math.round(weather.temperature)}°C` : '--°C'}
+            </span>
+            {renderWeatherIcon()}
+          </div>
+          
+          {/* Login Link */}
+          <Link href="/login" className="text-primary hover:text-primary/80">
+            <LogIn className="h-5 w-5" />
+          </Link>
         </div>
       </div>
     </header>
