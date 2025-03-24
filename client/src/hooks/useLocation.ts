@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react';
 import { UserLocation } from '@/types';
 import { useToast } from '@/hooks/use-toast';
 
+// Default location: Göteborg, Sweden (central coordinates)
 const DEFAULT_LOCATION = {
-  latitude: 51.505,
-  longitude: -0.09,
+  latitude: 57.708870,
+  longitude: 11.974560,
 };
 
 export function useLocation() {

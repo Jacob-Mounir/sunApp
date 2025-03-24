@@ -46,7 +46,7 @@ export default function Home() {
   const { data: venues = [], isLoading: venuesLoading, refetch: refetchVenues } = useVenues({
     latitude: location.latitude,
     longitude: location.longitude,
-    radius: 5000, // 5km radius
+    radius: 10000, // 10km radius to capture more venues in Göteborg
     venueType: getActiveVenueType(),
   });
   
@@ -125,6 +125,7 @@ export default function Home() {
     } else {
       // If a specific filter is clicked
       const newFilters = { ...filters, all: false };
+      // Set the new filter value
       newFilters[filter] = !filters[filter];
       
       // If no filters are active, make "all" active

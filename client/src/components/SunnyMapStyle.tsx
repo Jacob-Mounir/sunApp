@@ -100,42 +100,13 @@ export function addCustomMapStyles(map: L.Map) {
   };
 }
 
-// Custom TileLayer with our sun-themed styling
-export class SunnyTileLayer extends L.TileLayer {
-  constructor(urlTemplate: string, options?: L.TileLayerOptions) {
-    super(urlTemplate, options);
-  }
-
-  // Add custom styling when layer is added to map
-  onAdd(map: L.Map): SunnyTileLayer {
-    // Apply our base layer
-    super.onAdd(map);
-    
-    // Add our custom styling
-    const container = map.getContainer();
-    container.classList.add('sunny-map');
-    
-    return this;
-  }
-
-  // Clean up when layer is removed
-  onRemove(map: L.Map): SunnyTileLayer {
-    // Remove our styling
-    const container = map.getContainer();
-    container.classList.remove('sunny-map');
-    
-    // Remove the base layer
-    super.onRemove(map);
-    
-    return this;
-  }
-}
-
 // Create and return a styled tile layer
 export function createSunnyTileLayer(): L.TileLayer {
-  // Use OpenStreetMap as base with our custom styling
-  return new SunnyTileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  // Use OpenStreetMap as base
+  const tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
   });
+  
+  return tileLayer;
 }
