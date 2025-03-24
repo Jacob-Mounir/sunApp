@@ -106,9 +106,10 @@ export class SunnyTileLayer extends L.TileLayer {
     super(urlTemplate, options);
   }
 
-  onAdd(map: L.Map): this {
+  // Add custom styling when layer is added to map
+  onAdd(map: L.Map): SunnyTileLayer {
     // Apply our base layer
-    L.TileLayer.prototype.onAdd.call(this, map);
+    super.onAdd(map);
     
     // Add our custom styling
     const container = map.getContainer();
@@ -117,13 +118,16 @@ export class SunnyTileLayer extends L.TileLayer {
     return this;
   }
 
-  onRemove(map: L.Map): this {
+  // Clean up when layer is removed
+  onRemove(map: L.Map): SunnyTileLayer {
     // Remove our styling
     const container = map.getContainer();
     container.classList.remove('sunny-map');
     
     // Remove the base layer
-    return L.TileLayer.prototype.onRemove.call(this, map);
+    super.onRemove(map);
+    
+    return this;
   }
 }
 

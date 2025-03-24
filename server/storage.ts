@@ -75,24 +75,42 @@ export class DatabaseStorage implements IStorage {
 
   // Venue methods
   async getVenues(latitude: number, longitude: number, radius = 5000, venueType?: string): Promise<Venue[]> {
+    console.log(`getVenues called with: lat=${latitude}, lon=${longitude}, radius=${radius}, type=${venueType || 'any'}`);
+    
     // First, get all venues or filter by type
     let query = db.select().from(venues);
     
     if (venueType) {
-      query = query.where(eq(venues.venueType, venueType));
+      console.log(`Filtering by venue type: ${venueType}`);
+      query = db.select().from(venues).where(eq(venues.venueType, venueType));
     }
     
     const allVenues = await query;
+    console.log(`Retrieved ${allVenues.length} venues from database`);
     
     // Then filter venues by calculating distance (cannot be done in SQL query easily)
-    return allVenues.filter(venue => {
+    const filteredVenues = allVenues.filter(venue => {
+      // Check for valid coordinates
+      if (venue.latitude === null || venue.longitude === null || 
+          isNaN(venue.latitude) || isNaN(venue.longitude)) {
+        console.log(`Skipping venue ${venue.id}: ${venue.name} due to invalid coordinates`);
+        return false;
+      }
+      
       const distance = this.calculateDistance(
         latitude, longitude, 
         venue.latitude, venue.longitude
       );
+      
       // Convert radius from meters to kilometers
-      return distance <= (radius / 1000);
+      const isInRange = distance <= (radius / 1000);
+      console.log(`Venue ${venue.id}: ${venue.name} is ${distance.toFixed(2)}km away, radius is ${(radius/1000).toFixed(2)}km, in range: ${isInRange}`);
+      
+      return isInRange;
     });
+    
+    console.log(`Returning ${filteredVenues.length} venues after distance filtering`);
+    return filteredVenues;
   }
 
   async getVenue(id: number): Promise<Venue | undefined> {

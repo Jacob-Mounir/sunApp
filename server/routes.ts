@@ -23,20 +23,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get venues near location
   app.get("/api/venues", async (req: Request, res: Response) => {
     try {
+      console.log("Received venue request with query params:", req.query);
+      
       const { latitude, longitude, radius, venueType } = venueSearchSchema.parse({
         latitude: parseFloat(req.query.latitude as string),
         longitude: parseFloat(req.query.longitude as string),
         radius: req.query.radius ? parseInt(req.query.radius as string) : undefined,
         venueType: req.query.venueType as string || undefined
       });
+      
+      console.log("Parsed venue search params:", { latitude, longitude, radius, venueType });
 
       const venues = await storage.getVenues(latitude, longitude, radius, venueType);
+      console.log(`Found ${venues.length} venues within radius ${radius}m of (${latitude}, ${longitude})`);
+      
       res.json(venues);
     } catch (error) {
+      console.error("Error in /api/venues endpoint:", error);
+      
       if (error instanceof ZodError) {
         const validationError = fromZodError(error);
+        console.error("Validation error:", validationError.message);
         res.status(400).json({ error: validationError.message });
       } else {
+        console.error("Unknown error:", error);
         res.status(500).json({ error: "Failed to get venues" });
       }
     }
