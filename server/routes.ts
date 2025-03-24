@@ -7,13 +7,13 @@ import { fromZodError } from "zod-validation-error";
 import fetch from "node-fetch";
 
 // Weather API configuration
-const WEATHER_API_KEY = process.env.OPENWEATHER_API_KEY || "";
+const WEATHER_API_KEY = process.env.OPENWEATHER_API_KEY || "2a84f4292f6faae16cc7e3987735edab";
 const WEATHER_API_BASE_URL = "https://api.openweathermap.org/data/2.5";
 
 // Debug log for environment variables
 console.log("Environment variables check:", {
-  haveApiKey: !!process.env.OPENWEATHER_API_KEY,
-  keyFirstChars: process.env.OPENWEATHER_API_KEY ? process.env.OPENWEATHER_API_KEY.substring(0, 4) + "..." : "none",
+  haveApiKey: !!WEATHER_API_KEY,
+  keyFirstChars: WEATHER_API_KEY ? WEATHER_API_KEY.substring(0, 4) + "..." : "none",
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
