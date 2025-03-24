@@ -11,6 +11,12 @@ export interface Venue {
   hasSunnySpot: boolean;
   sunnySpotDescription?: string;
   imageUrl?: string;
+  city?: string;
+  area?: string;
+  sunHoursStart?: string;
+  sunHoursEnd?: string;
+  hasHeaters?: boolean;
+  website?: string;
   distance?: number; // Calculated on client side
 }
 

@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, real } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, real, timestamp } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -19,6 +19,12 @@ export const venues = pgTable("venues", {
   hasSunnySpot: boolean("has_sunny_spot").default(true),
   sunnySpotDescription: text("sunny_spot_description"),
   imageUrl: text("image_url"),
+  city: text("city"),
+  area: text("area"),
+  sunHoursStart: text("sun_hours_start"),
+  sunHoursEnd: text("sun_hours_end"),
+  hasHeaters: boolean("has_heaters").default(false),
+  website: text("website"),
 });
 
 // Create insert schema for venues
@@ -37,9 +43,29 @@ export const weatherData = pgTable("weather_data", {
   timestamp: text("timestamp").notNull(),
 });
 
-// Create insert schema for weather data
+// For storing sun calculation data
+export const sunCalculations = pgTable("sun_calculations", {
+  id: serial("id").primaryKey(),
+  venueId: integer("venue_id").notNull(),
+  date: timestamp("date").notNull(),
+  sunriseTime: text("sunrise_time"),
+  sunsetTime: text("sunset_time"),
+  sunExposureStart: text("sun_exposure_start"),
+  sunExposureEnd: text("sun_exposure_end"),
+  calculationMethod: text("calculation_method"),
+  obstructionHeight: real("obstruction_height"),
+  obstructionDirection: text("obstruction_direction"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Create insert schemas
 export const insertWeatherDataSchema = createInsertSchema(weatherData).omit({
   id: true,
+});
+
+export const insertSunCalculationSchema = createInsertSchema(sunCalculations).omit({
+  id: true,
+  createdAt: true,
 });
 
 // Export types for venues and weather data
@@ -47,6 +73,8 @@ export type InsertVenue = z.infer<typeof insertVenueSchema>;
 export type Venue = typeof venues.$inferSelect;
 export type InsertWeatherData = z.infer<typeof insertWeatherDataSchema>;
 export type WeatherData = typeof weatherData.$inferSelect;
+export type InsertSunCalculation = z.infer<typeof insertSunCalculationSchema>;
+export type SunCalculation = typeof sunCalculations.$inferSelect;
 
 // User interface
 export const users = pgTable("users", {

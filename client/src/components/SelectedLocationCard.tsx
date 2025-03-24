@@ -1,5 +1,5 @@
 import { Venue, WeatherData } from '@/types';
-import { X, Sun, MapPin, Route, Clock, Navigation, Bookmark, Star } from 'lucide-react';
+import { X, Sun, MapPin, Route, Clock, Navigation, Bookmark, Star, Globe, Home, Thermometer } from 'lucide-react';
 import { isSunnyWeather } from '@/hooks/useWeather';
 
 interface SelectedLocationCardProps {
@@ -20,7 +20,7 @@ export function SelectedLocationCard({ venue, weatherData, onClose }: SelectedLo
       return `${(distance * 1000).toFixed(0)} meters away`;
     }
     
-    return `${distance.toFixed(1)} miles away`;
+    return `${distance.toFixed(1)} kilometers away`;
   };
 
   // Format venue type label
@@ -65,13 +65,27 @@ export function SelectedLocationCard({ venue, weatherData, onClose }: SelectedLo
     );
   };
 
+  // Open website
+  const openWebsite = () => {
+    if (!venue.website) {
+      alert('No website available');
+      return;
+    }
+    
+    window.open(venue.website, '_blank');
+  };
+
   // Save location (placeholder function)
   const saveLocation = () => {
     alert('This feature is not implemented yet.');
   };
 
-  // Estimate sun hours (placeholder)
+  // Get sun hours
   const getSunHours = () => {
+    if (venue.sunHoursStart && venue.sunHoursEnd) {
+      return `${venue.sunHoursStart} - ${venue.sunHoursEnd}`;
+    }
+    
     const now = new Date();
     const hours = now.getHours();
     
