@@ -112,7 +112,7 @@ export default function Home() {
   });
 
   // Handle filter changes
-  const handleFilterChange = (filter: keyof FilterState) => {
+  const handleFilterChange = (filter: string) => {
     if (filter === 'all') {
       // If "all" is clicked, make only "all" active
       setFilters({
@@ -124,9 +124,9 @@ export default function Home() {
       });
     } else {
       // If a specific filter is clicked
-      const newFilters = { ...filters, all: false };
-      // Set the new filter value
-      newFilters[filter] = !filters[filter];
+      const newFilters = { ...filters, all: false } as FilterState;
+      // Set the new filter value 
+      newFilters[filter] = !filters[filter as keyof FilterState];
       
       // If no filters are active, make "all" active
       const anyActive = Object.entries(newFilters).some(
@@ -219,7 +219,11 @@ export default function Home() {
       
       <FilterBar 
         filters={filters} 
-        onFilterChange={handleFilterChange} 
+        onFilterChange={handleFilterChange}
+        sunnyOnly={showSunnyOnly}
+        heatersOnly={showHeatersOnly}
+        onSunnyToggle={toggleSunnyFilter}
+        onHeatersToggle={toggleHeatersFilter}
       />
       
       <main className="flex-grow relative pb-16">
