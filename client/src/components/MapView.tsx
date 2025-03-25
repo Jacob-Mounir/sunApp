@@ -73,7 +73,7 @@ export function MapView({ venues, userLocation, weatherData, onVenueSelect }: Ma
           { icon: userIcon }
         ).addTo(mapRef.current);
         
-        // Add pulse animation style with amber/orange colors
+        // Add enhanced animations and styles for markers
         const style = document.createElement('style');
         style.textContent = `
           .pulse-animation {
@@ -106,9 +106,29 @@ export function MapView({ venues, userLocation, weatherData, onVenueSelect }: Ma
             }
           }
           
+          /* Scale animation for sunny spot indicators */
+          .scale-animation {
+            animation: scale 2s infinite alternate ease-in-out;
+          }
+          @keyframes scale {
+            0% {
+              transform: scale(0.8);
+              opacity: 0.3;
+            }
+            100% {
+              transform: scale(1.2);
+              opacity: 0;
+            }
+          }
+          
           /* Add glow effect for sunny markers */
           .glow-effect {
             box-shadow: 0 0 8px 2px rgba(245, 158, 11, 0.6);
+          }
+          
+          /* Better hovering effects for map elements */
+          .leaflet-marker-icon:hover {
+            z-index: 1000 !important;
           }
         `;
         document.head.appendChild(style);
@@ -169,22 +189,33 @@ export function MapView({ venues, userLocation, weatherData, onVenueSelect }: Ma
                       </svg>`;
       }
       
-      // Get sunshine indicator - using more vibrant orange/amber colors to match our theme
+      // Check if venue has heaters
+      const hasHeaters = venue.hasHeaters === true;
+      
+      // Get sunshine indicator with enhanced visual effects
       const sunshineIndicator = venue.hasSunnySpot && isSunny 
-        ? '<div class="absolute -top-1 -right-1 w-3 h-3 bg-amber-500 rounded-full border border-white glow-effect"></div>'
+        ? `<div class="absolute -top-1 -right-1 w-3.5 h-3.5 bg-amber-500 rounded-full border border-white glow-effect pulse-animation"></div>
+           <div class="absolute -top-1 -right-1 w-3.5 h-3.5 bg-amber-400 rounded-full opacity-75 scale-animation"></div>`
         : '<div class="absolute -top-1 -right-1 w-3 h-3 bg-amber-300 rounded-full border border-white"></div>';
       
-      // Create custom icon with orange/amber styling to match our map style
+      // Add heaters indicator if applicable
+      const heatersIndicator = hasHeaters 
+        ? '<div class="absolute -bottom-1 -left-1 w-3 h-3 bg-red-500 rounded-full border border-white"></div>'
+        : '';
+      
+      // Create enhanced custom icon with orange/amber styling to match our map style
       const venueIcon = L.divIcon({
-        html: `<div class="relative">
-                <div class="w-6 h-6 rounded-full bg-white shadow-md flex items-center justify-center border-2 border-amber-500 cursor-pointer text-amber-600">
+        html: `<div class="relative group">
+                <div class="w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center border-2 ${isSunny ? 'border-amber-500' : 'border-amber-400'} cursor-pointer text-amber-600 group-hover:scale-110 transition-transform">
                   ${iconHtml}
+                  <span class="absolute -bottom-6 left-1/2 transform -translate-x-1/2 bg-white px-2 py-0.5 rounded text-xs font-bold text-amber-800 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm whitespace-nowrap">${venue.name}</span>
                 </div>
                 ${sunshineIndicator}
+                ${heatersIndicator}
               </div>`,
         className: '',
-        iconSize: [24, 24],
-        iconAnchor: [12, 12]
+        iconSize: [32, 32],
+        iconAnchor: [16, 16]
       });
       
       // Create marker
