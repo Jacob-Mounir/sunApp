@@ -73,7 +73,7 @@ export function SelectedLocationCard({ venue, weatherData, onClose }: SelectedLo
   const [, navigate] = useLocation();
   
   // Use saved venues hook
-  const { savedVenues, saveVenue, removeVenue, isVenueSaved, toggleSavedVenue } = useSavedVenues();
+  const { savedVenues, saveVenue, removeSavedVenue, isVenueSaved, toggleSavedVenue } = useSavedVenues();
   const { toast } = useToast();
 
   // Determine if it's currently sunny
@@ -356,10 +356,16 @@ export function SelectedLocationCard({ venue, weatherData, onClose }: SelectedLo
             <Navigation className="h-4 w-4 mr-2" /> Get Directions
           </button>
           <button 
-            className="bg-white border border-amber-300 text-amber-700 py-2.5 px-4 rounded-lg font-medium text-sm flex items-center justify-center hover:bg-amber-50 transition-colors"
+            className={`
+              py-2.5 px-4 rounded-lg font-medium text-sm flex items-center justify-center transition-colors
+              ${isVenueSaved(venue.id) 
+                ? 'bg-amber-100 text-amber-700 hover:bg-amber-200' 
+                : 'bg-white border border-amber-300 text-amber-700 hover:bg-amber-50'}
+            `}
             onClick={saveLocation}
           >
-            <Bookmark className="h-4 w-4 mr-2" /> Save Location
+            <Bookmark className={`h-4 w-4 mr-2 ${isVenueSaved(venue.id) ? 'fill-amber-500' : ''}`} /> 
+            {isVenueSaved(venue.id) ? 'Saved' : 'Save Location'}
           </button>
         </div>
         
