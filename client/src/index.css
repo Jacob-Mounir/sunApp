@@ -199,6 +199,19 @@ html, body {
   opacity: 0;
 }
 
+/* Weather effects responsive adjustments */
+@media (max-width: 640px) {
+  .weather-effect-container {
+    /* Account for bottom navigation on mobile */
+    height: calc(100% - 60px);
+  }
+  
+  /* Reduce number of elements on mobile for better performance */
+  .rain-drop, .snow-flake, .cloud, .fog-patch {
+    opacity: 0.7; /* Slightly reduce opacity for better visibility */
+  }
+}
+
 /* Rain Effect */
 .rain-drops {
   position: absolute;

@@ -38,7 +38,9 @@ export const WeatherEffects: React.FC<WeatherEffectsProps> = ({
   // Generate rain drops
   const renderRainDrops = () => {
     const drops = [];
-    const dropCount = 100;
+    // Reduce drop count on smaller screens for better performance
+    const isMobile = window.innerWidth < 640;
+    const dropCount = isMobile ? 60 : 100;
     
     for (let i = 0; i < dropCount; i++) {
       const left = `${Math.random() * 100}%`;
@@ -64,7 +66,9 @@ export const WeatherEffects: React.FC<WeatherEffectsProps> = ({
   // Generate snow flakes
   const renderSnowFlakes = () => {
     const flakes = [];
-    const flakeCount = 60;
+    // Reduce flake count on mobile for better performance
+    const isMobile = window.innerWidth < 640;
+    const flakeCount = isMobile ? 40 : 60;
     
     for (let i = 0; i < flakeCount; i++) {
       const left = `${Math.random() * 100}%`;
@@ -93,14 +97,17 @@ export const WeatherEffects: React.FC<WeatherEffectsProps> = ({
   // Generate clouds
   const renderClouds = () => {
     const clouds = [];
-    const cloudCount = 5;
+    // Mobile optimization - reduce number of clouds on small screens
+    const isMobile = window.innerWidth < 640;
+    const cloudCount = isMobile ? 3 : 5;
     
     for (let i = 0; i < cloudCount; i++) {
       const top = `${10 + Math.random() * 30}%`;
       const left = `${Math.random() * 100}%`;
       const width = `${80 + Math.random() * 100}px`;
       const height = `${30 + Math.random() * 30}px`;
-      const animationDuration = `${15 + Math.random() * 10}s`;
+      // Slightly speed up animation on mobile for better performance
+      const animationDuration = `${isMobile ? 12 : 15 + Math.random() * 10}s`;
       const animationDelay = `${Math.random() * 5}s`;
       const opacity = 0.4 + Math.random() * 0.3;
       
