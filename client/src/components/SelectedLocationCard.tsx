@@ -210,7 +210,7 @@ export function SelectedLocationCard({ venue, weatherData, onClose }: SelectedLo
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-lg overflow-hidden max-w-md mx-auto pointer-events-auto">
+    <div className="bg-white rounded-lg shadow-lg overflow-hidden max-w-md mx-auto pointer-events-auto z-30">
       <div className="relative">
         {venue.imageUrl ? (
           <img 

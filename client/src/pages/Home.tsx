@@ -266,7 +266,7 @@ export default function Home() {
       />
       
       {/* Floating Action Button for refreshing */}
-      <div className="fixed bottom-24 right-4 z-10">
+      <div className="fixed bottom-24 right-4 z-10 sm:bottom-24 xs:bottom-20">
         <Button
           className="w-12 h-12 rounded-full shadow-lg"
           onClick={handleRefresh}

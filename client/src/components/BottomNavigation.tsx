@@ -78,7 +78,7 @@ export function BottomNavigation({ activeItem, onItemClick }: BottomNavigationPr
               <span className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-12 h-1 bg-gradient-to-r from-orange-500 to-red-500 rounded-full"></span>
             )}
             <div className={cn(
-              "flex items-center justify-center w-10 h-10 mb-1 rounded-full",
+              "flex items-center justify-center w-10 h-10 mb-1 rounded-full bottom-nav-icon",
               activeItem === 'settings' ? 'bg-orange-100' : 'bg-transparent'
             )}>
               <Settings className={cn(
@@ -87,7 +87,7 @@ export function BottomNavigation({ activeItem, onItemClick }: BottomNavigationPr
               )} />
             </div>
             <span className={cn(
-              "text-xs",
+              "text-xs bottom-nav-label",
               activeItem === 'settings' ? 'font-medium' : ''
             )}>
               Settings
