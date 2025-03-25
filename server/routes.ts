@@ -1,10 +1,11 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { venueSearchSchema, insertVenueSchema, insertWeatherDataSchema } from "@shared/schema";
+import { venueSearchSchema, insertVenueSchema, insertWeatherDataSchema, insertSunCalculationSchema } from "@shared/schema";
 import { ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
 import fetch from "node-fetch";
+import { SunCalculationService } from "./sunCalculationService";
 
 // Weather API configuration
 const WEATHER_API_KEY = process.env.OPENWEATHER_API_KEY || "2a84f4292f6faae16cc7e3987735edab";
