@@ -424,19 +424,12 @@ export function MapView({ venues, userLocation, weatherData, onVenueSelect }: Ma
           <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
         </svg></span>` : '';
       
-      // Create pill-shaped marker with venue type icon and sun rating
+      // Create simplified marker based on screenshot design
       const venueIcon = L.divIcon({
         html: `<div class="marker-container">
-                <div class="sun-rating-marker ${isSunny ? 'sunny' : ''} ${isSaved ? 'saved' : ''}">
-                  <span class="venue-icon">${getVenueIconHtml()}</span>
-                  <span class="venue-sun-rating">
-                    <svg class="sun-icon-rating" viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
-                      <circle cx="12" cy="12" r="5"></circle>
-                    </svg>
-                    ${formattedRating}
-                  </span>
-                  ${isSunny ? '<span class="current-sun-icon glow-animation"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" fill="currentColor"><circle cx="12" cy="12" r="5"></circle></svg></span>' : ''}
-                  ${bookmarkIconHtml}
+                <div class="sun-rating-marker-new">
+                  <div class="sun-icon-container"></div>
+                  <span class="rating-value">${formattedRating}</span>
                 </div>
               </div>`,
         className: '',
