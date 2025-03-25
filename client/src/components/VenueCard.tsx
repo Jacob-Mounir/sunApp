@@ -1,6 +1,59 @@
 import { Venue } from '@/types';
 import { Utensils, Coffee, Beer, TreePine, Star, MapPin, Sun, CloudSun, Clock, Thermometer, Home, ExternalLink, Flame, Route } from 'lucide-react';
 
+// Calculate sun rating (1-5) based on venue data
+const getSunRating = (venue: Venue): number => {
+  // This is a simplified algorithm - in a real app, this would be based on actual sun data
+  if (!venue.hasSunnySpot) return 1;
+  
+  // Use various venue properties to determine rating
+  let rating = 3; // Default middle rating
+  
+  // If venue has specified sun hours, use that to calculate rating
+  if (venue.sunHoursStart && venue.sunHoursEnd) {
+    try {
+      const startHour = parseInt(venue.sunHoursStart.split(':')[0]);
+      const endHour = parseInt(venue.sunHoursEnd.split(':')[0]);
+      const sunHours = endHour - startHour;
+      
+      // 1-2 hours: 1 sun
+      // 3-4 hours: 2 suns  
+      // 5-6 hours: 3 suns
+      // 7-8 hours: 4 suns
+      // 9+ hours: 5 suns
+      if (sunHours <= 2) rating = 1;
+      else if (sunHours <= 4) rating = 2;
+      else if (sunHours <= 6) rating = 3;
+      else if (sunHours <= 8) rating = 4;
+      else rating = 5;
+    } catch (e) {
+      // If calculation fails, use a default rating based on hasSunnySpot
+      rating = venue.hasSunnySpot ? 3 : 1;
+    }
+  } else {
+    // If no sun hours data, use a rating based on venue type
+    // Parks tend to be more sunny, cafes more mixed
+    switch (venue.venueType) {
+      case 'park':
+        rating = 4;
+        break;
+      case 'restaurant':
+        rating = venue.hasHeaters ? 4 : 3;
+        break;
+      case 'cafe':
+        rating = 3;
+        break;
+      case 'bar':
+        rating = venue.hasHeaters ? 4 : 2;
+        break;
+      default:
+        rating = 3;
+    }
+  }
+  
+  return rating;
+};
+
 interface VenueCardProps {
   venue: Venue;
   isSunny: boolean;
@@ -180,22 +233,34 @@ export function VenueCard({ venue, isSunny, onClick }: VenueCardProps) {
           {/* Sun prediction indicator */}
           {venue.hasSunnySpot && (
             <div className="mt-2 bg-gradient-to-r from-amber-50 to-amber-100 rounded-lg p-2">
-              <div className="text-xs font-medium text-amber-800 flex items-center">
-                <Sun className="h-3.5 w-3.5 mr-1.5 text-amber-500" />
-                {isSunny ? 'Currently sunny!' : 'Sunny during parts of the day'}
+              <div className="text-xs font-medium text-amber-800 flex items-center justify-between">
+                <div className="flex items-center">
+                  <Sun className="h-3.5 w-3.5 mr-1.5 text-amber-500" />
+                  {isSunny ? 'Currently sunny!' : 'Sunny during parts of the day'}
+                </div>
+                
+                {/* Sun rating display (1-5 suns) */}
+                <div className="flex">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <Sun 
+                      key={i} 
+                      className={`h-3 w-3 ${i < getSunRating(venue) ? 'text-amber-500' : 'text-gray-300'}`} 
+                      fill={i < getSunRating(venue) ? 'currentColor' : 'none'} 
+                    />
+                  ))}
+                </div>
               </div>
+              
               {venue.sunHoursStart && venue.sunHoursEnd && (
                 <div className="mt-1 w-full bg-gray-200 rounded-full h-1.5">
                   <div 
                     className="bg-gradient-to-r from-amber-400 to-amber-500 h-1.5 rounded-full" 
                     style={{ 
-                      width: '70%', 
+                      width: `${Math.min(getSunRating(venue) * 20, 100)}%`, // Width based on sun rating (20% per sun)
                       // Animation to suggest sun movement
                       animation: 'sunMovement 3s infinite alternate ease-in-out'
                     }}
                   ></div>
-                  {/* CSS animation in a style element would go here, 
-                    but we'll use the inline animation property instead */}
                 </div>
               )}
             </div>
