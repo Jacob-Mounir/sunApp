@@ -485,7 +485,7 @@ export function MapView({ venues, userLocation, weatherData, onVenueSelect }: Ma
   };
 
   return (
-    <div className="absolute inset-0 bg-gray-100 map-container z-10" id="map-container">
+    <div className="absolute inset-0 bg-gray-100 map-container" id="map-container">
       {/* The map will be rendered here */}
       
       {/* Sun position indicator */}
