@@ -31,20 +31,40 @@ export function MapView({ venues, userLocation, weatherData, onVenueSelect }: Ma
 
   // Initialize map
   useEffect(() => {
+    // Check if the map container exists
+    const mapContainer = document.getElementById('map-container');
+    if (!mapContainer) {
+      console.error("Map container not found");
+      return;
+    }
+    
     if (!mapRef.current) {
       // Create map
-      const map = L.map('map-container').setView(
-        [userLocation.latitude, userLocation.longitude], 
-        13  // Lower zoom level to see more venues
-      );
-      
-      // Add clean light tile layer
-      createSunnyTileLayer().addTo(map);
-      
-      // Apply custom styling to match the clean light style
-      addCustomMapStyles(map);
-      
-      mapRef.current = map;
+      try {
+        console.log("Initializing map with coordinates:", userLocation.latitude, userLocation.longitude);
+        const map = L.map('map-container', {
+          zoomControl: true,
+          attributionControl: true
+        }).setView(
+          [userLocation.latitude, userLocation.longitude], 
+          13  // Lower zoom level to see more venues
+        );
+        
+        // Add clean light tile layer
+        createSunnyTileLayer().addTo(map);
+        
+        // Apply custom styling to match the clean light style
+        addCustomMapStyles(map);
+        
+        mapRef.current = map;
+        
+        // Force a resize to ensure the map renders correctly
+        setTimeout(() => {
+          map.invalidateSize();
+        }, 100);
+      } catch (error) {
+        console.error("Error initializing map:", error);
+      }
     }
     
     return () => {
@@ -53,7 +73,7 @@ export function MapView({ venues, userLocation, weatherData, onVenueSelect }: Ma
         mapRef.current = null;
       }
     };
-  }, []);
+  }, [userLocation.latitude, userLocation.longitude]);
 
   // Update map when user location changes
   useEffect(() => {
