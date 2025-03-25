@@ -5,6 +5,7 @@ import { VenueCard } from '@/components/VenueCard';
 import { Venue } from '@/types';
 import { useToast } from '@/hooks/use-toast';
 import { useSavedVenues } from '@/hooks/useSavedVenues';
+import { BottomNavigation } from '@/components/BottomNavigation';
 
 export default function SavedLocations() {
   const [, navigate] = useLocation();
@@ -34,8 +35,19 @@ export default function SavedLocations() {
     setIsFiltering(!isFiltering);
   };
   
+  // Navigation handler for bottom navigation
+  const handleNavItemClick = (item: 'explore' | 'saved' | 'settings') => {
+    if (item === 'explore') {
+      navigate('/');
+    } else if (item === 'saved') {
+      // Already on saved page
+    } else if (item === 'settings') {
+      navigate('/settings');
+    }
+  };
+
   return (
-    <div className="container mx-auto px-4 py-6 max-w-2xl">
+    <div className="container mx-auto px-4 py-6 max-w-2xl pb-20">
       <div className="flex items-center mb-6">
         <button 
           onClick={() => navigate("/")}
@@ -143,6 +155,11 @@ export default function SavedLocations() {
           </button>
         </div>
       )}
+      
+      <BottomNavigation 
+        activeItem="saved" 
+        onItemClick={handleNavItemClick} 
+      />
     </div>
   );
 }

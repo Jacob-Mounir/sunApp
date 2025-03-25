@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useLocation } from 'wouter';
 import { ArrowLeft, Moon, Sun, Settings as SettingsIcon, Bell, MapPin, Globe, Lock, Info, LogOut, Sliders } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { BottomNavigation } from '@/components/BottomNavigation';
 
 import {
   Card,

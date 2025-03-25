@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useLocation as useWouterLocation } from 'wouter';
 import { AppHeader } from '@/components/AppHeader';
 import { SearchBar } from '@/components/SearchBar';
 import { TabSelector, TabOption } from '@/components/TabSelector';
@@ -187,17 +188,17 @@ export default function Home() {
   };
 
   // Handle bottom navigation item click
+  const [, navigate] = useWouterLocation();
   const handleNavItemClick = (item: 'explore' | 'saved' | 'settings') => {
     setActiveNavItem(item);
     
-    // For now, just switch to the correct tab
-    // In a full app, we would navigate to different screens
+    // Navigate to the correct page based on selected item
     if (item === 'explore') {
       // Already on home screen
     } else if (item === 'saved') {
-      alert('Saved places feature not implemented yet.');
+      navigate('/saved');
     } else if (item === 'settings') {
-      alert('Settings feature not implemented yet.');
+      navigate('/settings');
     }
   };
 

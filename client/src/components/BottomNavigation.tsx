@@ -1,5 +1,6 @@
 import { Sun, Bookmark, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useLocation, Link } from 'wouter';
 
 type NavItem = 'explore' | 'saved' | 'settings';
 
@@ -9,6 +10,7 @@ interface BottomNavigationProps {
 }
 
 export function BottomNavigation({ activeItem, onItemClick }: BottomNavigationProps) {
+  const [location] = useLocation();
   return (
     <div className="bg-white fixed bottom-0 left-0 right-0 border-t shadow-lg z-50 bottom-nav-safe-area">
       <div className="max-w-xl mx-auto px-4 bottom-nav-container">
