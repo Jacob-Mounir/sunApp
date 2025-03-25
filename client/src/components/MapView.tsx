@@ -8,6 +8,7 @@ import { useSunPosition } from '@/hooks/useSunCalculation';
 import { Sun } from 'lucide-react';
 import { addCustomMapStyles, createSunnyTileLayer } from './SunnyMapStyle';
 import { useSavedVenues } from '@/hooks/useSavedVenues';
+import { WeatherEffects } from './WeatherEffects';
 
 interface MapViewProps {
   venues: Venue[];
@@ -461,6 +462,9 @@ export function MapView({ venues, userLocation, weatherData, onVenueSelect }: Ma
       <div id="map-container" style={{ width: '100%', height: '100%' }}>
         {/* The map will be rendered here */}
       </div>
+      
+      {/* Weather animations */}
+      <WeatherEffects weatherData={weatherData} />
       
       {/* Sun position indicator */}
       {isCurrentlySunny && (

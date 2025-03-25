@@ -182,6 +182,227 @@ html, body {
   animation: glow 1.5s infinite alternate;
 }
 
+/* Weather Effects Animations */
+.weather-effect-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 50;
+  overflow: hidden;
+  transition: opacity 0.5s ease-in-out;
+}
+
+.weather-effect-container.transitioning {
+  opacity: 0;
+}
+
+/* Rain Effect */
+.rain-drops {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.rain-drop {
+  position: absolute;
+  top: -20px;
+  width: 1px;
+  height: 20px;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.7));
+  animation: rain-fall linear infinite;
+  opacity: 0.6;
+}
+
+@keyframes rain-fall {
+  0% {
+    transform: translateY(-20px);
+  }
+  100% {
+    transform: translateY(100vh);
+  }
+}
+
+/* Snow Effect */
+.snow-flakes {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.snow-flake {
+  position: absolute;
+  top: -10px;
+  width: 6px;
+  height: 6px;
+  background-color: white;
+  border-radius: 50%;
+  animation: snow-fall linear infinite;
+  opacity: 0.8;
+  filter: blur(1px);
+}
+
+@keyframes snow-fall {
+  0% {
+    transform: translateY(-10px) rotate(0deg);
+  }
+  25% {
+    transform: translateY(25vh) translateX(20px) rotate(90deg);
+  }
+  50% {
+    transform: translateY(50vh) translateX(-20px) rotate(180deg);
+  }
+  75% {
+    transform: translateY(75vh) translateX(20px) rotate(270deg);
+  }
+  100% {
+    transform: translateY(100vh) translateX(-20px) rotate(360deg);
+  }
+}
+
+/* Cloud Effect */
+.cloud-layer {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.cloud-group {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.cloud {
+  position: absolute;
+  width: 100px;
+  height: 40px;
+  background-color: rgba(255, 255, 255, 0.7);
+  border-radius: 20px;
+  animation: cloud-drift 20s linear infinite;
+  filter: blur(5px);
+}
+
+.cloud-layer.dark .cloud {
+  background-color: rgba(50, 50, 50, 0.7);
+}
+
+@keyframes cloud-drift {
+  0% {
+    transform: translateX(-120px);
+  }
+  100% {
+    transform: translateX(calc(100vw + 120px));
+  }
+}
+
+/* Fog Effect */
+.fog-layer {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.fog-patch {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 200%;
+  height: 100%;
+  background: linear-gradient(to right, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.1));
+  animation: fog-drift 30s linear infinite;
+  filter: blur(8px);
+}
+
+@keyframes fog-drift {
+  0% {
+    transform: translateX(-50%);
+  }
+  100% {
+    transform: translateX(0%);
+  }
+}
+
+/* Sun Effect */
+.sun-effect {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 60px;
+  height: 60px;
+}
+
+.sun-glow {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background-color: rgba(255, 193, 7, 0.5);
+  animation: sun-pulse 3s ease-in-out infinite alternate;
+}
+
+.sun-rays {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, rgba(255, 193, 7, 0.8) 0%, rgba(255, 193, 7, 0) 70%);
+  animation: sun-rotate 20s linear infinite;
+}
+
+@keyframes sun-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1.3);
+    opacity: 0.9;
+  }
+}
+
+@keyframes sun-rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Thunder Effect */
+.thunder-effect {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.lightning {
+  position: absolute;
+  top: 0;
+  left: 60%;
+  width: 3px;
+  height: 0;
+  background-color: rgba(255, 255, 255, 0.9);
+  filter: blur(1px);
+  animation: lightning-flash 6s infinite;
+  transform-origin: top;
+  z-index: 55;
+}
+
+@keyframes lightning-flash {
+  0%, 95%, 98% {
+    height: 0;
+    opacity: 0;
+  }
+  96%, 97% {
+    height: 200px;
+    opacity: 1;
+  }
+}
+
 @layer base {
   * {
     @apply border-border;
