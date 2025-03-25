@@ -13,7 +13,8 @@ import { useWeather } from '@/hooks/useWeather';
 import { useSunPosition, isVenueCurrentlySunny } from '@/hooks/useSunCalculation';
 import { isSunnyWeather } from '@/hooks/useWeather';
 import { Button } from '@/components/ui/button';
-import { RotateCw } from 'lucide-react';
+import { RotateCw, Plus } from 'lucide-react';
+import { AddVenueModal } from '@/components/AddVenueModal';
 
 export default function Home() {
   // Tab state
@@ -265,8 +266,18 @@ export default function Home() {
         onItemClick={handleNavItemClick}
       />
       
-      {/* Floating Action Button for refreshing */}
-      <div className="fixed bottom-24 right-4 z-10 sm:bottom-24 xs:bottom-20">
+      {/* Floating Action Buttons */}
+      <div className="fixed bottom-24 right-4 z-10 sm:bottom-24 xs:bottom-20 flex flex-col space-y-2">
+        {/* Add Venue Button */}
+        <AddVenueModal>
+          <Button
+            className="w-12 h-12 rounded-full shadow-lg bg-amber-500 hover:bg-amber-600"
+          >
+            <Plus className="h-5 w-5" />
+          </Button>
+        </AddVenueModal>
+        
+        {/* Refresh Button */}
         <Button
           className="w-12 h-12 rounded-full shadow-lg"
           onClick={handleRefresh}
