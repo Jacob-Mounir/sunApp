@@ -6,6 +6,8 @@ import {
 } from 'lucide-react';
 import { isSunnyWeather } from '@/hooks/useWeather';
 import { useLocation } from 'wouter';
+import { useSavedVenues } from '@/hooks/useSavedVenues';
+import { useToast } from '@/hooks/use-toast';
 
 // Calculate sun rating (1-5) based on venue data
 const getSunRating = (venue: Venue): number => {
@@ -69,6 +71,10 @@ interface SelectedLocationCardProps {
 export function SelectedLocationCard({ venue, weatherData, onClose }: SelectedLocationCardProps) {
   // For navigation
   const [, navigate] = useLocation();
+  
+  // Use saved venues hook
+  const { savedVenues, saveVenue, removeVenue, isVenueSaved, toggleSavedVenue } = useSavedVenues();
+  const { toast } = useToast();
 
   // Determine if it's currently sunny
   const isSunny = venue.hasSunnySpot && isSunnyWeather(weatherData?.weatherCondition, weatherData?.icon);
@@ -151,9 +157,10 @@ export function SelectedLocationCard({ venue, weatherData, onClose }: SelectedLo
     }
   };
 
-  // Save location (placeholder function)
+  // Save or remove location
   const saveLocation = () => {
-    alert('This feature is not implemented yet.');
+    toggleSavedVenue(venue);
+    // Toast notifications are handled in the hook
   };
 
   // Get sun hours

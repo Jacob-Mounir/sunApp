@@ -139,8 +139,8 @@ export function MapView({ venues, userLocation, weatherData, onVenueSelect }: Ma
             z-index: 1000 !important;
           }
           
-          /* Price marker styles */
-          .price-marker {
+          /* Venue marker styles */
+          .sun-rating-marker {
             display: flex;
             align-items: center;
             gap: 4px;
@@ -155,15 +155,16 @@ export function MapView({ venues, userLocation, weatherData, onVenueSelect }: Ma
             border: 1px solid rgba(0,0,0,0.1);
             transition: all 0.2s ease;
             height: 24px;
+            position: relative;
           }
           
-          .price-marker.sunny {
+          .sun-rating-marker.sunny {
             background: linear-gradient(to right, #f59e0b, #d97706);
             color: white;
             border: none;
           }
           
-          .price-marker:hover {
+          .sun-rating-marker:hover {
             transform: scale(1.05);
             box-shadow: 0 4px 8px rgba(0,0,0,0.15);
           }
@@ -250,6 +251,27 @@ export function MapView({ venues, userLocation, weatherData, onVenueSelect }: Ma
             color: #d1d5db; /* gray-300 */
             stroke: #d1d5db;
             fill: none;
+          }
+          
+          /* Saved marker styles */
+          .sun-rating-marker.saved {
+            border: 2px solid #f59e0b; /* amber-500 */
+            box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.3), 0 2px 4px rgba(0,0,0,0.15);
+          }
+          
+          .bookmark-icon {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            background-color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+            border: 1px solid rgba(245, 158, 11, 0.5);
           }
         `;
         document.head.appendChild(style);
@@ -456,7 +478,7 @@ export function MapView({ venues, userLocation, weatherData, onVenueSelect }: Ma
       
       markers.current.push(marker);
     });
-  }, [venues, onVenueSelect, mapRef, weatherData, isCurrentlySunny]);
+  }, [venues, onVenueSelect, mapRef, weatherData, isCurrentlySunny, isVenueSaved]);
 
   const handleCloseLocationDetails = () => {
     setSelectedVenue(null);
