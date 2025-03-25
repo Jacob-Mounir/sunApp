@@ -433,8 +433,8 @@ export function MapView({ venues, userLocation, weatherData, onVenueSelect }: Ma
                 </div>
               </div>`,
         className: '',
-        iconSize: [30, 30],
-        iconAnchor: [15, 15]
+        iconSize: [60, 26],
+        iconAnchor: [30, 13]
       });
       
       const marker = L.marker(

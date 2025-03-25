@@ -108,30 +108,32 @@ html, body {
 /* New marker style based on screenshot */
 .sun-rating-marker-new {
   background-color: white;
-  border-radius: 20px;
+  border-radius: 16px;
   padding: 5px 10px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 5px;
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 500;
   color: #333;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.15);
   white-space: nowrap;
-  height: 28px;
+  height: 26px;
 }
 
 .sun-icon-container {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background-color: #f59e0b;
   display: inline-block;
 }
 
 .rating-value {
-  font-weight: 600;
-  font-size: 15px;
+  font-weight: 500;
+  font-size: 14px;
+  color: #333;
+  margin-left: 0;
 }
 
 .sun-rating-marker.sunny {
