@@ -448,12 +448,14 @@ export function MapView({ venues, userLocation, weatherData, onVenueSelect }: Ma
       
       {/* Selected location card */}
       {selectedVenue && (
-        <div className="absolute bottom-0 left-0 right-0 p-4 pointer-events-none">
-          <SelectedLocationCard
-            venue={selectedVenue}
-            weatherData={weatherData}
-            onClose={handleCloseLocationDetails}
-          />
+        <div className="absolute bottom-0 left-0 right-0 p-4 pointer-events-none z-50">
+          <div className="pointer-events-auto">
+            <SelectedLocationCard
+              venue={selectedVenue}
+              weatherData={weatherData}
+              onClose={handleCloseLocationDetails}
+            />
+          </div>
         </div>
       )}
     </div>

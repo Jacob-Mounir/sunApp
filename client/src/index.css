@@ -2,6 +2,23 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Z-index Management */
+.venue-details-page {
+  position: relative;
+  z-index: 10;
+  background-color: white;
+  min-height: 100vh;
+}
+
+.map-container {
+  position: relative;
+  z-index: 1;
+}
+
+.location-card-overlay {
+  z-index: 50;
+}
+
 /* Custom animations */
 @keyframes sunMovement {
   0% {
