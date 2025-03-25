@@ -2,9 +2,10 @@ import { Venue, WeatherData } from '@/types';
 import { 
   X, Sun, MapPin, Route, Clock, Navigation, Bookmark, Star, Globe, Home, 
   Thermometer, CloudSun, Utensils, Coffee, Beer, TreePine, Share2, CalendarClock, 
-  ExternalLink, Phone, Hash
+  ExternalLink, Phone, Hash, Info
 } from 'lucide-react';
 import { isSunnyWeather } from '@/hooks/useWeather';
+import { useLocation } from 'wouter';
 
 // Calculate sun rating (1-5) based on venue data
 const getSunRating = (venue: Venue): number => {
@@ -66,6 +67,9 @@ interface SelectedLocationCardProps {
 }
 
 export function SelectedLocationCard({ venue, weatherData, onClose }: SelectedLocationCardProps) {
+  // For navigation
+  const [, navigate] = useLocation();
+
   // Determine if it's currently sunny
   const isSunny = venue.hasSunnySpot && isSunnyWeather(weatherData?.weatherCondition, weatherData?.icon);
   
@@ -360,15 +364,30 @@ export function SelectedLocationCard({ venue, weatherData, onClose }: SelectedLo
             <Share2 className="h-4 w-4 mr-2" /> Share
           </button>
           
-          {venue.website && (
+          {venue.website ? (
             <button 
               className="flex-1 bg-gray-100 text-gray-800 py-2 px-4 rounded-lg text-center font-medium text-sm flex items-center justify-center hover:bg-gray-200 transition-colors"
               onClick={openWebsite}
             >
               <ExternalLink className="h-4 w-4 mr-2" /> Website
             </button>
+          ) : (
+            <button 
+              className="flex-1 bg-amber-100 text-amber-800 py-2 px-4 rounded-lg text-center font-medium text-sm flex items-center justify-center hover:bg-amber-200 transition-colors"
+              onClick={() => navigate(`/venue/${venue.id}`)}
+            >
+              <Info className="h-4 w-4 mr-2" /> Details
+            </button>
           )}
         </div>
+        
+        {/* View full details button */}
+        <button 
+          className="mt-3 w-full bg-gradient-to-r from-amber-400 to-amber-500 text-white py-2.5 px-4 rounded-lg font-medium text-sm flex items-center justify-center shadow-sm hover:from-amber-500 hover:to-amber-600 transition-colors"
+          onClick={() => navigate(`/venue/${venue.id}`)}
+        >
+          <Info className="h-4 w-4 mr-2" /> View Full Details
+        </button>
       </div>
     </div>
   );
