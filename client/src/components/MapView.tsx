@@ -433,7 +433,7 @@ export function MapView({ venues, userLocation, weatherData, onVenueSelect }: Ma
   };
 
   return (
-    <div className="absolute inset-0 bg-gray-100" id="map-container">
+    <div className="absolute inset-0 bg-gray-100 map-container" id="map-container">
       {/* The map will be rendered here */}
       
       {/* Sun position indicator */}
@@ -448,7 +448,7 @@ export function MapView({ venues, userLocation, weatherData, onVenueSelect }: Ma
       
       {/* Selected location card */}
       {selectedVenue && (
-        <div className="absolute bottom-0 left-0 right-0 p-4 pointer-events-none z-50">
+        <div className="absolute bottom-0 left-0 right-0 p-4 pointer-events-none location-card-overlay">
           <div className="pointer-events-auto">
             <SelectedLocationCard
               venue={selectedVenue}

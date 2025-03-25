@@ -193,7 +193,7 @@ export default function VenueDetails() {
   }
   
   return (
-    <div className="pb-24">
+    <div className="pb-24 venue-details-page">
       {/* Header Image */}
       <div className="relative w-full h-64 bg-amber-100">
         {venue.imageUrl ? (
