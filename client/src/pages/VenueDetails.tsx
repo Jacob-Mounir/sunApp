@@ -10,12 +10,12 @@ import { Venue } from '@/types';
 import { useVenue } from '@/hooks/useVenues';
 import { useWeather, isSunnyWeather } from '@/hooks/useWeather';
 import { useVenueSunshine, getSunshinePercentage } from '@/hooks/useSunCalculation';
+import { useSavedVenues } from '@/hooks/useSavedVenues';
 
 export default function VenueDetails() {
   const [, navigate] = useLocation();
   const [, params] = useRoute('/venue/:id');
   const { toast } = useToast();
-  const [isSaved, setIsSaved] = useState(false);
   
   const id = params?.id ? parseInt(params.id) : 0;
   const { data: venue, isLoading: venueLoading } = useVenue(id);
@@ -27,13 +27,14 @@ export default function VenueDetails() {
   
   const { data: sunshineData } = useVenueSunshine(id);
   
+  // Use the saved venues hook
+  const { isVenueSaved, toggleSavedVenue } = useSavedVenues();
+  
   const isCurrentlySunny = venue?.hasSunnySpot && 
     isSunnyWeather(weatherData?.weatherCondition, weatherData?.icon);
   
-  useEffect(() => {
-    // Check if this venue is saved (placeholder logic)
-    setIsSaved(false);
-  }, [id]);
+  // Check if this venue is saved
+  const isSaved = venue ? isVenueSaved(venue.id) : false;
   
   // Get sun rating for this venue
   const getSunRating = (venue?: Venue): number => {
@@ -146,13 +147,9 @@ export default function VenueDetails() {
   
   // Toggle save status
   const toggleSaved = () => {
-    setIsSaved(!isSaved);
-    toast({
-      title: !isSaved ? "Location saved" : "Location removed",
-      description: !isSaved 
-        ? "This location has been added to your saved list" 
-        : "This location has been removed from your saved list",
-    });
+    if (venue) {
+      toggleSavedVenue(venue);
+    }
   };
   
   // Share venue (placeholder function)

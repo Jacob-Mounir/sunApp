@@ -4,6 +4,7 @@ import { ArrowLeft, Bookmark, Trash2, MapPin, Sun, CloudSun, Info, Home, Search,
 import { VenueCard } from '@/components/VenueCard';
 import { Venue } from '@/types';
 import { useToast } from '@/hooks/use-toast';
+import { useSavedVenues } from '@/hooks/useSavedVenues';
 
 export default function SavedLocations() {
   const [, navigate] = useLocation();
