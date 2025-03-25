@@ -502,6 +502,29 @@ html, body {
   }
 }
 
+/* Responsive bottom navigation */
+@media (max-width: 640px) {
+  /* Make the bottom navigation more compact on small screens */
+  .bottom-nav-container {
+    padding: 0.5rem 0;
+  }
+  
+  .bottom-nav-icon {
+    width: 2rem;
+    height: 2rem;
+    margin-bottom: 0.25rem;
+  }
+  
+  .bottom-nav-label {
+    font-size: 0.65rem;
+  }
+
+  /* Ensure safe area at the bottom on mobile devices */
+  .bottom-nav-safe-area {
+    padding-bottom: env(safe-area-inset-bottom, 0.5rem);
+  }
+}
+
 @layer base {
   * {
     @apply border-border;

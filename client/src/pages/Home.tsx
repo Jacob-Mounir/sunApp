@@ -236,7 +236,7 @@ export default function Home() {
         onHeatersToggle={toggleHeatersFilter}
       />
       
-      <main className="flex-grow relative pb-16" style={{ height: 'calc(100vh - 200px)' }}>
+      <main className="flex-grow relative pb-20" style={{ height: 'calc(100vh - 230px)' }}>
         {/* Map View */}
         <div className={activeTab === 'map' ? 'block absolute inset-0' : 'hidden'} style={{ height: '100%', width: '100%' }}>
           <MapView

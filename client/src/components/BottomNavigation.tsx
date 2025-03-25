@@ -10,8 +10,8 @@ interface BottomNavigationProps {
 
 export function BottomNavigation({ activeItem, onItemClick }: BottomNavigationProps) {
   return (
-    <div className="bg-white fixed bottom-0 left-0 right-0 border-t shadow-lg">
-      <div className="max-w-xl mx-auto px-4">
+    <div className="bg-white fixed bottom-0 left-0 right-0 border-t shadow-lg z-50 bottom-nav-safe-area">
+      <div className="max-w-xl mx-auto px-4 bottom-nav-container">
         <div className="flex justify-around">
           <button 
             className={cn(
@@ -24,7 +24,7 @@ export function BottomNavigation({ activeItem, onItemClick }: BottomNavigationPr
               <span className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-12 h-1 bg-gradient-to-r from-orange-500 to-red-500 rounded-full"></span>
             )}
             <div className={cn(
-              "flex items-center justify-center w-10 h-10 mb-1 rounded-full",
+              "flex items-center justify-center w-10 h-10 mb-1 rounded-full bottom-nav-icon",
               activeItem === 'explore' ? 'bg-orange-100' : 'bg-transparent'
             )}>
               <Sun className={cn(
@@ -33,7 +33,7 @@ export function BottomNavigation({ activeItem, onItemClick }: BottomNavigationPr
               )} />
             </div>
             <span className={cn(
-              "text-xs",
+              "text-xs bottom-nav-label",
               activeItem === 'explore' ? 'font-medium' : ''
             )}>
               Explore
@@ -51,7 +51,7 @@ export function BottomNavigation({ activeItem, onItemClick }: BottomNavigationPr
               <span className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-12 h-1 bg-gradient-to-r from-orange-500 to-red-500 rounded-full"></span>
             )}
             <div className={cn(
-              "flex items-center justify-center w-10 h-10 mb-1 rounded-full",
+              "flex items-center justify-center w-10 h-10 mb-1 rounded-full bottom-nav-icon",
               activeItem === 'saved' ? 'bg-orange-100' : 'bg-transparent'
             )}>
               <Bookmark className={cn(
@@ -60,7 +60,7 @@ export function BottomNavigation({ activeItem, onItemClick }: BottomNavigationPr
               )} />
             </div>
             <span className={cn(
-              "text-xs",
+              "text-xs bottom-nav-label",
               activeItem === 'saved' ? 'font-medium' : ''
             )}>
               Saved
