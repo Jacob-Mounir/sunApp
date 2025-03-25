@@ -194,12 +194,8 @@ export function VenueCard({ venue, isSunny, onClick }: VenueCardProps) {
                       animation: 'sunMovement 3s infinite alternate ease-in-out'
                     }}
                   ></div>
-                  <style jsx>{`
-                    @keyframes sunMovement {
-                      0% { width: 0%; }
-                      100% { width: 100%; }
-                    }
-                  `}</style>
+                  {/* CSS animation in a style element would go here, 
+                    but we'll use the inline animation property instead */}
                 </div>
               )}
             </div>
