@@ -4,6 +4,7 @@ import { SelectedLocationCard } from './SelectedLocationCard';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { isSunnyWeather } from '@/hooks/useWeather';
+import { useSunPosition } from '@/hooks/useSunCalculation';
 import { UserIcon, Utensils, Coffee, Beer, TreePine, Sun } from 'lucide-react';
 import { addCustomMapStyles, createSunnyTileLayer } from './SunnyMapStyle';
 
@@ -19,6 +20,14 @@ export function MapView({ venues, userLocation, weatherData, onVenueSelect }: Ma
   const [selectedVenue, setSelectedVenue] = useState<Venue | null>(null);
   const markers = useRef<L.Marker[]>([]);
   const userMarker = useRef<L.Marker | null>(null);
+  
+  // Get sun position for determining sunshine
+  const { data: sunPosition } = useSunPosition(userLocation.latitude, userLocation.longitude);
+  
+  // Determine if it's currently sunny based on weather and sun position
+  const isSunnyWeatherNow = isSunnyWeather(weatherData?.weatherCondition, weatherData?.icon);
+  const isSunAboveHorizon = sunPosition ? sunPosition.elevation > 0 : false;
+  const isCurrentlySunny = isSunnyWeatherNow && isSunAboveHorizon;
 
   // Initialize map
   useEffect(() => {
@@ -154,6 +163,34 @@ export function MapView({ venues, userLocation, weatherData, onVenueSelect }: Ma
             margin-left: 4px;
             stroke: white;
           }
+          
+          .glow-animation {
+            position: relative;
+          }
+          
+          .glow-animation::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            border-radius: 50%;
+            background-color: rgba(245, 158, 11, 0.5); /* amber-500 with opacity */
+            z-index: -1;
+            animation: glow 1.5s infinite alternate;
+          }
+          
+          @keyframes glow {
+            0% {
+              transform: scale(1);
+              opacity: 0.7;
+            }
+            100% {
+              transform: scale(1.3);
+              opacity: 0;
+            }
+          }
         `;
         document.head.appendChild(style);
       }
@@ -174,9 +211,8 @@ export function MapView({ venues, userLocation, weatherData, onVenueSelect }: Ma
       // This would be replaced with actual price data from your API
       const price = Math.floor(Math.random() * 800 + 200);
       
-      // Check if venue is sunny (this would typically use your sunshine calculation)
-      const isSunny = venue.hasSunnySpot && 
-        isSunnyWeather(weatherData?.weatherCondition, weatherData?.icon);
+      // Check if venue is sunny based on sun position and weather
+      const isSunny = venue.hasSunnySpot && isCurrentlySunny;
       
       // Get the appropriate icon for venue type
       const getVenueIconHtml = () => {
@@ -251,7 +287,7 @@ export function MapView({ venues, userLocation, weatherData, onVenueSelect }: Ma
       
       markers.current.push(marker);
     });
-  }, [venues, onVenueSelect, mapRef, weatherData]);
+  }, [venues, onVenueSelect, mapRef, weatherData, isCurrentlySunny]);
 
   const handleCloseLocationDetails = () => {
     setSelectedVenue(null);
@@ -260,6 +296,16 @@ export function MapView({ venues, userLocation, weatherData, onVenueSelect }: Ma
   return (
     <div className="absolute inset-0 bg-gray-100" id="map-container">
       {/* The map will be rendered here */}
+      
+      {/* Sun position indicator */}
+      {isCurrentlySunny && (
+        <div className="absolute top-4 right-4 flex items-center gap-2 bg-amber-100 px-3 py-2 rounded-full shadow-md z-50">
+          <span className="text-amber-600 font-medium text-sm">Sun is out!</span>
+          <div className="w-5 h-5 rounded-full bg-amber-500 shadow-md flex items-center justify-center glow-animation">
+            <Sun className="h-3 w-3 text-white" />
+          </div>
+        </div>
+      )}
       
       {/* Selected location card */}
       {selectedVenue && (
