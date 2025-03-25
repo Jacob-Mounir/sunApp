@@ -5,8 +5,9 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { isSunnyWeather } from '@/hooks/useWeather';
 import { useSunPosition } from '@/hooks/useSunCalculation';
-import { UserIcon, Utensils, Coffee, Beer, TreePine, Sun } from 'lucide-react';
+import { UserIcon, Utensils, Coffee, Beer, TreePine, Sun, Bookmark } from 'lucide-react';
 import { addCustomMapStyles, createSunnyTileLayer } from './SunnyMapStyle';
+import { useSavedVenues } from '@/hooks/useSavedVenues';
 
 interface MapViewProps {
   venues: Venue[];
@@ -20,6 +21,9 @@ export function MapView({ venues, userLocation, weatherData, onVenueSelect }: Ma
   const [selectedVenue, setSelectedVenue] = useState<Venue | null>(null);
   const markers = useRef<L.Marker[]>([]);
   const userMarker = useRef<L.Marker | null>(null);
+  
+  // Use saved venues hook to highlight saved locations
+  const { isVenueSaved } = useSavedVenues();
   
   // Get sun position for determining sunshine
   const { data: sunPosition } = useSunPosition(userLocation.latitude, userLocation.longitude);
@@ -401,10 +405,19 @@ export function MapView({ venues, userLocation, weatherData, onVenueSelect }: Ma
       // Format sun rating to one decimal place
       const formattedRating = sunRating.toFixed(1);
       
+      // Check if this venue is saved
+      const isSaved = isVenueSaved(venue.id);
+      
+      // Create bookmark icon HTML for saved venues
+      const bookmarkIconHtml = isSaved ? 
+        `<span class="bookmark-icon"><svg viewBox="0 0 24 24" width="12" height="12" stroke="#ff8c00" fill="#ff8c00" stroke-width="2">
+          <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+        </svg></span>` : '';
+      
       // Create pill-shaped marker with venue type icon and sun rating
       const venueIcon = L.divIcon({
         html: `<div class="marker-container">
-                <div class="sun-rating-marker ${isSunny ? 'sunny' : ''}">
+                <div class="sun-rating-marker ${isSunny ? 'sunny' : ''} ${isSaved ? 'saved' : ''}">
                   <span class="venue-icon">${getVenueIconHtml()}</span>
                   <span class="venue-sun-rating">
                     <svg class="sun-icon-rating" viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
@@ -421,6 +434,7 @@ export function MapView({ venues, userLocation, weatherData, onVenueSelect }: Ma
                     ${formattedRating}
                   </span>
                   ${isSunny ? '<span class="current-sun-icon glow-animation"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" fill="currentColor"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg></span>' : ''}
+                  ${bookmarkIconHtml}
                 </div>
               </div>`,
         className: '',
