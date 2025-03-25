@@ -425,17 +425,29 @@ export function MapView({ venues, userLocation, weatherData, onVenueSelect }: Ma
           <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
         </svg></span>` : '';
       
-      // Create simplified marker based on screenshot design
+      // Create Airbnb-style marker with sun rating
       const venueIcon = L.divIcon({
         html: `<div class="marker-container">
                 <div class="sun-rating-marker-new">
-                  <div class="sun-icon-container"></div>
+                  <div class="sun-icon-container">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" stroke="currentColor" stroke-width="0.5">
+                      <circle cx="12" cy="12" r="5"></circle>
+                      <line x1="12" y1="1" x2="12" y2="3"></line>
+                      <line x1="12" y1="21" x2="12" y2="23"></line>
+                      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                      <line x1="1" y1="12" x2="3" y2="12"></line>
+                      <line x1="21" y1="12" x2="23" y2="12"></line>
+                      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                  </div>
                   <span class="rating-value">${formattedRating}</span>
                 </div>
               </div>`,
         className: '',
-        iconSize: [60, 26],
-        iconAnchor: [30, 13]
+        iconSize: [70, 30],
+        iconAnchor: [35, 15]
       });
       
       const marker = L.marker(
