@@ -13,8 +13,8 @@ export function BottomNavigation({ activeItem, onItemClick }: BottomNavigationPr
   const [location] = useLocation();
   return (
     <div className="bg-white fixed bottom-0 left-0 right-0 border-t shadow-lg z-50 bottom-nav-safe-area">
-      <div className="max-w-xl mx-auto px-4 bottom-nav-container">
-        <div className="flex justify-around">
+      <div className="max-w-xl mx-auto px-4 bottom-nav-container py-1">
+        <div className="flex justify-around items-center h-16">
           <button 
             className={cn(
               "py-3 flex flex-col items-center relative",

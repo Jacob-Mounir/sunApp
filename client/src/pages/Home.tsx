@@ -216,7 +216,7 @@ export default function Home() {
   }, [filters, refetchVenues]);
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen page-content">
       <AppHeader 
         latitude={location.latitude}
         longitude={location.longitude} 
@@ -238,7 +238,7 @@ export default function Home() {
         onHeatersToggle={toggleHeatersFilter}
       />
       
-      <main className="flex-grow relative pb-20" style={{ height: 'calc(100vh - 230px)' }}>
+      <main className="flex-grow relative">
         {/* Map View */}
         <div className={activeTab === 'map' ? 'block absolute inset-0' : 'hidden'} style={{ height: '100%', width: '100%' }}>
           <MapView

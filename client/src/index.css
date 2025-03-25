@@ -8,6 +8,7 @@
   z-index: 10;
   background-color: white;
   min-height: 100vh;
+  padding-bottom: 80px; /* Space for bottom navigation */
 }
 
 /* Ensure the main container fills available space */
@@ -15,14 +16,25 @@ html, body {
   height: 100%;
   margin: 0;
   padding: 0;
-  overflow: hidden;
+  overflow: auto;
+}
+
+/* Content padding for bottom navigation */
+.page-content {
+  padding-bottom: 70px; /* Space for bottom navigation */
+  min-height: 100vh;
+  position: relative;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 #root {
   height: 100%;
-  overflow: hidden;
+  overflow: auto;
   display: flex;
   flex-direction: column;
+  position: relative;
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
 }
 
 /* Map container specific styles */
