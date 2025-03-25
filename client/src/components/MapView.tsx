@@ -464,8 +464,8 @@ export function MapView({ venues, userLocation, weatherData, onVenueSelect }: Ma
   };
 
   return (
-    <div className="relative w-full h-full bg-gray-100">
-      <div id="map-container" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 10 }}>
+    <div className="map-container-wrapper">
+      <div id="map-container" style={{ width: '100%', height: '100%' }}>
         {/* The map will be rendered here */}
       </div>
       

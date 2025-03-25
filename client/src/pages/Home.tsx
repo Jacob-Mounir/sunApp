@@ -236,9 +236,9 @@ export default function Home() {
         onHeatersToggle={toggleHeatersFilter}
       />
       
-      <main className="flex-grow relative pb-16">
+      <main className="flex-grow relative pb-16" style={{ height: 'calc(100vh - 200px)' }}>
         {/* Map View */}
-        <div className={activeTab === 'map' ? 'block h-full' : 'hidden'}>
+        <div className={activeTab === 'map' ? 'block absolute inset-0' : 'hidden'} style={{ height: '100%', width: '100%' }}>
           <MapView
             venues={filteredVenues}
             userLocation={{
@@ -251,7 +251,7 @@ export default function Home() {
         </div>
         
         {/* List View */}
-        <div className={activeTab === 'list' ? 'block' : 'hidden'}>
+        <div className={activeTab === 'list' ? 'block h-full w-full overflow-auto' : 'hidden'}>
           <ListView
             venues={filteredVenues}
             weatherData={weatherData}
