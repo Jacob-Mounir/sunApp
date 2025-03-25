@@ -25,6 +25,19 @@ export const venues = pgTable("venues", {
   sunHoursEnd: text("sun_hours_end"),
   hasHeaters: boolean("has_heaters").default(false),
   website: text("website"),
+  // Operating hours fields
+  mondayHours: text("monday_hours"),
+  tuesdayHours: text("tuesday_hours"),
+  wednesdayHours: text("wednesday_hours"),
+  thursdayHours: text("thursday_hours"),
+  fridayHours: text("friday_hours"),
+  saturdayHours: text("saturday_hours"),
+  sundayHours: text("sunday_hours"),
+  // Contact information fields
+  phoneNumber: text("phone_number"),
+  email: text("email"),
+  instagramUrl: text("instagram_url"),
+  facebookUrl: text("facebook_url"),
 });
 
 // Create insert schema for venues

@@ -18,6 +18,21 @@ export interface Venue {
   hasHeaters?: boolean;
   website?: string;
   distance?: number; // Calculated on client side
+  
+  // Operating hours
+  mondayHours?: string;
+  tuesdayHours?: string;
+  wednesdayHours?: string;
+  thursdayHours?: string;
+  fridayHours?: string;
+  saturdayHours?: string;
+  sundayHours?: string;
+  
+  // Contact information
+  phoneNumber?: string;
+  email?: string;
+  instagramUrl?: string;
+  facebookUrl?: string;
 }
 
 // Types for weather data

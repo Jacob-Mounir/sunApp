@@ -44,6 +44,19 @@ export function AddVenueForm({ onSuccess, onCancel }: AddVenueFormProps) {
       latitude: 0,
       longitude: 0,
       hasSunnySpot: true,
+      // Operating hours
+      mondayHours: '',
+      tuesdayHours: '',
+      wednesdayHours: '',
+      thursdayHours: '',
+      fridayHours: '',
+      saturdayHours: '',
+      sundayHours: '',
+      // Contact information
+      phoneNumber: '',
+      email: '',
+      instagramUrl: '',
+      facebookUrl: '',
     }
   });
   
