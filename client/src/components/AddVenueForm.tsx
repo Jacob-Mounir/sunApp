@@ -64,12 +64,19 @@ export function AddVenueForm({ onSuccess, onCancel }: AddVenueFormProps) {
     setIsSubmitting(true);
     
     try {
-      const response = await apiRequest('/api/venues', {
+      const response = await fetch('/api/venues', {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify(data),
       });
       
-      const newVenue = response as unknown as Venue;
+      if (!response.ok) {
+        throw new Error('Failed to add venue');
+      }
+      
+      const newVenue = await response.json() as Venue;
       
       // Invalidate the venues query to refetch the list
       queryClient.invalidateQueries({ queryKey: ['/api/venues'] });
@@ -342,8 +349,168 @@ export function AddVenueForm({ onSuccess, onCancel }: AddVenueFormProps) {
             <p className="text-red-500 text-xs mt-1">{errors.sunnySpotDescription.message}</p>
           )}
         </div>
+
+        {/* Operating Hours Section */}
+        <div className="mt-8">
+          <h3 className="text-lg font-medium mb-4 pb-2 border-b">Operating Hours</h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label htmlFor="mondayHours" className="block text-sm font-medium">
+                Monday
+              </label>
+              <input
+                id="mondayHours"
+                type="text"
+                {...register('mondayHours')}
+                className="w-full px-3 py-2 border rounded-md"
+                placeholder="e.g., 09:00-22:00 or Closed"
+              />
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="tuesdayHours" className="block text-sm font-medium">
+                Tuesday
+              </label>
+              <input
+                id="tuesdayHours"
+                type="text"
+                {...register('tuesdayHours')}
+                className="w-full px-3 py-2 border rounded-md"
+                placeholder="e.g., 09:00-22:00 or Closed"
+              />
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+            <div className="space-y-2">
+              <label htmlFor="wednesdayHours" className="block text-sm font-medium">
+                Wednesday
+              </label>
+              <input
+                id="wednesdayHours"
+                type="text"
+                {...register('wednesdayHours')}
+                className="w-full px-3 py-2 border rounded-md"
+                placeholder="e.g., 09:00-22:00 or Closed"
+              />
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="thursdayHours" className="block text-sm font-medium">
+                Thursday
+              </label>
+              <input
+                id="thursdayHours"
+                type="text"
+                {...register('thursdayHours')}
+                className="w-full px-3 py-2 border rounded-md"
+                placeholder="e.g., 09:00-22:00 or Closed"
+              />
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+            <div className="space-y-2">
+              <label htmlFor="fridayHours" className="block text-sm font-medium">
+                Friday
+              </label>
+              <input
+                id="fridayHours"
+                type="text"
+                {...register('fridayHours')}
+                className="w-full px-3 py-2 border rounded-md"
+                placeholder="e.g., 09:00-22:00 or Closed"
+              />
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="saturdayHours" className="block text-sm font-medium">
+                Saturday
+              </label>
+              <input
+                id="saturdayHours"
+                type="text"
+                {...register('saturdayHours')}
+                className="w-full px-3 py-2 border rounded-md"
+                placeholder="e.g., 09:00-22:00 or Closed"
+              />
+            </div>
+          </div>
+          
+          <div className="mt-2">
+            <div className="space-y-2">
+              <label htmlFor="sundayHours" className="block text-sm font-medium">
+                Sunday
+              </label>
+              <input
+                id="sundayHours"
+                type="text"
+                {...register('sundayHours')}
+                className="w-full px-3 py-2 border rounded-md"
+                placeholder="e.g., 09:00-22:00 or Closed"
+              />
+            </div>
+          </div>
+        </div>
         
-        <div className="flex justify-end space-x-2 pt-4">
+        {/* Contact Information Section */}
+        <div className="mt-8">
+          <h3 className="text-lg font-medium mb-4 pb-2 border-b">Contact Information</h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label htmlFor="phoneNumber" className="block text-sm font-medium">
+                Phone Number
+              </label>
+              <input
+                id="phoneNumber"
+                type="text"
+                {...register('phoneNumber')}
+                className="w-full px-3 py-2 border rounded-md"
+                placeholder="e.g., +46 123 456 789"
+              />
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="email" className="block text-sm font-medium">
+                Email Address
+              </label>
+              <input
+                id="email"
+                type="email"
+                {...register('email')}
+                className="w-full px-3 py-2 border rounded-md"
+                placeholder="e.g., info@venue.com"
+              />
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+            <div className="space-y-2">
+              <label htmlFor="instagramUrl" className="block text-sm font-medium">
+                Instagram URL
+              </label>
+              <input
+                id="instagramUrl"
+                type="text"
+                {...register('instagramUrl')}
+                className="w-full px-3 py-2 border rounded-md"
+                placeholder="e.g., https://instagram.com/venue"
+              />
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="facebookUrl" className="block text-sm font-medium">
+                Facebook URL
+              </label>
+              <input
+                id="facebookUrl"
+                type="text"
+                {...register('facebookUrl')}
+                className="w-full px-3 py-2 border rounded-md"
+                placeholder="e.g., https://facebook.com/venue"
+              />
+            </div>
+          </div>
+        </div>
+        
+        <div className="flex justify-end space-x-2 pt-8">
           {onCancel && (
             <button
               type="button"
