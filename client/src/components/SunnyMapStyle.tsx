@@ -1,92 +1,115 @@
 import L from 'leaflet';
 
 /**
- * Implements a custom map style inspired by the provided Google Maps JSON style:
- * Main colors:
- * - Base: #ff7000 (orange) with high lightness (69%)
- * - Geometry: #cb8536 (amber/brown)
- * - Labels: #ffb471 (light orange) with high lightness (66%)
- * - Water: #ecc080 (sandy/amber color)
+ * Implements a clean, light map style similar to the provided screenshot
+ * with pill-shaped price markers
  */
 
 // Custom style options for different map providers
 export const SUNNY_MAP_STYLE = {
-  // Custom map style with warm orange/amber theme
-  // Inspired by the provided Google Maps style
-  openStreetMap: {
-    url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-  },
-  openStreetMapHot: {
-    url: 'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-  },
-  cartoVoyager: {
-    url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+  // Clean, light map style
+  cartoDB: {
+    url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
     subdomains: 'abcd',
     maxZoom: 19
+  },
+  // Alternative light styles
+  stamenToner: {
+    url: 'https://stamen-tiles-{s}.a.ssl.fastly.net/toner-lite/{z}/{x}/{y}{r}.png',
+    attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, under <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a>',
+    subdomains: 'abcd',
+    maxZoom: 20
+  },
+  googleStreets: {
+    url: 'https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',
+    attribution: '&copy; Google Maps',
+    subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+    maxZoom: 20
   }
 };
 
-// Create a Leaflet control to apply our custom styles based on the provided Google Maps style
+// Create a Leaflet control to apply our custom styles
 export function addCustomMapStyles(map: L.Map) {
-  // Add styles that match the provided orange/amber theme from the Google Maps style array
+  // Add styles that match the clean, light style in the screenshot
   const mapContainer = map.getContainer();
   
   // Remove any existing filter
   mapContainer.style.filter = '';
   
-  // Base filter to match the overall orange/amber tone (#ff7000 with lightness 69%)
-  // These values are carefully calibrated to match the provided Google Maps style
-  mapContainer.style.filter = 'sepia(40%) hue-rotate(355deg) saturate(180%) brightness(105%) contrast(95%)';
+  // Subtle adjustments to match the clean, light style
+  mapContainer.style.filter = 'saturate(90%) brightness(105%) contrast(95%)';
   
-  // Add additional styling to match specific elements from the Google Maps style
+  // Add additional styling
   const style = document.createElement('style');
   style.textContent = `
     /* Base map styles */
     .leaflet-tile-pane {
-      opacity: 0.92;
+      opacity: 1;
     }
     
-    /* Custom water styling to match #ecc080 */
+    /* Custom background */
     .leaflet-container {
-      background: #ecc080;
+      background: #f8f9fa;
     }
     
-    /* Enhance text contrast */
+    /* Enhance text visibility */
     .leaflet-container .leaflet-overlay-pane svg path {
-      stroke-width: 2px;
-      stroke-opacity: 0.8;
+      stroke-width: 1px;
+      stroke-opacity: 0.7;
     }
     
-    /* Add subtle shadows to elements */
+    /* Add subtle shadows to markers */
     .leaflet-marker-icon {
-      filter: drop-shadow(0 0 4px rgba(203, 133, 54, 0.6)); /* #cb8536 with opacity */
+      filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15));
+    }
+    
+    /* Custom pill markers */
+    .price-marker {
+      background-color: white;
+      border-radius: 16px;
+      padding: 4px 8px;
+      font-size: 12px;
+      font-weight: 500;
+      color: #333;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      white-space: nowrap;
+      transition: transform 0.2s ease;
+    }
+    
+    .price-marker:hover {
+      transform: scale(1.05);
+      z-index: 1000;
     }
     
     /* Custom zoom controls styling */
     .leaflet-control-zoom {
-      border-color: #cb8536 !important;
+      border: none !important;
+      box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1) !important;
     }
     
     .leaflet-control-zoom a {
-      color: #cb8536 !important;
-      background-color: rgba(255, 251, 245, 0.9) !important;
+      color: #333 !important;
+      background-color: white !important;
+      border-radius: 4px !important;
     }
     
     .leaflet-control-zoom a:hover {
-      background-color: rgba(255, 240, 220, 0.95) !important;
+      background-color: #f5f5f5 !important;
     }
     
-    /* Make map attribution amber-themed */
+    /* Make map attribution clean */
     .leaflet-control-attribution {
-      background-color: rgba(255, 240, 218, 0.8) !important;
-      color: #cb8536 !important;
+      background-color: rgba(255, 255, 255, 0.7) !important;
+      color: #666 !important;
+      font-size: 10px !important;
     }
     
     .leaflet-control-attribution a {
-      color: #b16c1f !important;
+      color: #333 !important;
     }
   `;
   document.head.appendChild(style);
@@ -102,10 +125,11 @@ export function addCustomMapStyles(map: L.Map) {
 
 // Create and return a styled tile layer
 export function createSunnyTileLayer(): L.TileLayer {
-  // Use OpenStreetMap as base
-  const tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+  // Use CartoDB light base map for a clean, minimal look
+  const tileLayer = L.tileLayer(SUNNY_MAP_STYLE.cartoDB.url, {
+    maxZoom: SUNNY_MAP_STYLE.cartoDB.maxZoom,
+    attribution: SUNNY_MAP_STYLE.cartoDB.attribution,
+    subdomains: SUNNY_MAP_STYLE.cartoDB.subdomains as string
   });
   
   return tileLayer;
