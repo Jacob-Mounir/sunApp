@@ -293,17 +293,12 @@ export function SelectedLocationCard({ venue, weatherData, onClose }: SelectedLo
             Sun Exposure
           </h4>
           
-          {/* Sun rating display (1-5 suns) */}
+          {/* Sun rating display with numeric value */}
           <div className="flex items-center mb-2">
             <span className="text-xs font-medium text-amber-700 mr-2">Rating:</span>
-            <div className="flex">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Sun 
-                  key={i} 
-                  className={`h-4 w-4 ${i < getSunRating(venue) ? 'text-amber-500' : 'text-gray-300'}`} 
-                  fill={i < getSunRating(venue) ? 'currentColor' : 'none'} 
-                />
-              ))}
+            <div className="flex items-center bg-amber-200 px-3 py-1 rounded-full">
+              <Sun className="h-4 w-4 text-amber-600 mr-1.5" fill="currentColor" />
+              <span className="text-sm font-bold text-amber-800">{getSunRating(venue).toFixed(1)}</span>
             </div>
           </div>
           
