@@ -1,6 +1,6 @@
 import { FilterState } from '@/types';
 import { cn } from '@/lib/utils';
-import { Sun, Flame } from 'lucide-react';
+import { Sun, Flame, Utensils, Coffee, Beer, TreePine, MapPin } from 'lucide-react';
 
 interface FilterBarProps {
   filters: FilterState;
@@ -19,82 +19,106 @@ export function FilterBar({
   onSunnyToggle, 
   onHeatersToggle 
 }: FilterBarProps) {
+  
+  // Helper function to get icon for each type
+  const getTypeIcon = (type: string) => {
+    switch(type) {
+      case 'restaurant':
+        return <Utensils size={14} className="mr-1" />;
+      case 'cafe':
+        return <Coffee size={14} className="mr-1" />;
+      case 'bar':
+        return <Beer size={14} className="mr-1" />;
+      case 'park':
+        return <TreePine size={14} className="mr-1" />;
+      case 'all':
+        return <MapPin size={14} className="mr-1" />;
+      default:
+        return null;
+    }
+  };
+  
   return (
-    <div className="bg-gray-50 px-4 py-2 sticky top-[146px] z-10">
+    <div className="bg-white px-4 py-3 sticky top-[146px] z-10 shadow-sm">
       <div className="max-w-xl mx-auto">
         {/* Venue type filters */}
-        <div className="flex space-x-2 overflow-x-auto py-1 scrollbar-hide">
+        <div className="flex space-x-2 overflow-x-auto py-1 no-scrollbar">
           <button 
             className={cn(
-              "px-3 py-1 text-sm rounded-full whitespace-nowrap font-medium shadow-sm",
+              "px-3 py-1.5 text-sm rounded-full whitespace-nowrap font-medium flex items-center transition-all",
               filters.all 
-                ? "bg-primary text-white" 
-                : "bg-white text-gray-600 border border-gray-200"
+                ? "bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md" 
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
             )}
             onClick={() => onFilterChange('all')}
           >
+            {getTypeIcon('all')}
             All Places
           </button>
           <button 
             className={cn(
-              "px-3 py-1 text-sm rounded-full whitespace-nowrap font-medium shadow-sm",
+              "px-3 py-1.5 text-sm rounded-full whitespace-nowrap font-medium flex items-center transition-all",
               filters.restaurant 
-                ? "bg-primary text-white" 
-                : "bg-white text-gray-600 border border-gray-200"
+                ? "bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md" 
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
             )}
             onClick={() => onFilterChange('restaurant')}
           >
+            {getTypeIcon('restaurant')}
             Restaurants
           </button>
           <button 
             className={cn(
-              "px-3 py-1 text-sm rounded-full whitespace-nowrap font-medium shadow-sm",
+              "px-3 py-1.5 text-sm rounded-full whitespace-nowrap font-medium flex items-center transition-all",
               filters.cafe 
-                ? "bg-primary text-white" 
-                : "bg-white text-gray-600 border border-gray-200"
+                ? "bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md" 
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
             )}
             onClick={() => onFilterChange('cafe')}
           >
+            {getTypeIcon('cafe')}
             Cafés
           </button>
           <button 
             className={cn(
-              "px-3 py-1 text-sm rounded-full whitespace-nowrap font-medium shadow-sm",
+              "px-3 py-1.5 text-sm rounded-full whitespace-nowrap font-medium flex items-center transition-all",
               filters.bar 
-                ? "bg-primary text-white" 
-                : "bg-white text-gray-600 border border-gray-200"
+                ? "bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md" 
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
             )}
             onClick={() => onFilterChange('bar')}
           >
+            {getTypeIcon('bar')}
             Bars
           </button>
           <button 
             className={cn(
-              "px-3 py-1 text-sm rounded-full whitespace-nowrap font-medium shadow-sm",
+              "px-3 py-1.5 text-sm rounded-full whitespace-nowrap font-medium flex items-center transition-all",
               filters.park 
-                ? "bg-primary text-white" 
-                : "bg-white text-gray-600 border border-gray-200"
+                ? "bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md" 
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
             )}
             onClick={() => onFilterChange('park')}
           >
+            {getTypeIcon('park')}
             Parks
           </button>
         </div>
         
         {/* Special feature filters */}
         {(onSunnyToggle || onHeatersToggle) && (
-          <div className="flex space-x-2 mt-2 pb-1">
+          <div className="flex space-x-2 mt-3">
             {onSunnyToggle && (
               <button 
                 className={cn(
-                  "px-3 py-1 text-sm rounded-full whitespace-nowrap font-medium shadow-sm flex items-center gap-1.5",
+                  "px-3 py-1.5 text-sm rounded-full whitespace-nowrap font-medium flex items-center transition-all",
                   sunnyOnly
-                    ? "bg-amber-500 text-white" 
-                    : "bg-white text-gray-600 border border-gray-200"
+                    ? "bg-gradient-to-r from-yellow-500 to-amber-500 text-white shadow-md" 
+                    : "bg-amber-100 text-amber-800 hover:bg-amber-200"
                 )}
                 onClick={onSunnyToggle}
               >
-                <Sun size={14} className={sunnyOnly ? "text-white" : "text-amber-500"} />
+                <Sun size={14} className="mr-1.5" />
                 Sunny Now
               </button>
             )}
@@ -102,14 +126,14 @@ export function FilterBar({
             {onHeatersToggle && (
               <button 
                 className={cn(
-                  "px-3 py-1 text-sm rounded-full whitespace-nowrap font-medium shadow-sm flex items-center gap-1.5",
+                  "px-3 py-1.5 text-sm rounded-full whitespace-nowrap font-medium flex items-center transition-all",
                   heatersOnly
-                    ? "bg-red-500 text-white" 
-                    : "bg-white text-gray-600 border border-gray-200"
+                    ? "bg-gradient-to-r from-red-500 to-red-600 text-white shadow-md" 
+                    : "bg-red-100 text-red-800 hover:bg-red-200"
                 )}
                 onClick={onHeatersToggle}
               >
-                <Flame size={14} className={heatersOnly ? "text-white" : "text-red-500"} />
+                <Flame size={14} className="mr-1.5" />
                 With Heaters
               </button>
             )}
