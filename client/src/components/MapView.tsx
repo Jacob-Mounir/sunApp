@@ -263,10 +263,6 @@ export function MapView({ venues, userLocation, weatherData, onVenueSelect }: Ma
     
     // Add venue markers
     venues.forEach(venue => {
-      // Generate a price value for display (similar to the screenshot)
-      // This would be replaced with actual price data from your API
-      const price = Math.floor(Math.random() * 800 + 200);
-      
       // Check if venue is sunny based on sun position and weather
       const isSunny = venue.hasSunnySpot && isCurrentlySunny;
       
