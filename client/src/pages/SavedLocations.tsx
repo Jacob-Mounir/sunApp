@@ -8,71 +8,12 @@ import { useSavedVenues } from '@/hooks/useSavedVenues';
 
 export default function SavedLocations() {
   const [, navigate] = useLocation();
-  const { toast } = useToast();
-  const [savedVenues, setSavedVenues] = useState<Venue[]>([]);
+  const { savedVenues, removeSavedVenue } = useSavedVenues();
   const [searchTerm, setSearchTerm] = useState('');
   const [isFiltering, setIsFiltering] = useState(false);
   
-  // Get saved venues from local storage
-  useEffect(() => {
-    // This is a placeholder - in a real app, this data would come from a database
-    // Here we're simulating saved venues with sample data
-    const sampleSavedVenues: Venue[] = [
-      {
-        id: 1,
-        name: "Kafé Södermalm",
-        venueType: "cafe",
-        latitude: 59.31,
-        longitude: 18.07,
-        address: "Södermannagatan 10, Stockholm",
-        hasSunnySpot: true,
-        sunHoursStart: "10:00",
-        sunHoursEnd: "16:00",
-        city: "Stockholm",
-        area: "Södermalm",
-        hasHeaters: true,
-        website: "https://example.com/kafesoder",
-        distance: 0.5,
-      },
-      {
-        id: 2,
-        name: "Park Central",
-        venueType: "park",
-        latitude: 59.33,
-        longitude: 18.06,
-        address: "Kungsträdgården, Stockholm",
-        hasSunnySpot: true,
-        city: "Stockholm",
-        area: "City",
-        distance: 1.2,
-      },
-      {
-        id: 3,
-        name: "Urban Deli Terrace",
-        venueType: "restaurant",
-        latitude: 59.31,
-        longitude: 18.08,
-        address: "Nytorget 4, Stockholm",
-        hasSunnySpot: true,
-        sunHoursStart: "12:00",
-        sunHoursEnd: "19:00",
-        hasHeaters: true,
-        city: "Stockholm",
-        area: "Södermalm",
-        website: "https://example.com/urbandeli",
-        distance: 0.7,
-      }
-    ];
-    
-    setSavedVenues(sampleSavedVenues);
-  }, []);
-  
   const handleRemoveSaved = (venueId: number) => {
-    setSavedVenues(venues => venues.filter(venue => venue.id !== venueId));
-    toast({
-      title: "Location removed",
-      description: "The location has been removed from your saved list",
-    });
+    removeSavedVenue(venueId);
   };
   
   const handleVenueSelect = (venue: Venue) => {
