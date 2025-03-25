@@ -22,6 +22,7 @@ export function MapView({ venues, userLocation, weatherData, onVenueSelect }: Ma
   const [selectedVenue, setSelectedVenue] = useState<Venue | null>(null);
   const markers = useRef<L.Marker[]>([]);
   const userMarker = useRef<L.Marker | null>(null);
+  const [mapReady, setMapReady] = useState(false);
   
   // Use saved venues hook to highlight saved locations
   const { isVenueSaved } = useSavedVenues();
@@ -49,7 +50,12 @@ export function MapView({ venues, userLocation, weatherData, onVenueSelect }: Ma
         console.log("Initializing map with coordinates:", userLocation.latitude, userLocation.longitude);
         const map = L.map('map-container', {
           zoomControl: true,
-          attributionControl: true
+          attributionControl: true,
+          scrollWheelZoom: true,
+          doubleClickZoom: true,
+          dragging: true,
+          // @ts-ignore - tap is a valid Leaflet option but not typed correctly
+          tap: true // Enables mobile touch events
         }).setView(
           [userLocation.latitude, userLocation.longitude], 
           13  // Lower zoom level to see more venues
@@ -63,10 +69,25 @@ export function MapView({ venues, userLocation, weatherData, onVenueSelect }: Ma
         
         mapRef.current = map;
         
+        // Handle window resize events
+        const handleResize = () => {
+          if (mapRef.current) {
+            mapRef.current.invalidateSize();
+          }
+        };
+        
+        window.addEventListener('resize', handleResize);
+        
         // Force a resize to ensure the map renders correctly
         setTimeout(() => {
           map.invalidateSize();
-        }, 100);
+          setMapReady(true);
+        }, 250);
+        
+        // Return cleanup function
+        return () => {
+          window.removeEventListener('resize', handleResize);
+        };
       } catch (error) {
         console.error("Error initializing map:", error);
       }
@@ -76,6 +97,7 @@ export function MapView({ venues, userLocation, weatherData, onVenueSelect }: Ma
       if (mapRef.current) {
         mapRef.current.remove();
         mapRef.current = null;
+        setMapReady(false);
       }
     };
   }, [userLocation.latitude, userLocation.longitude]);
@@ -425,10 +447,10 @@ export function MapView({ venues, userLocation, weatherData, onVenueSelect }: Ma
           <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
         </svg></span>` : '';
       
-      // Create Airbnb-style marker with sun rating
+      // Create responsive Airbnb-style marker with sun rating
       const venueIcon = L.divIcon({
         html: `<div class="marker-container">
-                <div class="sun-rating-marker-new">
+                <div class="sun-rating-marker-new ${isSaved ? 'saved' : ''}">
                   <div class="sun-icon-container">
                     <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" stroke="currentColor" stroke-width="0.5">
                       <circle cx="12" cy="12" r="5"></circle>
@@ -443,11 +465,12 @@ export function MapView({ venues, userLocation, weatherData, onVenueSelect }: Ma
                     </svg>
                   </div>
                   <span class="rating-value">${formattedRating}</span>
+                  ${bookmarkIconHtml}
                 </div>
               </div>`,
         className: '',
-        iconSize: [70, 30],
-        iconAnchor: [35, 15]
+        iconSize: [70, 30], // Default size
+        iconAnchor: [35, 15] // Default anchor
       });
       
       const marker = L.marker(
@@ -470,28 +493,47 @@ export function MapView({ venues, userLocation, weatherData, onVenueSelect }: Ma
   };
 
   return (
-    <div className="map-container-wrapper">
-      <div id="map-container" style={{ width: '100%', height: '100%' }}>
+    <div className="map-container-wrapper relative w-full h-full overflow-hidden">
+      {/* Loading indicator while map initializes */}
+      {!mapReady && (
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-50 z-50">
+          <div className="flex flex-col items-center">
+            <div className="w-8 h-8 rounded-full border-2 border-amber-500 border-t-transparent animate-spin mb-2"></div>
+            <span className="text-sm text-gray-600">Loading map...</span>
+          </div>
+        </div>
+      )}
+      
+      <div 
+        id="map-container" 
+        className="leaflet-container-responsive"
+        style={{ 
+          width: '100%', 
+          height: '100%',
+          minHeight: '300px',
+          visibility: mapReady ? 'visible' : 'hidden'
+        }}
+      >
         {/* The map will be rendered here */}
       </div>
       
       {/* Weather animations */}
       <WeatherEffects weatherData={weatherData} />
       
-      {/* Sun position indicator */}
+      {/* Sun position indicator - responsive for different screen sizes */}
       {isCurrentlySunny && (
-        <div className="absolute top-4 right-4 flex items-center gap-2 bg-amber-100 px-3 py-2 rounded-full shadow-md z-50">
-          <span className="text-amber-600 font-medium text-sm">Sun is out!</span>
-          <div className="w-5 h-5 rounded-full bg-amber-500 shadow-md flex items-center justify-center glow-animation">
-            <Sun className="h-3 w-3 text-white" />
+        <div className="absolute top-3 sm:top-4 right-3 sm:right-4 flex items-center gap-1 sm:gap-2 bg-amber-100 px-2 sm:px-3 py-1 sm:py-2 rounded-full shadow-md z-50 text-xs sm:text-sm">
+          <span className="text-amber-600 font-medium hidden xs:inline">Sun is out!</span>
+          <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-amber-500 shadow-md flex items-center justify-center glow-animation">
+            <Sun className="h-2 w-2 sm:h-3 sm:w-3 text-white" />
           </div>
         </div>
       )}
       
-      {/* Selected location card */}
+      {/* Selected location card - responsive for different screens */}
       {selectedVenue && (
-        <div className="absolute bottom-0 left-0 right-0 p-4 pointer-events-none location-card-overlay z-50">
-          <div className="pointer-events-auto">
+        <div className="absolute bottom-0 left-0 right-0 p-2 sm:p-4 pointer-events-none location-card-overlay z-50">
+          <div className="pointer-events-auto max-w-md mx-auto">
             <SelectedLocationCard
               venue={selectedVenue}
               weatherData={weatherData}
@@ -500,6 +542,8 @@ export function MapView({ venues, userLocation, weatherData, onVenueSelect }: Ma
           </div>
         </div>
       )}
+
+      {/* Map attribution and controls are automatically responsive through Leaflet */}
     </div>
   );
 }
