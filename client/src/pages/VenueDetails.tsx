@@ -6,6 +6,7 @@ import {
   Camera, MessageSquare, Flag, Utensils, Coffee, Beer, TreePine, Flame, Info
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { BottomNavigation } from '@/components/BottomNavigation';
 import { Venue } from '@/types';
 import { useVenue } from '@/hooks/useVenues';
 import { useWeather, isSunnyWeather } from '@/hooks/useWeather';
