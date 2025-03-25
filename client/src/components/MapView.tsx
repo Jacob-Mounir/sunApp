@@ -191,6 +191,42 @@ export function MapView({ venues, userLocation, weatherData, onVenueSelect }: Ma
               opacity: 0;
             }
           }
+          
+          /* Marker container with price and sun rating */
+          .marker-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+          }
+          
+          /* Sun rating styles */
+          .sun-rating {
+            display: flex;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 12px;
+            padding: 2px 4px;
+            margin-top: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border: 1px solid rgba(0,0,0,0.05);
+          }
+          
+          .sun-rating-icon {
+            width: 10px;
+            height: 10px;
+            margin: 0 1px;
+          }
+          
+          .sun-rating-icon.filled {
+            color: #f59e0b; /* amber-500 */
+            stroke: #f59e0b;
+            fill: #f59e0b;
+          }
+          
+          .sun-rating-icon.empty {
+            color: #d1d5db; /* gray-300 */
+            stroke: #d1d5db;
+            fill: none;
+          }
         `;
         document.head.appendChild(style);
       }
@@ -213,6 +249,63 @@ export function MapView({ venues, userLocation, weatherData, onVenueSelect }: Ma
       
       // Check if venue is sunny based on sun position and weather
       const isSunny = venue.hasSunnySpot && isCurrentlySunny;
+      
+      // Calculate the sun rating (1-5) based on venue data
+      // In a real app, this would come from the venue's calculated sun exposure over time
+      const getSunRating = (): number => {
+        // This is a placeholder - in production this would use actual data from the venue
+        // like total sunshine hours, shadow calculations, etc.
+        if (!venue.hasSunnySpot) return 1;
+        
+        // Use various venue properties to determine rating
+        let rating = 3; // Default middle rating
+        
+        // If venue has specified sun hours, use that to calculate rating
+        if (venue.sunHoursStart && venue.sunHoursEnd) {
+          try {
+            const startHour = parseInt(venue.sunHoursStart.split(':')[0]);
+            const endHour = parseInt(venue.sunHoursEnd.split(':')[0]);
+            const sunHours = endHour - startHour;
+            
+            // 1-2 hours: 1 sun
+            // 3-4 hours: 2 suns  
+            // 5-6 hours: 3 suns
+            // 7-8 hours: 4 suns
+            // 9+ hours: 5 suns
+            if (sunHours <= 2) rating = 1;
+            else if (sunHours <= 4) rating = 2;
+            else if (sunHours <= 6) rating = 3;
+            else if (sunHours <= 8) rating = 4;
+            else rating = 5;
+          } catch (e) {
+            // If calculation fails, use a default rating based on hasSunnySpot
+            rating = venue.hasSunnySpot ? 3 : 1;
+          }
+        } else {
+          // If no sun hours data, use a rating based on venue type
+          // Parks tend to be more sunny, cafes more mixed
+          switch (venue.venueType) {
+            case 'park':
+              rating = 4;
+              break;
+            case 'restaurant':
+              rating = venue.hasHeaters ? 4 : 3;
+              break;
+            case 'cafe':
+              rating = 3;
+              break;
+            case 'bar':
+              rating = venue.hasHeaters ? 4 : 2;
+              break;
+            default:
+              rating = 3;
+          }
+        }
+        
+        return rating;
+      };
+      
+      const sunRating = getSunRating();
       
       // Get the appropriate icon for venue type
       const getVenueIconHtml = () => {
@@ -261,16 +354,47 @@ export function MapView({ venues, userLocation, weatherData, onVenueSelect }: Ma
         return iconHtml;
       };
       
-      // Create pill-shaped price marker with venue type icon and sunshine indicator
+      // Function to generate the sun rating HTML (1-5 suns)
+      const getSunRatingHtml = () => {
+        const sunIcon = `<svg class="sun-rating-icon" viewBox="0 0 24 24" width="10" height="10" fill="currentColor">
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line>
+          <line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>`;
+        
+        // Generate filled and empty sun icons based on rating
+        let ratingHtml = '<div class="sun-rating">';
+        for (let i = 1; i <= 5; i++) {
+          if (i <= sunRating) {
+            ratingHtml += `<span class="sun-rating-icon filled">${sunIcon}</span>`;
+          } else {
+            ratingHtml += `<span class="sun-rating-icon empty">${sunIcon}</span>`;
+          }
+        }
+        ratingHtml += '</div>';
+        
+        return ratingHtml;
+      };
+      
+      // Create pill-shaped price marker with venue type icon, price and sun rating
       const venueIcon = L.divIcon({
-        html: `<div class="price-marker ${isSunny ? 'sunny' : ''}">
-                <span class="venue-icon">${getVenueIconHtml()}</span>
-                ${price} kr SEK
-                ${isSunny ? '<span class="sun-icon"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" fill="none"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg></span>' : ''}
+        html: `<div class="marker-container">
+                <div class="price-marker ${isSunny ? 'sunny' : ''}">
+                  <span class="venue-icon">${getVenueIconHtml()}</span>
+                  ${price} kr SEK
+                  ${isSunny ? '<span class="sun-icon"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" fill="none"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg></span>' : ''}
+                </div>
+                ${getSunRatingHtml()}
               </div>`,
         className: '',
-        iconSize: [80, 24],
-        iconAnchor: [40, 12]
+        iconSize: [80, 40],
+        iconAnchor: [40, 20]
       });
       
       // Create marker
