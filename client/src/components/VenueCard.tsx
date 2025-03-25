@@ -239,15 +239,10 @@ export function VenueCard({ venue, isSunny, onClick }: VenueCardProps) {
                   {isSunny ? 'Currently sunny!' : 'Sunny during parts of the day'}
                 </div>
                 
-                {/* Sun rating display (1-5 suns) */}
-                <div className="flex">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <Sun 
-                      key={i} 
-                      className={`h-3 w-3 ${i < getSunRating(venue) ? 'text-amber-500' : 'text-gray-300'}`} 
-                      fill={i < getSunRating(venue) ? 'currentColor' : 'none'} 
-                    />
-                  ))}
+                {/* Sun rating display with numeric value */}
+                <div className="flex items-center bg-amber-200 px-2 py-0.5 rounded-full">
+                  <Sun className="h-3.5 w-3.5 text-amber-600 mr-1" fill="currentColor" />
+                  <span className="text-xs font-bold text-amber-800">{getSunRating(venue).toFixed(1)}</span>
                 </div>
               </div>
               

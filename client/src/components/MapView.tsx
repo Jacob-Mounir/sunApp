@@ -382,15 +382,30 @@ export function MapView({ venues, userLocation, weatherData, onVenueSelect }: Ma
         return ratingHtml;
       };
       
-      // Create pill-shaped price marker with venue type icon, price and sun rating
+      // Format sun rating to one decimal place
+      const formattedRating = sunRating.toFixed(1);
+      
+      // Create pill-shaped marker with venue type icon and sun rating
       const venueIcon = L.divIcon({
         html: `<div class="marker-container">
-                <div class="price-marker ${isSunny ? 'sunny' : ''}">
+                <div class="sun-rating-marker ${isSunny ? 'sunny' : ''}">
                   <span class="venue-icon">${getVenueIconHtml()}</span>
-                  ${price} kr SEK
-                  ${isSunny ? '<span class="sun-icon"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" fill="none"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg></span>' : ''}
+                  <span class="venue-sun-rating">
+                    <svg class="sun-icon-rating" viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
+                      <circle cx="12" cy="12" r="5"></circle>
+                      <line x1="12" y1="1" x2="12" y2="3"></line>
+                      <line x1="12" y1="21" x2="12" y2="23"></line>
+                      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                      <line x1="1" y1="12" x2="3" y2="12"></line>
+                      <line x1="21" y1="12" x2="23" y2="12"></line>
+                      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                    ${formattedRating}
+                  </span>
+                  ${isSunny ? '<span class="current-sun-icon glow-animation"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" fill="currentColor"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg></span>' : ''}
                 </div>
-                ${getSunRatingHtml()}
               </div>`,
         className: '',
         iconSize: [80, 40],

@@ -23,6 +23,68 @@
   }
 }
 
+/* Map marker styles */
+.sun-rating-marker {
+  background-color: white;
+  border-radius: 30px;
+  padding: 4px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 600;
+  color: #333;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  white-space: nowrap;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.sun-rating-marker.sunny {
+  background: linear-gradient(to right, #f59e0b, #fbbf24);
+  color: white;
+  border: none;
+}
+
+.venue-sun-rating {
+  display: inline-flex;
+  align-items: center;
+  font-weight: 700;
+}
+
+.sun-icon-rating {
+  margin-right: 4px;
+  color: #f59e0b;
+  stroke: #f59e0b;
+}
+
+.sun-rating-marker.sunny .sun-icon-rating {
+  color: white;
+  stroke: white;
+}
+
+.current-sun-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 6px;
+  stroke: white;
+  fill: white;
+  color: white;
+}
+
+.glow-animation::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  border-radius: 50%;
+  background-color: rgba(245, 158, 11, 0.5);
+  z-index: -1;
+  animation: glow 1.5s infinite alternate;
+}
+
 @layer base {
   * {
     @apply border-border;
