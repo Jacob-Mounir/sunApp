@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
-import { MapPin, Venue, WeatherData } from '@/types';
+import { Venue, WeatherData } from '@/types';
 import { SelectedLocationCard } from './SelectedLocationCard';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { isSunnyWeather } from '@/hooks/useWeather';
 import { useSunPosition } from '@/hooks/useSunCalculation';
-import { UserIcon, Utensils, Coffee, Beer, TreePine, Sun, Bookmark } from 'lucide-react';
+import { Sun } from 'lucide-react';
 import { addCustomMapStyles, createSunnyTileLayer } from './SunnyMapStyle';
 import { useSavedVenues } from '@/hooks/useSavedVenues';
 
@@ -293,13 +293,9 @@ export function MapView({ venues, userLocation, weatherData, onVenueSelect }: Ma
       const isSunny = venue.hasSunnySpot && isCurrentlySunny;
       
       // Calculate the sun rating (1-5) based on venue data
-      // In a real app, this would come from the venue's calculated sun exposure over time
       const getSunRating = (): number => {
-        // This is a placeholder - in production this would use actual data from the venue
-        // like total sunshine hours, shadow calculations, etc.
         if (!venue.hasSunnySpot) return 1;
         
-        // Use various venue properties to determine rating
         let rating = 3; // Default middle rating
         
         // If venue has specified sun hours, use that to calculate rating
@@ -309,23 +305,15 @@ export function MapView({ venues, userLocation, weatherData, onVenueSelect }: Ma
             const endHour = parseInt(venue.sunHoursEnd.split(':')[0]);
             const sunHours = endHour - startHour;
             
-            // 1-2 hours: 1 sun
-            // 3-4 hours: 2 suns  
-            // 5-6 hours: 3 suns
-            // 7-8 hours: 4 suns
-            // 9+ hours: 5 suns
             if (sunHours <= 2) rating = 1;
             else if (sunHours <= 4) rating = 2;
             else if (sunHours <= 6) rating = 3;
             else if (sunHours <= 8) rating = 4;
             else rating = 5;
           } catch (e) {
-            // If calculation fails, use a default rating based on hasSunnySpot
             rating = venue.hasSunnySpot ? 3 : 1;
           }
         } else {
-          // If no sun hours data, use a rating based on venue type
-          // Parks tend to be more sunny, cafes more mixed
           switch (venue.venueType) {
             case 'park':
               rating = 4;
@@ -444,27 +432,18 @@ export function MapView({ venues, userLocation, weatherData, onVenueSelect }: Ma
                   <span class="venue-sun-rating">
                     <svg class="sun-icon-rating" viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
                       <circle cx="12" cy="12" r="5"></circle>
-                      <line x1="12" y1="1" x2="12" y2="3"></line>
-                      <line x1="12" y1="21" x2="12" y2="23"></line>
-                      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-                      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-                      <line x1="1" y1="12" x2="3" y2="12"></line>
-                      <line x1="21" y1="12" x2="23" y2="12"></line>
-                      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-                      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
                     </svg>
                     ${formattedRating}
                   </span>
-                  ${isSunny ? '<span class="current-sun-icon glow-animation"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" fill="currentColor"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg></span>' : ''}
+                  ${isSunny ? '<span class="current-sun-icon glow-animation"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" fill="currentColor"><circle cx="12" cy="12" r="5"></circle></svg></span>' : ''}
                   ${bookmarkIconHtml}
                 </div>
               </div>`,
         className: '',
-        iconSize: [80, 40],
-        iconAnchor: [40, 20]
+        iconSize: [30, 30],
+        iconAnchor: [15, 15]
       });
       
-      // Create marker
       const marker = L.marker(
         [venue.latitude, venue.longitude],
         { icon: venueIcon }
@@ -485,8 +464,8 @@ export function MapView({ venues, userLocation, weatherData, onVenueSelect }: Ma
   };
 
   return (
-    <div className="relative w-full h-full bg-gray-100" style={{ zIndex: 1 }}>
-      <div id="map-container" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 1 }}>
+    <div className="relative w-full h-full bg-gray-100">
+      <div id="map-container" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 10 }}>
         {/* The map will be rendered here */}
       </div>
       
@@ -502,7 +481,7 @@ export function MapView({ venues, userLocation, weatherData, onVenueSelect }: Ma
       
       {/* Selected location card */}
       {selectedVenue && (
-        <div className="absolute bottom-0 left-0 right-0 p-4 pointer-events-none location-card-overlay">
+        <div className="absolute bottom-0 left-0 right-0 p-4 pointer-events-none location-card-overlay z-50">
           <div className="pointer-events-auto">
             <SelectedLocationCard
               venue={selectedVenue}
