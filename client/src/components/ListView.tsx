@@ -34,7 +34,21 @@ export function ListView({ venues, weatherData, onVenueSelect }: ListViewProps) 
   return (
     <div className="px-4 py-4 pb-24">
       <div className="max-w-xl mx-auto">
-        <h2 className="text-lg font-semibold mb-4">Sunny Places Nearby</h2>
+        <div className="flex items-center gap-2 mb-4">
+          <h2 className="text-lg font-semibold">Sunny Places Nearby</h2>
+          {isCurrentlySunny && (
+            <div className="flex items-center text-amber-500 text-sm font-medium bg-amber-100 px-2 py-1 rounded-full">
+              <span className="sun-icon mr-1">☀️</span>
+              <span>Sun is out!</span>
+            </div>
+          )}
+          {!isCurrentlySunny && sunPosition && sunPosition.elevation > 0 && (
+            <div className="flex items-center text-gray-500 text-sm font-medium bg-gray-100 px-2 py-1 rounded-full">
+              <span className="mr-1">☁️</span>
+              <span>Cloudy</span>
+            </div>
+          )}
+        </div>
         
         {sortedVenues.length === 0 ? (
           <div className="bg-white rounded-lg shadow p-4 text-center">
@@ -42,14 +56,16 @@ export function ListView({ venues, weatherData, onVenueSelect }: ListViewProps) 
             <p className="text-sm text-gray-500 mt-2">Try adjusting your filters or search term.</p>
           </div>
         ) : (
-          sortedVenues.map(venue => (
-            <VenueCard
-              key={venue.id}
-              venue={venue}
-              isSunny={venue.hasSunnySpot && isCurrentlySunny}
-              onClick={() => onVenueSelect(venue)}
-            />
-          ))
+          <div className="space-y-3">
+            {sortedVenues.map(venue => (
+              <VenueCard
+                key={venue.id}
+                venue={venue}
+                isSunny={venue.hasSunnySpot && isCurrentlySunny}
+                onClick={() => onVenueSelect(venue)}
+              />
+            ))}
+          </div>
         )}
       </div>
     </div>

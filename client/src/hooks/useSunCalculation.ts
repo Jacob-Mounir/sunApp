@@ -53,10 +53,16 @@ interface VenueSunshineData {
  */
 export function useSunPosition(latitude: number, longitude: number, date?: Date) {
   const dateParam = date ? date.toISOString() : new Date().toISOString();
+  const queryUrl = `/api/sun/position?latitude=${latitude}&longitude=${longitude}&date=${dateParam}`;
   
   return useQuery<SunPosition>({
-    queryKey: ['/api/sun/position', latitude, longitude, dateParam],
-    queryFn: getQueryFn({ on401: 'throw' }),
+    queryKey: ['sunPosition', latitude, longitude, dateParam],
+    queryFn: () => fetch(queryUrl).then(res => {
+      if (!res.ok) {
+        throw new Error(`Sun position API error: ${res.status}`);
+      }
+      return res.json();
+    }),
     enabled: !isNaN(latitude) && !isNaN(longitude),
     refetchOnWindowFocus: false,
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -68,10 +74,16 @@ export function useSunPosition(latitude: number, longitude: number, date?: Date)
  */
 export function useSunTimes(latitude: number, longitude: number, date?: Date) {
   const dateParam = date ? date.toISOString() : new Date().toISOString();
+  const queryUrl = `/api/sun/times?latitude=${latitude}&longitude=${longitude}&date=${dateParam}`;
   
   return useQuery<SunTimes>({
-    queryKey: ['/api/sun/times', latitude, longitude, dateParam],
-    queryFn: getQueryFn({ on401: 'throw' }),
+    queryKey: ['sunTimes', latitude, longitude, dateParam],
+    queryFn: () => fetch(queryUrl).then(res => {
+      if (!res.ok) {
+        throw new Error(`Sun times API error: ${res.status}`);
+      }
+      return res.json();
+    }),
     enabled: !isNaN(latitude) && !isNaN(longitude),
     refetchOnWindowFocus: false,
     staleTime: 60 * 60 * 1000, // 1 hour
@@ -83,10 +95,16 @@ export function useSunTimes(latitude: number, longitude: number, date?: Date) {
  */
 export function useVenueSunshine(venueId: number, date?: Date) {
   const dateParam = date ? date.toISOString() : new Date().toISOString();
+  const queryUrl = `/api/venues/${venueId}/sunshine?date=${dateParam}`;
   
   return useQuery<VenueSunshineData>({
-    queryKey: [`/api/venues/${venueId}/sunshine`, dateParam],
-    queryFn: getQueryFn({ on401: 'throw' }),
+    queryKey: ['venueSunshine', venueId, dateParam],
+    queryFn: () => fetch(queryUrl).then(res => {
+      if (!res.ok) {
+        throw new Error(`Venue sunshine API error: ${res.status}`);
+      }
+      return res.json();
+    }),
     enabled: !isNaN(venueId),
     refetchOnWindowFocus: false,
     staleTime: 60 * 60 * 1000, // 1 hour
