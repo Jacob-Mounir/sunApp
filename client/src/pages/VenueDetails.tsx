@@ -176,6 +176,17 @@ export default function VenueDetails() {
     }
   };
   
+  // Navigation handler for bottom navigation
+  const handleNavItemClick = (item: 'explore' | 'saved' | 'settings') => {
+    if (item === 'explore') {
+      navigate('/');
+    } else if (item === 'saved') {
+      navigate('/saved');
+    } else if (item === 'settings') {
+      navigate('/settings');
+    }
+  };
+  
   // Check if page is loading
   if (venueLoading || !venue) {
     return (
@@ -600,31 +611,11 @@ export default function VenueDetails() {
         </div>
       </div>
       
-      {/* Bottom bar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-3 flex items-center justify-around">
-        <button className="flex flex-col items-center">
-          <Share2 className="h-6 w-6 text-gray-600 mb-1" />
-          <span className="text-xs text-gray-600">Share</span>
-        </button>
-        
-        <button className="flex flex-col items-center">
-          <MessageSquare className="h-6 w-6 text-gray-600 mb-1" />
-          <span className="text-xs text-gray-600">Review</span>
-        </button>
-        
-        <button className="flex flex-col items-center">
-          <Flag className="h-6 w-6 text-gray-600 mb-1" />
-          <span className="text-xs text-gray-600">Report</span>
-        </button>
-        
-        <button 
-          className="flex flex-col items-center"
-          onClick={() => navigate("/about")}
-        >
-          <Info className="h-6 w-6 text-gray-600 mb-1" />
-          <span className="text-xs text-gray-600">About</span>
-        </button>
-      </div>
+      {/* Bottom Navigation */}
+      <BottomNavigation 
+        activeItem="explore" 
+        onItemClick={handleNavItemClick} 
+      />
     </div>
   );
 }
