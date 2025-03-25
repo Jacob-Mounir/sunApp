@@ -1,5 +1,9 @@
 import { Venue, WeatherData } from '@/types';
-import { X, Sun, MapPin, Route, Clock, Navigation, Bookmark, Star, Globe, Home, Thermometer } from 'lucide-react';
+import { 
+  X, Sun, MapPin, Route, Clock, Navigation, Bookmark, Star, Globe, Home, 
+  Thermometer, CloudSun, Utensils, Coffee, Beer, TreePine, Share2, CalendarClock, 
+  ExternalLink, Phone, Hash
+} from 'lucide-react';
 import { isSunnyWeather } from '@/hooks/useWeather';
 
 interface SelectedLocationCardProps {
@@ -43,15 +47,15 @@ export function SelectedLocationCard({ venue, weatherData, onClose }: SelectedLo
   const getVenueTypeIcon = () => {
     switch (venue.venueType) {
       case 'restaurant':
-        return <span className="mr-1">🍽️</span>;
+        return <Utensils className="h-4 w-4 mr-1 text-amber-600" />;
       case 'cafe':
-        return <span className="mr-1">☕</span>;
+        return <Coffee className="h-4 w-4 mr-1 text-amber-600" />;
       case 'bar':
-        return <span className="mr-1">🍸</span>;
+        return <Beer className="h-4 w-4 mr-1 text-amber-600" />;
       case 'park':
-        return <span className="mr-1">🌳</span>;
+        return <TreePine className="h-4 w-4 mr-1 text-amber-600" />;
       default:
-        return null;
+        return <MapPin className="h-4 w-4 mr-1 text-amber-600" />;
     }
   };
 
@@ -73,6 +77,21 @@ export function SelectedLocationCard({ venue, weatherData, onClose }: SelectedLo
     }
     
     window.open(venue.website, '_blank');
+  };
+
+  // Share venue (placeholder function)
+  const shareVenue = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: venue.name,
+        text: `Check out ${venue.name} on SunSpotter!`,
+        url: window.location.href,
+      }).catch(() => {
+        alert('Sharing failed. This feature may not be supported in your browser.');
+      });
+    } else {
+      alert('Web Share API not supported in your browser');
+    }
   };
 
   // Save location (placeholder function)
@@ -100,6 +119,32 @@ export function SelectedLocationCard({ venue, weatherData, onClose }: SelectedLo
     return `Sunny until: ${end.getHours()}:00 ${end.getHours() >= 12 ? 'PM' : 'AM'}`;
   };
 
+  // Get current weather
+  const getCurrentWeather = () => {
+    if (!weatherData) return null;
+    
+    return (
+      <div className="px-3 py-2 bg-blue-50 rounded-lg mt-3">
+        <h4 className="text-sm font-semibold text-blue-700 mb-1">Current Weather</h4>
+        <div className="flex items-center">
+          {weatherData.icon && (
+            <img 
+              src={`https://openweathermap.org/img/wn/${weatherData.icon}.png`} 
+              alt={weatherData.weatherCondition || 'Weather icon'} 
+              className="w-10 h-10 mr-2"
+            />
+          )}
+          <div>
+            <p className="text-blue-700 font-medium">{weatherData.weatherCondition}</p>
+            {weatherData.temperature !== undefined && (
+              <p className="text-sm text-blue-600">{weatherData.temperature.toFixed(1)}°C</p>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-lg overflow-hidden max-w-xl mx-auto pointer-events-auto">
       <div className="relative">
@@ -107,116 +152,160 @@ export function SelectedLocationCard({ venue, weatherData, onClose }: SelectedLo
           <img 
             src={venue.imageUrl} 
             alt={venue.name} 
-            className="w-full h-36 object-cover"
+            className="w-full h-48 object-cover"
           />
         ) : (
-          <div className="w-full h-36 bg-gradient-to-r from-blue-100 to-purple-100 flex items-center justify-center">
-            <span className="text-gray-600 text-lg font-medium">{venue.name}</span>
+          <div className="w-full h-48 bg-gradient-to-r from-amber-100 to-amber-300 flex items-center justify-center">
+            <div className="text-center">
+              <div className="flex justify-center mb-2">
+                {getVenueTypeIcon()}
+              </div>
+              <span className="text-amber-800 text-xl font-medium">{venue.name}</span>
+            </div>
           </div>
         )}
         <button 
-          className="absolute top-2 right-2 w-8 h-8 bg-white bg-opacity-80 rounded-full flex items-center justify-center text-gray-600"
+          className="absolute top-2 right-2 w-8 h-8 bg-white bg-opacity-80 rounded-full flex items-center justify-center text-gray-600 hover:bg-opacity-100 transition-colors"
           onClick={onClose}
+          aria-label="Close venue details"
         >
           <X className="h-4 w-4" />
         </button>
         
         {/* Sun status indicator */}
         <div className={`
-          absolute top-2 left-2 text-xs font-bold px-2 py-1 rounded-full flex items-center
-          ${isSunny ? 'bg-yellow-400 text-dark' : 'bg-yellow-300 text-dark'}
+          absolute top-2 left-2 text-xs font-bold px-3 py-1.5 rounded-full flex items-center
+          ${isSunny 
+            ? 'bg-gradient-to-r from-yellow-400 to-amber-500 text-white shadow-md' 
+            : 'bg-gradient-to-r from-yellow-300 to-amber-400 text-amber-900'}
         `}>
-          <Sun className="h-3 w-3 mr-1" />
+          {isSunny 
+            ? <Sun className="h-3.5 w-3.5 mr-1.5" /> 
+            : <CloudSun className="h-3.5 w-3.5 mr-1.5" />}
           {isSunny ? 'Sunny now' : 'Partial sun'}
+        </div>
+        
+        {/* Venue type badge */}
+        <div className="absolute bottom-2 left-2 text-xs font-bold px-3 py-1.5 rounded-full flex items-center bg-white bg-opacity-90 text-amber-700 shadow-sm">
+          {getVenueTypeIcon()}
+          {getVenueTypeLabel()}
         </div>
         
         {/* Heaters indicator if available */}
         {venue.hasHeaters !== undefined && (
           <div className={`
-            absolute bottom-2 right-2 text-xs font-bold px-2 py-1 rounded-full flex items-center
-            ${venue.hasHeaters ? 'bg-red-400 text-white' : 'bg-gray-300 text-gray-700'}
+            absolute bottom-2 right-2 text-xs font-bold px-3 py-1.5 rounded-full flex items-center
+            ${venue.hasHeaters 
+              ? 'bg-gradient-to-r from-red-400 to-red-500 text-white shadow-sm' 
+              : 'bg-gray-200 text-gray-700'}
           `}>
-            <Thermometer className="h-3 w-3 mr-1" />
+            <Thermometer className="h-3.5 w-3.5 mr-1.5" />
             {venue.hasHeaters ? 'Outdoor heating' : 'No heating'}
           </div>
         )}
       </div>
       
       <div className="p-4">
-        <div className="flex justify-between items-start">
-          <div>
-            <h3 className="font-semibold text-lg">{venue.name}</h3>
-            <div className="flex items-center mt-1">
-              <p className="text-sm text-gray-600">
-                {getVenueTypeIcon()} {getVenueTypeLabel()}
-              </p>
-              
-              {venue.city && (
-                <p className="text-sm text-gray-600 ml-3 flex items-center">
-                  <Home className="h-3 w-3 mr-1" />
-                  {venue.city}
-                  {venue.area && `, ${venue.area}`}
-                </p>
-              )}
-            </div>
-          </div>
+        <div className="flex justify-between items-start mb-3">
+          <h3 className="font-bold text-xl text-amber-900">{venue.name}</h3>
           {venue.rating && (
-            <div className="flex items-center bg-gray-100 px-2 py-1 rounded">
-              <span className="text-sm font-medium text-dark flex items-center">
-                <Star className="h-3 w-3 text-yellow-500 mr-1" />
+            <div className="flex items-center bg-amber-100 px-2 py-1 rounded">
+              <span className="text-sm font-medium text-amber-800 flex items-center">
+                <Star className="h-3.5 w-3.5 text-amber-500 mr-1" fill="currentColor" />
                 {venue.rating.toFixed(1)}
               </span>
             </div>
           )}
         </div>
         
-        <div className="mt-3">
-          <p className="text-sm text-gray-600 flex items-center">
-            <MapPin className="h-3 w-3 mr-1" />
-            {venue.address}
-          </p>
-          <p className="text-sm text-gray-600 mt-1 flex items-center">
-            <Route className="h-3 w-3 mr-1" />
+        <div className="flex flex-wrap gap-2 mb-4">
+          <div className="inline-flex items-center bg-amber-50 text-amber-800 px-2.5 py-1 rounded-md text-xs">
+            {venue.city || ''}
+            {venue.area && ` · ${venue.area}`}
+          </div>
+          
+          <div className="inline-flex items-center bg-blue-50 text-blue-800 px-2.5 py-1 rounded-md text-xs">
+            <Route className="h-3.5 w-3.5 mr-1" />
             {formatDistance(venue.distance)}
+          </div>
+        </div>
+        
+        {/* Weather information */}
+        {getCurrentWeather()}
+        
+        {/* Sun hours information */}
+        <div className="px-3 py-2 bg-amber-50 rounded-lg mt-3">
+          <h4 className="text-sm font-semibold text-amber-700 mb-1 flex items-center">
+            <Sun className="h-4 w-4 mr-1 text-amber-500" fill="currentColor" /> 
+            Sun Exposure
+          </h4>
+          <p className="text-sm text-amber-800 flex items-center mb-1">
+            <CalendarClock className="h-3.5 w-3.5 mr-1.5 text-amber-600" />
+            <span>{getSunHours()}</span>
           </p>
-          <p className="text-sm text-gray-600 mt-1 flex items-center">
-            <Clock className="h-3 w-3 mr-1" />
-            <span className="font-medium">Sun hours:</span> {getSunHours()}
+          {venue.sunnySpotDescription && (
+            <p className="text-sm text-amber-700 mt-1 italic">
+              "{venue.sunnySpotDescription}"
+            </p>
+          )}
+        </div>
+        
+        {/* Location details */}
+        <div className="mt-4 space-y-2">
+          <p className="text-sm text-gray-700 flex items-center">
+            <MapPin className="h-4 w-4 mr-2 text-gray-500" />
+            {venue.address}
           </p>
           
           {venue.website && (
-            <p className="text-sm text-gray-600 mt-1 flex items-center underline">
-              <Globe className="h-3 w-3 mr-1" />
-              <a href={venue.website} target="_blank" rel="noopener noreferrer">
-                Visit website
+            <p className="text-sm text-gray-700 flex items-center">
+              <Globe className="h-4 w-4 mr-2 text-gray-500" />
+              <a 
+                href={venue.website} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="text-blue-600 hover:underline flex items-center"
+              >
+                {venue.website.replace(/^https?:\/\/(www\.)?/, '')}
+                <ExternalLink className="h-3 w-3 ml-1" />
               </a>
             </p>
           )}
         </div>
         
-        <div className="mt-4 flex space-x-2">
+        {/* Action buttons */}
+        <div className="mt-5 grid grid-cols-2 gap-3">
           <button 
-            className="flex-1 bg-primary text-white py-2 px-4 rounded-lg text-center font-medium text-sm flex items-center justify-center"
+            className="bg-gradient-to-r from-amber-500 to-amber-600 text-white py-2.5 px-4 rounded-lg font-medium text-sm flex items-center justify-center shadow-sm hover:from-amber-600 hover:to-amber-700 transition-colors"
             onClick={getDirections}
           >
-            <Navigation className="h-4 w-4 mr-1" /> Directions
+            <Navigation className="h-4 w-4 mr-2" /> Get Directions
           </button>
           <button 
-            className="flex-1 bg-gray-100 text-dark py-2 px-4 rounded-lg text-center font-medium text-sm flex items-center justify-center"
+            className="bg-white border border-amber-300 text-amber-700 py-2.5 px-4 rounded-lg font-medium text-sm flex items-center justify-center hover:bg-amber-50 transition-colors"
             onClick={saveLocation}
           >
-            <Bookmark className="h-4 w-4 mr-1" /> Save
+            <Bookmark className="h-4 w-4 mr-2" /> Save Location
           </button>
         </div>
         
-        {venue.website && (
+        <div className="mt-3 flex space-x-3">
           <button 
-            className="w-full mt-2 bg-white border border-gray-200 text-dark py-2 px-4 rounded-lg text-center font-medium text-sm flex items-center justify-center"
-            onClick={openWebsite}
+            className="flex-1 bg-gray-100 text-gray-800 py-2 px-4 rounded-lg text-center font-medium text-sm flex items-center justify-center hover:bg-gray-200 transition-colors"
+            onClick={shareVenue}
           >
-            <Globe className="h-4 w-4 mr-1" /> Visit Website
+            <Share2 className="h-4 w-4 mr-2" /> Share
           </button>
-        )}
+          
+          {venue.website && (
+            <button 
+              className="flex-1 bg-gray-100 text-gray-800 py-2 px-4 rounded-lg text-center font-medium text-sm flex items-center justify-center hover:bg-gray-200 transition-colors"
+              onClick={openWebsite}
+            >
+              <ExternalLink className="h-4 w-4 mr-2" /> Website
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
