@@ -1,6 +1,7 @@
 import { Venue, WeatherData } from '@/types';
 import { VenueCard } from './VenueCard';
 import { isSunnyWeather } from '@/hooks/useWeather';
+import { useSunPosition } from '@/hooks/useSunCalculation';
 
 interface ListViewProps {
   venues: Venue[];
@@ -9,8 +10,21 @@ interface ListViewProps {
 }
 
 export function ListView({ venues, weatherData, onVenueSelect }: ListViewProps) {
-  // Determine if it's currently sunny
-  const isSunny = isSunnyWeather(weatherData?.weatherCondition, weatherData?.icon);
+  // Use a default location (first venue's location or fallback to Gothenburg)
+  const defaultLat = 57.70887; // Gothenburg latitude
+  const defaultLng = 11.97456; // Gothenburg longitude
+  
+  // Get the location for sun position calculation
+  const sunLat = venues.length > 0 ? venues[0].latitude : defaultLat;
+  const sunLng = venues.length > 0 ? venues[0].longitude : defaultLng;
+  
+  // Get sun position for determining if venues are sunny
+  const { data: sunPosition } = useSunPosition(sunLat, sunLng);
+  
+  // Determine if it's currently sunny based on weather and sun position
+  const isSunnyWeatherNow = isSunnyWeather(weatherData?.weatherCondition, weatherData?.icon);
+  const isSunAboveHorizon = sunPosition ? sunPosition.elevation > 0 : false;
+  const isCurrentlySunny = isSunnyWeatherNow && isSunAboveHorizon;
   
   // Sort venues by distance
   const sortedVenues = [...venues].sort((a, b) => 
@@ -32,7 +46,7 @@ export function ListView({ venues, weatherData, onVenueSelect }: ListViewProps) 
             <VenueCard
               key={venue.id}
               venue={venue}
-              isSunny={venue.hasSunnySpot && isSunny}
+              isSunny={venue.hasSunnySpot && isCurrentlySunny}
               onClick={() => onVenueSelect(venue)}
             />
           ))

@@ -10,6 +10,8 @@ import { FilterState, Venue } from '@/types';
 import { useLocation } from '@/hooks/useLocation';
 import { useVenues } from '@/hooks/useVenues';
 import { useWeather } from '@/hooks/useWeather';
+import { useSunPosition, isVenueCurrentlySunny } from '@/hooks/useSunCalculation';
+import { isSunnyWeather } from '@/hooks/useWeather';
 import { Button } from '@/components/ui/button';
 import { RotateCw } from 'lucide-react';
 
@@ -56,18 +58,24 @@ export default function Home() {
     location.longitude
   );
 
-  // Helper function to check if a venue is currently sunny based on time and weather
+  // Get current sun position
+  const { data: sunPosition } = useSunPosition(
+    location.latitude, 
+    location.longitude
+  );
+  
+  // Helper function to check if a venue is currently sunny based on sun calculation
   const isVenueSunny = (venue: Venue) => {
+    // Basic check if venue has a sunny spot
     if (!venue.hasSunnySpot) return false;
-    if (!weatherData) return true; // Default to true if no weather data
     
-    // Check if the current weather is sunny
-    const isSunny = weatherData.weatherCondition?.toLowerCase().includes('clear') || 
-                    weatherData.weatherCondition?.toLowerCase().includes('sun');
+    // Check if the current weather allows for sunshine
+    if (!weatherData || !isSunnyWeather(weatherData.weatherCondition, weatherData.icon)) return false;
     
-    if (!isSunny) return false;
+    // Check if the sun is above the horizon
+    if (sunPosition && sunPosition.elevation <= 0) return false;
     
-    // Check if current time is within sun hours
+    // Check if current time is within sun hours (if specified)
     if (venue.sunHoursStart && venue.sunHoursEnd) {
       const now = new Date();
       const currentHour = now.getHours();
@@ -83,7 +91,9 @@ export default function Home() {
       return currentTime >= startTime && currentTime <= endTime;
     }
     
-    return true; // Default to true if no sun hours specified
+    // If we have no specific sun hours but the weather is sunny and the sun is up,
+    // assume the venue gets sun at the current time
+    return true; 
   };
   
   // Filter venues based on search term, filters, and special conditions
