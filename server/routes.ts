@@ -183,6 +183,156 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get sun position for a specific location and time
+  app.get("/api/sun/position", async (req: Request, res: Response) => {
+    try {
+      const latitude = parseFloat(req.query.latitude as string);
+      const longitude = parseFloat(req.query.longitude as string);
+      const date = req.query.date ? new Date(req.query.date as string) : new Date();
+      
+      if (isNaN(latitude) || isNaN(longitude)) {
+        return res.status(400).json({ error: "Invalid latitude or longitude" });
+      }
+      
+      if (isNaN(date.getTime())) {
+        return res.status(400).json({ error: "Invalid date format" });
+      }
+      
+      const sunPosition = SunCalculationService.getSunPosition(latitude, longitude, date);
+      res.json(sunPosition);
+    } catch (error) {
+      console.error("Error calculating sun position:", error);
+      res.status(500).json({ error: "Failed to calculate sun position" });
+    }
+  });
+  
+  // Get sun times (sunrise, sunset, etc.) for a specific location and date
+  app.get("/api/sun/times", async (req: Request, res: Response) => {
+    try {
+      const latitude = parseFloat(req.query.latitude as string);
+      const longitude = parseFloat(req.query.longitude as string);
+      const date = req.query.date ? new Date(req.query.date as string) : new Date();
+      
+      if (isNaN(latitude) || isNaN(longitude)) {
+        return res.status(400).json({ error: "Invalid latitude or longitude" });
+      }
+      
+      if (isNaN(date.getTime())) {
+        return res.status(400).json({ error: "Invalid date format" });
+      }
+      
+      const sunTimes = SunCalculationService.getSunTimes(latitude, longitude, date);
+      res.json(sunTimes);
+    } catch (error) {
+      console.error("Error calculating sun times:", error);
+      res.status(500).json({ error: "Failed to calculate sun times" });
+    }
+  });
+  
+  // Get sunshine data for a specific venue
+  app.get("/api/venues/:id/sunshine", async (req: Request, res: Response) => {
+    try {
+      const venueId = parseInt(req.params.id);
+      const date = req.query.date ? new Date(req.query.date as string) : new Date();
+      
+      if (isNaN(venueId)) {
+        return res.status(400).json({ error: "Invalid venue ID" });
+      }
+      
+      if (isNaN(date.getTime())) {
+        return res.status(400).json({ error: "Invalid date format" });
+      }
+      
+      // Get venue information
+      const venue = await storage.getVenue(venueId);
+      
+      if (!venue) {
+        return res.status(404).json({ error: "Venue not found" });
+      }
+      
+      // Check if we already have cached sun calculation data
+      let sunCalculation = await storage.getSunCalculation(venueId, date);
+      
+      if (!sunCalculation) {
+        // Calculate new sun data for the venue
+        const { latitude, longitude } = venue;
+        
+        // Example building data (simplified approximation)
+        // In a real app, this would come from a buildings database or API
+        const buildings = [
+          {
+            height: 20, // 20m tall building
+            width: 15,
+            length: 30,
+            azimuth: 0, // facing north
+            distance: 50, // 50m away
+            direction: 90 // to the east of the venue
+          },
+          {
+            height: 15, // 15m tall building
+            width: 20,
+            length: 20,
+            azimuth: 45, // facing northeast
+            distance: 40, // 40m away
+            direction: 270 // to the west of the venue
+          }
+        ];
+        
+        // Calculate sunny periods
+        const sunnyPeriods = SunCalculationService.calculateSunnyPeriods(
+          latitude, 
+          longitude, 
+          date,
+          buildings
+        );
+        
+        // Format the periods for storage and response
+        const formattedPeriods = sunnyPeriods.map(period => ({
+          start: period.start.toISOString(),
+          end: period.end.toISOString()
+        }));
+        
+        // Get sun times for the day
+        const sunTimes = SunCalculationService.getSunTimes(latitude, longitude, date);
+        
+        // Determine if the venue is currently in sunlight
+        const isCurrentlySunny = SunCalculationService.isVenueInSunlight(
+          latitude,
+          longitude,
+          new Date(),
+          buildings
+        );
+        
+        // Format date for database (just the date part, no time)
+        const dateStr = date.toISOString().split('T')[0];
+        
+        // Create and store calculation
+        sunCalculation = await storage.createSunCalculation({
+          venueId,
+          date: dateStr,
+          sunriseTime: sunTimes.sunrise.toISOString(),
+          sunsetTime: sunTimes.sunset.toISOString(),
+          sunnyPeriods: JSON.stringify(formattedPeriods),
+          calculationTimestamp: new Date().toISOString()
+        });
+      }
+      
+      // Add real-time sunshine status to the response
+      const sunPosition = SunCalculationService.getSunPosition(venue.latitude, venue.longitude, new Date());
+      const isCurrentlySunny = sunPosition.elevation > 0; // Simplified check - in reality would use buildings
+      
+      // Return combined response
+      res.json({
+        ...sunCalculation,
+        currentSunPosition: sunPosition,
+        isCurrentlySunny
+      });
+    } catch (error) {
+      console.error("Error calculating venue sunshine:", error);
+      res.status(500).json({ error: "Failed to calculate venue sunshine" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

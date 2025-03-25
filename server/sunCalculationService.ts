@@ -186,7 +186,7 @@ export class SunCalculationService {
       .where(
         and(
           eq(sunCalculations.venueId, venueId),
-          eq(sunCalculations.date, dateString)
+          eq(sunCalculations.date, dateString as any) // Type assertion to fix compatibility issue
         )
       );
     

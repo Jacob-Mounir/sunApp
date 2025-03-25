@@ -176,6 +176,34 @@ export function VenueCard({ venue, isSunny, onClick }: VenueCardProps) {
               Sun hours: {venue.sunHoursStart} - {venue.sunHoursEnd}
             </p>
           )}
+          
+          {/* Sun prediction indicator */}
+          {venue.hasSunnySpot && (
+            <div className="mt-2 bg-gradient-to-r from-amber-50 to-amber-100 rounded-lg p-2">
+              <div className="text-xs font-medium text-amber-800 flex items-center">
+                <Sun className="h-3.5 w-3.5 mr-1.5 text-amber-500" />
+                {isSunny ? 'Currently sunny!' : 'Sunny during parts of the day'}
+              </div>
+              {venue.sunHoursStart && venue.sunHoursEnd && (
+                <div className="mt-1 w-full bg-gray-200 rounded-full h-1.5">
+                  <div 
+                    className="bg-gradient-to-r from-amber-400 to-amber-500 h-1.5 rounded-full" 
+                    style={{ 
+                      width: '70%', 
+                      // Animation to suggest sun movement
+                      animation: 'sunMovement 3s infinite alternate ease-in-out'
+                    }}
+                  ></div>
+                  <style jsx>{`
+                    @keyframes sunMovement {
+                      0% { width: 0%; }
+                      100% { width: 100%; }
+                    }
+                  `}</style>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

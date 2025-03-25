@@ -47,14 +47,11 @@ export const weatherData = pgTable("weather_data", {
 export const sunCalculations = pgTable("sun_calculations", {
   id: serial("id").primaryKey(),
   venueId: integer("venue_id").notNull(),
-  date: timestamp("date").notNull(),
+  date: text("date").notNull(), // Store as text in format YYYY-MM-DD
   sunriseTime: text("sunrise_time"),
   sunsetTime: text("sunset_time"),
-  sunExposureStart: text("sun_exposure_start"),
-  sunExposureEnd: text("sun_exposure_end"),
-  calculationMethod: text("calculation_method"),
-  obstructionHeight: real("obstruction_height"),
-  obstructionDirection: text("obstruction_direction"),
+  sunnyPeriods: text("sunny_periods"), // JSON string of time periods
+  calculationTimestamp: text("calculation_timestamp").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
