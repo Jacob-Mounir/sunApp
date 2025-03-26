@@ -230,16 +230,16 @@ export default function VenueDetails() {
   return (
     <div className="pb-24 venue-details-page">
       {/* Header with Back Button and Venue Name */}
-      <div className="sticky top-0 z-50 bg-white shadow-sm border-b border-gray-100">
+      <div className="sticky top-0 z-50 bg-white dark:bg-gray-900 shadow-sm border-b border-gray-100 dark:border-gray-800">
         <div className="flex items-center justify-between py-3 px-4">
           <div className="flex items-center">
             <button 
               onClick={() => navigate("/")}
-              className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-700 hover:bg-gray-200 transition-colors mr-3"
+              className="w-8 h-8 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors mr-3"
             >
               <ArrowLeft className="h-4 w-4" />
             </button>
-            <h1 className="font-semibold text-lg">{venue.name}</h1>
+            <h1 className="font-semibold text-lg dark:text-white">{venue.name}</h1>
           </div>
           
           {/* Saved button */}
@@ -256,7 +256,7 @@ export default function VenueDetails() {
           <button 
             onClick={() => setActiveTab('overview')} 
             className={`px-3 py-1.5 rounded-full text-sm font-medium flex items-center ${
-              activeTab === 'overview' ? 'bg-amber-100 text-amber-800' : 'text-gray-600'
+              activeTab === 'overview' ? 'bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-300' : 'text-gray-600 dark:text-gray-400'
             }`}
           >
             <FileText className="h-4 w-4 mr-1.5" /> Overview
@@ -264,7 +264,7 @@ export default function VenueDetails() {
           <button 
             onClick={() => setActiveTab('sun')} 
             className={`px-3 py-1.5 rounded-full text-sm font-medium flex items-center ${
-              activeTab === 'sun' ? 'bg-amber-100 text-amber-800' : 'text-gray-600'
+              activeTab === 'sun' ? 'bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-300' : 'text-gray-600 dark:text-gray-400'
             }`}
           >
             <Sun className="h-4 w-4 mr-1.5" /> Sun Hours
@@ -272,7 +272,7 @@ export default function VenueDetails() {
           <button 
             onClick={() => setActiveTab('schedule')} 
             className={`px-3 py-1.5 rounded-full text-sm font-medium flex items-center ${
-              activeTab === 'schedule' ? 'bg-amber-100 text-amber-800' : 'text-gray-600'
+              activeTab === 'schedule' ? 'bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-300' : 'text-gray-600 dark:text-gray-400'
             }`}
           >
             <CalendarCheck className="h-4 w-4 mr-1.5" /> Schedule
@@ -280,7 +280,7 @@ export default function VenueDetails() {
           <button 
             onClick={() => setActiveTab('reviews')} 
             className={`px-3 py-1.5 rounded-full text-sm font-medium flex items-center ${
-              activeTab === 'reviews' ? 'bg-amber-100 text-amber-800' : 'text-gray-600'
+              activeTab === 'reviews' ? 'bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-300' : 'text-gray-600 dark:text-gray-400'
             }`}
           >
             <MessageSquare className="h-4 w-4 mr-1.5" /> Reviews
@@ -331,23 +331,23 @@ export default function VenueDetails() {
       </div>
       
       {/* Basic Info Card */}
-      <div className="mx-4 -mt-6 relative bg-white rounded-xl shadow-md p-4">
+      <div className="mx-4 -mt-6 relative bg-white dark:bg-gray-800 rounded-xl shadow-md p-4">
         <div className="flex justify-between items-start">
           <div>
             <div className="flex items-center mt-1">
-              <div className="flex items-center bg-gray-100 px-2 py-1 rounded-full text-xs">
+              <div className="flex items-center bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full text-xs">
                 {getVenueIcon()}
-                <span className="ml-1 text-gray-700">{getVenueTypeLabel()}</span>
+                <span className="ml-1 text-gray-700 dark:text-gray-300">{getVenueTypeLabel()}</span>
               </div>
               
               {venue.area && (
-                <div className="ml-2 bg-gray-100 px-2 py-1 rounded-full text-xs text-gray-700">
+                <div className="ml-2 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full text-xs text-gray-700 dark:text-gray-300">
                   {venue.area}
                 </div>
               )}
               
               {venue.city && !venue.area && (
-                <div className="ml-2 bg-gray-100 px-2 py-1 rounded-full text-xs text-gray-700">
+                <div className="ml-2 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full text-xs text-gray-700 dark:text-gray-300">
                   {venue.city}
                 </div>
               )}
@@ -402,7 +402,7 @@ export default function VenueDetails() {
         {activeTab === 'overview' && (
           <div className="tab-content">
             {/* Sun Exposure */}
-            <div className="mx-4 mt-4 bg-white rounded-xl shadow-md p-5">
+            <div className="mx-4 mt-4 bg-white dark:bg-gray-800 rounded-xl shadow-md p-5">
               <h2 className="text-lg font-bold text-amber-800 flex items-center">
                 <Sun className="h-5 w-5 text-amber-500 mr-2" fill="currentColor" /> 
                 Sun Exposure
@@ -493,7 +493,7 @@ export default function VenueDetails() {
             </div>
             
             {/* Details & Amenities */}
-            <div className="mx-4 mt-4 bg-white rounded-xl shadow-md p-5">
+            <div className="mx-4 mt-4 bg-white dark:bg-gray-800 rounded-xl shadow-md p-5">
               <h2 className="text-lg font-bold text-gray-800 mb-4">
                 Details & Amenities
               </h2>
@@ -548,7 +548,7 @@ export default function VenueDetails() {
             </div>
             
             {/* Contact Information */}
-            <div className="mx-4 mt-4 bg-white rounded-xl shadow-md p-5">
+            <div className="mx-4 mt-4 bg-white dark:bg-gray-800 rounded-xl shadow-md p-5">
               <h2 className="text-lg font-bold text-gray-800 flex items-center mb-4">
                 <Phone className="h-5 w-5 text-gray-600 mr-2" /> 
                 Contact Information
@@ -635,7 +635,7 @@ export default function VenueDetails() {
         {activeTab === 'sun' && (
           <div className="tab-content">
             {/* Sun Hours Content */}
-            <div className="mx-4 bg-white rounded-xl shadow-md p-5">
+            <div className="mx-4 bg-white dark:bg-gray-800 rounded-xl shadow-md p-5">
               <h2 className="text-lg font-bold text-amber-800 flex items-center mb-4">
                 <Sun className="h-5 w-5 text-amber-500 mr-2" fill="currentColor" /> 
                 Sun Hours Detail
@@ -698,7 +698,7 @@ export default function VenueDetails() {
         {activeTab === 'schedule' && (
           <div className="tab-content">
             {/* Operating Hours */}
-            <div className="mx-4 bg-white rounded-xl shadow-md p-5">
+            <div className="mx-4 bg-white dark:bg-gray-800 rounded-xl shadow-md p-5">
               <h2 className="text-lg font-bold text-gray-800 flex items-center mb-4">
                 <Clock className="h-5 w-5 text-gray-600 mr-2" /> 
                 Operating Hours
@@ -762,7 +762,7 @@ export default function VenueDetails() {
             </div>
             
             {/* Best Seasons */}
-            <div className="mx-4 mt-4 bg-white rounded-xl shadow-md p-5">
+            <div className="mx-4 mt-4 bg-white dark:bg-gray-800 rounded-xl shadow-md p-5">
               <h2 className="text-lg font-bold text-gray-800 flex items-center mb-4">
                 <Calendar className="h-5 w-5 text-gray-600 mr-2" /> 
                 Best Times to Visit
@@ -820,7 +820,7 @@ export default function VenueDetails() {
         {/* Reviews Tab */}
         {activeTab === 'reviews' && (
           <div className="tab-content">
-            <div className="mx-4 bg-white rounded-xl shadow-md p-5">
+            <div className="mx-4 bg-white dark:bg-gray-800 rounded-xl shadow-md p-5">
               <h2 className="text-lg font-bold text-gray-800 flex items-center mb-4">
                 <MessageSquare className="h-5 w-5 text-gray-600 mr-2" /> 
                 Reviews
