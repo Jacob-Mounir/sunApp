@@ -332,6 +332,137 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: "Failed to calculate venue sunshine" });
     }
   });
+  
+  // Get multi-day sunshine forecast for a venue
+  app.get("/api/venues/:id/sunshine/forecast", async (req: Request, res: Response) => {
+    try {
+      const venueId = parseInt(req.params.id);
+      const days = parseInt(req.query.days as string) || 7; // Default to 7-day forecast
+      const startDate = req.query.startDate ? new Date(req.query.startDate as string) : new Date();
+      
+      if (isNaN(venueId)) {
+        return res.status(400).json({ error: "Invalid venue ID" });
+      }
+      
+      if (isNaN(startDate.getTime())) {
+        return res.status(400).json({ error: "Invalid start date format" });
+      }
+      
+      // Limit forecast days to a reasonable number
+      const maxDays = Math.min(days, 14);
+      
+      // Get venue information
+      const venue = await storage.getVenue(venueId);
+      
+      if (!venue) {
+        return res.status(404).json({ error: "Venue not found" });
+      }
+      
+      const { latitude, longitude } = venue;
+      
+      // Example building data (simplified approximation)
+      // In a real app, this would come from a buildings database or API
+      const buildings = [
+        {
+          height: 20,
+          width: 15,
+          length: 30,
+          azimuth: 0,
+          distance: 50,
+          direction: 90
+        },
+        {
+          height: 15,
+          width: 20,
+          length: 20,
+          azimuth: 45,
+          distance: 40,
+          direction: 270
+        }
+      ];
+      
+      // Generate forecast for each day
+      const forecast = [];
+      
+      for (let i = 0; i < maxDays; i++) {
+        // Create date for this forecast day
+        const forecastDate = new Date(startDate);
+        forecastDate.setDate(startDate.getDate() + i);
+        
+        // Check if we already have cached calculation data
+        let sunCalculation = await storage.getSunCalculation(venueId, forecastDate);
+        
+        if (!sunCalculation) {
+          // Calculate sunny periods for this day
+          const sunnyPeriods = SunCalculationService.calculateSunnyPeriods(
+            latitude,
+            longitude,
+            forecastDate,
+            buildings
+          );
+          
+          // Format the periods for storage and response
+          const formattedPeriods = sunnyPeriods.map(period => ({
+            start: period.start.toISOString(),
+            end: period.end.toISOString()
+          }));
+          
+          // Get sun times for the day
+          const sunTimes = SunCalculationService.getSunTimes(latitude, longitude, forecastDate);
+          
+          // Format date for database (just the date part, no time)
+          const dateStr = forecastDate.toISOString().split('T')[0];
+          
+          // Create and store calculation
+          sunCalculation = await storage.createSunCalculation({
+            venueId,
+            date: dateStr,
+            sunriseTime: sunTimes.sunrise.toISOString(),
+            sunsetTime: sunTimes.sunset.toISOString(),
+            sunnyPeriods: JSON.stringify(formattedPeriods),
+            calculationTimestamp: new Date().toISOString()
+          });
+        }
+        
+        // Calculate sunshine percentage for the day
+        const sunnyPeriods = JSON.parse(sunCalculation.sunnyPeriods || '[]');
+        let totalSunshineMinutes = 0;
+        
+        for (const period of sunnyPeriods) {
+          const start = new Date(period.start);
+          const end = new Date(period.end);
+          totalSunshineMinutes += (end.getTime() - start.getTime()) / (60 * 1000);
+        }
+        
+        const sunrise = new Date(sunCalculation.sunriseTime || new Date());
+        const sunset = new Date(sunCalculation.sunsetTime || new Date());
+        const dayLengthMinutes = (sunset.getTime() - sunrise.getTime()) / (60 * 1000);
+        
+        const sunshinePercentage = dayLengthMinutes > 0 
+          ? Math.round((totalSunshineMinutes / dayLengthMinutes) * 100) 
+          : 0;
+        
+        forecast.push({
+          date: forecastDate.toISOString().split('T')[0],
+          sunriseTime: sunCalculation.sunriseTime,
+          sunsetTime: sunCalculation.sunsetTime,
+          sunnyPeriods: sunnyPeriods,
+          sunshinePercentage: sunshinePercentage,
+          sunshineMinutes: totalSunshineMinutes,
+          dayLengthMinutes: dayLengthMinutes
+        });
+      }
+      
+      res.json({
+        venueId,
+        venueName: venue.name,
+        forecast
+      });
+    } catch (error) {
+      console.error("Error calculating venue sunshine forecast:", error);
+      res.status(500).json({ error: "Failed to calculate venue sunshine forecast" });
+    }
+  });
 
   const httpServer = createServer(app);
   return httpServer;

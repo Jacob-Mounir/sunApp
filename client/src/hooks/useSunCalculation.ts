@@ -48,6 +48,24 @@ interface VenueSunshineData {
   isCurrentlySunny: boolean;
 }
 
+// Type definition for a single day forecast
+interface ForecastDay {
+  date: string;
+  sunriseTime: string;
+  sunsetTime: string;
+  sunnyPeriods: SunnyPeriod[];
+  sunshinePercentage: number;
+  sunshineMinutes: number;
+  dayLengthMinutes: number;
+}
+
+// Type definition for forecast response
+interface SunshineForecast {
+  venueId: number;
+  venueName: string;
+  forecast: ForecastDay[];
+}
+
 /**
  * Hook to get the current sun position for a specific location
  */
@@ -189,4 +207,25 @@ export function getSunshinePercentage(sunshineData?: VenueSunshineData): number 
   }
   
   return Math.min(100, Math.max(0, (totalSunshine / totalDaylight) * 100));
+}
+
+/**
+ * Hook to get sunshine forecast for a venue for multiple days
+ */
+export function useVenueSunshineForecast(venueId: number, days: number = 7, startDate?: Date) {
+  const dateParam = startDate ? startDate.toISOString() : new Date().toISOString();
+  const queryUrl = `/api/venues/${venueId}/sunshine/forecast?days=${days}&startDate=${dateParam}`;
+  
+  return useQuery<SunshineForecast>({
+    queryKey: ['venueSunshineForecast', venueId, days, dateParam],
+    queryFn: () => fetch(queryUrl).then(res => {
+      if (!res.ok) {
+        throw new Error(`Venue sunshine forecast API error: ${res.status}`);
+      }
+      return res.json();
+    }),
+    enabled: !isNaN(venueId) && days > 0,
+    refetchOnWindowFocus: false,
+    staleTime: 3 * 60 * 60 * 1000, // 3 hours
+  });
 }
