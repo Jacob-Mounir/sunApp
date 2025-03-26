@@ -650,7 +650,7 @@ export function AirbnbMapView({ venues, userLocation, weatherData, onVenueSelect
   }, [venues, isCurrentlySunny, onVenueSelect, isVenueSaved, selectedVenue]);
 
   // Calculate map height based on scroll position
-  const mapHeight = scrollY > 20 ? 'h-[300px]' : 'h-[220px]';
+  const mapHeight = scrollY > 20 ? 'h-[400px]' : 'h-[300px]';
 
   return (
     <div className={cn(

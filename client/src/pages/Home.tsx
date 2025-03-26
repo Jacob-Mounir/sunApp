@@ -224,8 +224,6 @@ export default function Home() {
         longitude={location.longitude} 
       />
       
-      <SearchBar onSearch={handleSearch} />
-      
       <FilterBar 
         filters={filters} 
         onFilterChange={handleFilterChange}
