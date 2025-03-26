@@ -497,7 +497,7 @@ export function MapView({ venues, userLocation, weatherData, onVenueSelect }: Ma
     <div className="map-container-wrapper relative w-full h-full overflow-hidden">
       {/* Loading indicator while map initializes */}
       {!mapReady && (
-        <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-90 z-50">
+        <div className="absolute inset-0 flex items-center justify-center bg-white z-50">
           <div className="flex flex-col items-center bg-white p-4 rounded-lg shadow-md map-loading-indicator">
             <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border-3 border-amber-500 border-t-transparent animate-spin mb-3"></div>
             <span className="text-sm sm:text-base font-medium text-amber-700">Loading sunny spots...</span>
