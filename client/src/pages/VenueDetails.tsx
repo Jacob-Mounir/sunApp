@@ -3,7 +3,8 @@ import { useRoute, useLocation } from 'wouter';
 import { 
   ArrowLeft, Sun, MapPin, Star, Navigation, Bookmark, Share2, 
   Clock, Phone, Globe, Calendar, ExternalLink, Users, ThumbsUp,
-  Camera, MessageSquare, Flag, Utensils, Coffee, Beer, TreePine, Flame, Info
+  Camera, MessageSquare, Flag, Utensils, Coffee, Beer, TreePine, Flame, Info,
+  FileText, CalendarCheck
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { BottomNavigation } from '@/components/BottomNavigation';
@@ -13,11 +14,15 @@ import { useVenue } from '@/hooks/useVenues';
 import { useWeather, isSunnyWeather } from '@/hooks/useWeather';
 import { useVenueSunshine, getSunshinePercentage } from '@/hooks/useSunCalculation';
 import { useSavedVenues } from '@/hooks/useSavedVenues';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function VenueDetails() {
   const [, navigate] = useLocation();
   const [, params] = useRoute('/venue/:id');
   const { toast } = useToast();
+  
+  // State to track active tab
+  const [activeTab, setActiveTab] = useState('overview');
   
   const id = params?.id ? parseInt(params.id) : 0;
   const { data: venue, isLoading: venueLoading } = useVenue(id);
@@ -228,16 +233,36 @@ export default function VenueDetails() {
         
         {/* Category Tabs - Sticky */}
         <div className="flex items-center justify-between px-4 py-2 overflow-x-auto no-scrollbar">
-          <button className="px-3 py-1.5 bg-amber-100 text-amber-800 rounded-full text-sm font-medium flex items-center">
-            <Info className="h-4 w-4 mr-1.5" /> Overview
+          <button 
+            onClick={() => setActiveTab('overview')} 
+            className={`px-3 py-1.5 rounded-full text-sm font-medium flex items-center ${
+              activeTab === 'overview' ? 'bg-amber-100 text-amber-800' : 'text-gray-600'
+            }`}
+          >
+            <FileText className="h-4 w-4 mr-1.5" /> Overview
           </button>
-          <button className="px-3 py-1.5 text-gray-600 rounded-full text-sm font-medium flex items-center">
+          <button 
+            onClick={() => setActiveTab('sun')} 
+            className={`px-3 py-1.5 rounded-full text-sm font-medium flex items-center ${
+              activeTab === 'sun' ? 'bg-amber-100 text-amber-800' : 'text-gray-600'
+            }`}
+          >
             <Sun className="h-4 w-4 mr-1.5" /> Sun Hours
           </button>
-          <button className="px-3 py-1.5 text-gray-600 rounded-full text-sm font-medium flex items-center">
-            <Clock className="h-4 w-4 mr-1.5" /> Schedule
+          <button 
+            onClick={() => setActiveTab('schedule')} 
+            className={`px-3 py-1.5 rounded-full text-sm font-medium flex items-center ${
+              activeTab === 'schedule' ? 'bg-amber-100 text-amber-800' : 'text-gray-600'
+            }`}
+          >
+            <CalendarCheck className="h-4 w-4 mr-1.5" /> Schedule
           </button>
-          <button className="px-3 py-1.5 text-gray-600 rounded-full text-sm font-medium flex items-center">
+          <button 
+            onClick={() => setActiveTab('reviews')} 
+            className={`px-3 py-1.5 rounded-full text-sm font-medium flex items-center ${
+              activeTab === 'reviews' ? 'bg-amber-100 text-amber-800' : 'text-gray-600'
+            }`}
+          >
             <MessageSquare className="h-4 w-4 mr-1.5" /> Reviews
           </button>
         </div>
