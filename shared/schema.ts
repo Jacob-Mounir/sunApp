@@ -68,31 +68,12 @@ export const sunCalculations = pgTable("sun_calculations", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-// For caching sun position data
-export const sunPositionCache = pgTable("sun_position_cache", {
-  id: serial("id").primaryKey(),
-  latitude: real("latitude").notNull(),
-  longitude: real("longitude").notNull(),
-  date: text("date").notNull(), // Store as text in format YYYY-MM-DD
-  hour: integer("hour").notNull(), // Hour of day (0-23)
-  azimuth: real("azimuth").notNull(),
-  elevation: real("elevation").notNull(),
-  calculationTimestamp: text("calculation_timestamp").notNull(),
-  expiresAt: timestamp("expires_at").notNull(),
-  createdAt: timestamp("created_at").defaultNow(),
-});
-
 // Create insert schemas
 export const insertWeatherDataSchema = createInsertSchema(weatherData).omit({
   id: true,
 });
 
 export const insertSunCalculationSchema = createInsertSchema(sunCalculations).omit({
-  id: true,
-  createdAt: true,
-});
-
-export const insertSunPositionCacheSchema = createInsertSchema(sunPositionCache).omit({
   id: true,
   createdAt: true,
 });

@@ -1,13 +1,7 @@
 import SunCalc from 'suncalc';
-import { 
-  InsertSunCalculation, 
-  SunCalculation, 
-  sunCalculations, 
-  sunPositionCache,
-  InsertSunPositionCache
-} from '@shared/schema';
+import { InsertSunCalculation, SunCalculation, sunCalculations } from '@shared/schema';
 import { db } from './db';
-import { eq, and, lte, gte } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 
 interface BuildingData {
   height: number;     // in meters
@@ -23,86 +17,99 @@ interface SunlightPeriod {
   end: Date;
 }
 
+// In-memory cache for sun position data
+interface SunPositionCacheEntry {
+  azimuth: number;
+  elevation: number;
+  timestamp: Date;
+  expiresAt: Date;
+}
+
 // Helper function to round coordinates to reduce number of cache entries
 function roundCoordinate(coord: number): number {
   // Round to 3 decimal places (approximately 100 meters precision)
   return Math.round(coord * 1000) / 1000;
 }
 
-// Helper function to format date as YYYY-MM-DD
-function formatDate(date: Date): string {
-  return date.toISOString().split('T')[0];
+// Helper function to generate a cache key
+function getCacheKey(latitude: number, longitude: number, date: Date): string {
+  const roundedLat = roundCoordinate(latitude);
+  const roundedLng = roundCoordinate(longitude);
+  const dateString = date.toISOString().split('T')[0];
+  const hour = date.getUTCHours();
+  return `${roundedLat}|${roundedLng}|${dateString}|${hour}`;
 }
 
 export class SunCalculationService {
+  // In-memory cache
+  private static sunPositionCache: Map<string, SunPositionCacheEntry> = new Map();
+  
   /**
    * Calculate sun position (azimuth and elevation) for a specific location and time
-   * with caching to reduce repeated calculations
+   * with in-memory caching to reduce repeated calculations
    */
-  public static async getSunPosition(latitude: number, longitude: number, date: Date) {
-    // Round coordinates for caching purposes
-    const roundedLat = roundCoordinate(latitude);
-    const roundedLng = roundCoordinate(longitude);
-    const dateString = formatDate(date);
-    const hour = date.getUTCHours();
+  public static getSunPosition(latitude: number, longitude: number, date: Date) {
+    const cacheKey = getCacheKey(latitude, longitude, date);
+    const now = new Date();
     
-    try {
-      // Check if we have a cached value that's still valid
-      const [cachedPosition] = await db
-        .select()
-        .from(sunPositionCache)
-        .where(
-          and(
-            eq(sunPositionCache.latitude, roundedLat),
-            eq(sunPositionCache.longitude, roundedLng),
-            eq(sunPositionCache.date, dateString),
-            eq(sunPositionCache.hour, hour),
-            gte(sunPositionCache.expiresAt, new Date())
-          )
-        );
-      
-      if (cachedPosition) {
-        // Use cached value
-        console.log(`Using cached sun position for ${roundedLat},${roundedLng} at ${dateString} hour ${hour}`);
-        return {
-          azimuth: cachedPosition.azimuth,
-          elevation: cachedPosition.elevation,
-          timestamp: date
-        };
-      }
-      
-      // Calculate new position
-      const sunPosition = this.calculateSunPosition(latitude, longitude, date);
-      
-      // Cache the result for 24 hours
-      const expiryDate = new Date();
-      expiryDate.setHours(expiryDate.getHours() + 24);
-      
-      const cacheEntry: InsertSunPositionCache = {
-        latitude: roundedLat,
-        longitude: roundedLng,
-        date: dateString,
-        hour: hour,
-        azimuth: sunPosition.azimuth,
-        elevation: sunPosition.elevation,
-        calculationTimestamp: new Date().toISOString(),
-        expiresAt: expiryDate
+    // Check if we have a valid cached entry
+    const cachedEntry = this.sunPositionCache.get(cacheKey);
+    if (cachedEntry && cachedEntry.expiresAt > now) {
+      console.log(`Using cached sun position for ${latitude},${longitude} at ${date.toISOString()}`);
+      return {
+        azimuth: cachedEntry.azimuth,
+        elevation: cachedEntry.elevation,
+        timestamp: date
       };
-      
-      // Store in cache
-      await db.insert(sunPositionCache).values(cacheEntry);
-      
-      return sunPosition;
-    } catch (error) {
-      console.error("Error with sun position cache:", error);
-      // Fallback to direct calculation if database operation fails
-      return this.calculateSunPosition(latitude, longitude, date);
+    }
+    
+    // Calculate new position
+    const sunPosition = this.calculateSunPosition(latitude, longitude, date);
+    
+    // Cache for 24 hours
+    const expiryDate = new Date();
+    expiryDate.setHours(expiryDate.getHours() + 24);
+    
+    // Store in cache
+    this.sunPositionCache.set(cacheKey, {
+      ...sunPosition,
+      expiresAt: expiryDate
+    });
+    
+    // Clean up expired entries periodically (if cache grows too large)
+    if (this.sunPositionCache.size > 1000) {
+      this.cleanupCache();
+    }
+    
+    return sunPosition;
+  }
+  
+  /**
+   * Clean up expired cache entries
+   */
+  private static cleanupCache() {
+    const now = new Date();
+    const keysToDelete: string[] = [];
+    
+    // Create an array of keys for iteration
+    const cacheKeys = Array.from(this.sunPositionCache.keys());
+    
+    // First identify expired keys
+    for (const key of cacheKeys) {
+      const entry = this.sunPositionCache.get(key);
+      if (entry && entry.expiresAt < now) {
+        keysToDelete.push(key);
+      }
+    }
+    
+    // Then delete them
+    for (const key of keysToDelete) {
+      this.sunPositionCache.delete(key);
     }
   }
   
   /**
-   * Direct calculation of sun position without caching
-   * This is used as a fallback and by the caching method
+   * Direct calculation of sun position
    */
   private static calculateSunPosition(latitude: number, longitude: number, date: Date) {
     const sunPosition = SunCalc.getPosition(date, latitude, longitude);
@@ -167,12 +174,12 @@ export class SunCalculationService {
   /**
    * Calculate the period when a venue receives direct sunlight throughout the day
    */
-  public static calculateSunnyPeriods(
+  public static async calculateSunnyPeriods(
     latitude: number, 
     longitude: number, 
     date: Date,
     buildings: BuildingData[] = []
-  ): SunlightPeriod[] {
+  ): Promise<SunlightPeriod[]> {
     // Get sunrise and sunset times
     const sunTimes = this.getSunTimes(latitude, longitude, date);
     const sunrise = sunTimes.sunrise;
@@ -195,7 +202,7 @@ export class SunCalculationService {
     
     for (let time = sunrise.getTime(); time <= sunset.getTime(); time += timeStep) {
       const currentTime = new Date(time);
-      const inSunlight = this.isVenueInSunlight(latitude, longitude, currentTime, buildings);
+      const inSunlight = await this.isVenueInSunlight(latitude, longitude, currentTime, buildings);
       
       if (inSunlight && !currentPeriod) {
         // Start a new sunny period
@@ -302,15 +309,15 @@ export class SunCalculationService {
     date: Date,
     buildings: BuildingData[] = []
   ): number {
+    // Using direct calculation to avoid Promise issues
+    const sunPosition = this.calculateSunPosition(latitude, longitude, date);
+    
     if (!buildings.length) {
       // No buildings, full sunshine (if sun is up)
-      const { elevation } = this.getSunPosition(latitude, longitude, date);
-      return elevation > 0 ? 1.0 : 0.0;
+      return sunPosition.elevation > 0 ? 1.0 : 0.0;
     }
     
-    const { azimuth, elevation } = this.getSunPosition(latitude, longitude, date);
-    
-    if (elevation <= 0) {
+    if (sunPosition.elevation <= 0) {
       // Sun is below horizon
       return 0.0;
     }
@@ -319,7 +326,7 @@ export class SunCalculationService {
     let blockingBuildings = 0;
     
     for (const building of buildings) {
-      if (this.isBuildingBlockingSun(building, azimuth, elevation)) {
+      if (this.isBuildingBlockingSun(building, sunPosition.azimuth, sunPosition.elevation)) {
         blockingBuildings++;
       }
     }
