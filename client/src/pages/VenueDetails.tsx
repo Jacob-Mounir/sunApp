@@ -363,13 +363,13 @@ export default function VenueDetails() {
         
         {/* Address */}
         <div className="mt-3 flex items-start">
-          <MapPin className="h-4 w-4 text-gray-500 mt-0.5 mr-2 flex-shrink-0" />
-          <p className="text-sm text-gray-600">{venue.address}</p>
+          <MapPin className="h-4 w-4 text-gray-500 dark:text-gray-400 mt-0.5 mr-2 flex-shrink-0" />
+          <p className="text-sm text-gray-600 dark:text-gray-300">{venue.address}</p>
         </div>
         
         {/* Distance */}
         {venue.distance && (
-          <p className="mt-1 ml-6 text-xs text-gray-500">
+          <p className="mt-1 ml-6 text-xs text-gray-500 dark:text-gray-400">
             {formatDistance(venue.distance)}
           </p>
         )}
