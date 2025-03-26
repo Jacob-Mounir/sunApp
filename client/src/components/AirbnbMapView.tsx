@@ -183,32 +183,43 @@ export function AirbnbMapView({ venues, userLocation, weatherData, onVenueSelect
             .pin-container {
               background-color: white;
               border-radius: 24px;
-              box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-              padding: 6px 12px;
+              box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+              padding: 6px 14px;
               font-size: 14px;
-              font-weight: 500;
+              font-weight: 600;
               color: #333;
-              transition: all 0.2s ease;
+              transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
               transform: scale(1);
-              border: 2px solid #eee;
+              border: 1.5px solid rgba(0,0,0,0.05);
               pointer-events: all;
               cursor: pointer;
               display: flex;
               align-items: center;
               min-width: 64px;
               justify-content: center;
+              height: 32px;
+            }
+            
+            .pin-container:hover {
+              transform: scale(1.05) translateY(-2px);
+              box-shadow: 0 6px 12px rgba(0,0,0,0.2);
             }
             
             .pin-container.sunny {
-              background: linear-gradient(to right, #f59e0b, #d97706);
+              background: linear-gradient(135deg, #f59e0b, #d97706);
               color: white;
-              border-color: #f59e0b;
+              border: none;
+              box-shadow: 0 4px 10px rgba(217, 119, 6, 0.3);
+            }
+            
+            .pin-container.sunny:hover {
+              box-shadow: 0 6px 14px rgba(217, 119, 6, 0.4);
             }
             
             .pin-container.selected {
-              transform: scale(1.1);
+              transform: scale(1.15) translateY(-5px);
               z-index: 1000 !important;
-              box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+              box-shadow: 0 8px 20px rgba(0,0,0,0.25);
             }
             
             .pin-content {
@@ -249,73 +260,122 @@ export function AirbnbMapView({ venues, userLocation, weatherData, onVenueSelect
             /* Popover styles */
             .map-popover {
               position: absolute;
-              bottom: 12px;
+              bottom: 16px;
               left: 50%;
-              transform: translateX(-50%);
+              transform: translateX(-50%) translateY(10px);
               background: white;
-              border-radius: 12px;
-              box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+              border-radius: 16px;
+              box-shadow: 0 8px 30px rgba(0,0,0,0.15);
               overflow: hidden;
-              width: 280px;
+              width: 300px;
               z-index: 1001;
               pointer-events: all;
               opacity: 0;
               visibility: hidden;
-              transition: opacity 0.3s ease, visibility 0.3s;
+              transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+              border: 1px solid rgba(0,0,0,0.05);
             }
             
             .map-popover.visible {
               opacity: 1;
               visibility: visible;
+              transform: translateX(-50%) translateY(0);
             }
             
             .map-popover-image {
               width: 100%;
-              height: 140px;
+              height: 150px;
               background-color: #f5f5f5;
               background-size: cover;
               background-position: center;
+              position: relative;
+            }
+            
+            .map-popover-image::after {
+              content: '';
+              position: absolute;
+              bottom: 0;
+              left: 0;
+              right: 0;
+              height: 50px;
+              background: linear-gradient(to top, rgba(0,0,0,0.3), transparent);
             }
             
             .map-popover-content {
-              padding: 12px;
+              padding: 16px;
             }
             
             .map-popover-title {
-              margin: 0 0 4px 0;
-              font-size: 16px;
+              margin: 0 0 6px 0;
+              font-size: 18px;
               font-weight: 600;
+              color: #1a1a1a;
+              position: relative;
+            }
+            
+            .map-popover-title::after {
+              content: '';
+              position: absolute;
+              bottom: -3px;
+              left: 0;
+              width: 40px;
+              height: 2px;
+              background: linear-gradient(to right, #f59e0b, transparent);
             }
             
             .map-popover-info {
               display: flex;
               justify-content: space-between;
-              margin-bottom: 8px;
+              margin-bottom: 12px;
+              padding-top: 4px;
             }
             
             .map-popover-type {
               color: #666;
               font-size: 14px;
+              display: flex;
+              align-items: center;
+              gap: 4px;
             }
             
             .map-popover-distance {
               color: #666;
               font-size: 14px;
+              font-weight: 500;
+              display: flex;
+              align-items: center;
+              gap: 4px;
             }
             
             .map-popover-sunny {
               display: flex;
               align-items: center;
-              gap: 4px;
+              gap: 6px;
               font-size: 14px;
               color: #f59e0b;
-              margin-bottom: 8px;
+              margin-bottom: 12px;
+              font-weight: 500;
+              padding: 6px 10px;
+              background-color: rgba(245, 158, 11, 0.1);
+              border-radius: 8px;
+              max-width: fit-content;
             }
             
             .map-popover-buttons {
               display: flex;
-              gap: 8px;
-              margin-top: 8px;
+              gap: 10px;
+              margin-top: 12px;
+            }
+            
+            .map-popover-buttons button {
+              transition: transform 0.2s ease, box-shadow 0.2s ease;
+              box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+              font-weight: 500;
+            }
+            
+            .map-popover-buttons button:hover {
+              transform: translateY(-1px);
+              box-shadow: 0 4px 8px rgba(0,0,0,0.15);
             }
             
             /* Better z-index for hover */
