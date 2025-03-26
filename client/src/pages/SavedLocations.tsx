@@ -1,19 +1,42 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
-import { ArrowLeft, Bookmark, Trash2, MapPin, Sun, CloudSun, Info, Home, Search, Filter } from 'lucide-react';
+import { 
+  ArrowLeft, Bookmark, Trash2, MapPin, Sun, CloudSun, Info, 
+  Home, Search, Filter, ChevronsRight, XCircle, Menu
+} from 'lucide-react';
 import { VenueCard } from '@/components/VenueCard';
 import { Venue } from '@/types';
 import { useToast } from '@/hooks/use-toast';
 import { useSavedVenues } from '@/hooks/useSavedVenues';
 import { BottomNavigation } from '@/components/BottomNavigation';
+import { FilterState } from '@/types';
 
 export default function SavedLocations() {
   const [, navigate] = useLocation();
-  const { savedVenues, removeSavedVenue } = useSavedVenues();
+  const { 
+    savedVenues, 
+    removeSavedVenue, 
+    getSavedCount, 
+    clearAllSaved,
+    isInitialized
+  } = useSavedVenues();
+  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [isFiltering, setIsFiltering] = useState(false);
+  const [activeVenueFilters, setActiveVenueFilters] = useState<FilterState>({
+    all: true,
+    restaurant: false,
+    cafe: false,
+    bar: false,
+    park: false
+  });
+  const [showSunnyOnly, setShowSunnyOnly] = useState(false);
+  const [showNearbyOnly, setShowNearbyOnly] = useState(false);
   
-  const handleRemoveSaved = (venueId: number) => {
+  const handleRemoveSaved = (venueId: number, event?: React.MouseEvent) => {
+    if (event) {
+      event.stopPropagation();
+    }
     removeSavedVenue(venueId);
   };
   
@@ -22,17 +45,91 @@ export default function SavedLocations() {
     navigate(`/venue/${venue.id}`);
   };
   
+  const handleFilterChange = (filter: string) => {
+    if (filter === 'all') {
+      setActiveVenueFilters({
+        all: true,
+        restaurant: false,
+        cafe: false,
+        bar: false,
+        park: false
+      });
+    } else {
+      setActiveVenueFilters(prev => {
+        const newFilters = {
+          ...prev,
+          all: false,
+          [filter]: !prev[filter]
+        };
+        
+        // If no filter is active, re-enable "all"
+        if (!newFilters.restaurant && !newFilters.cafe && !newFilters.bar && !newFilters.park) {
+          newFilters.all = true;
+        }
+        
+        return newFilters;
+      });
+    }
+  };
+  
+  const toggleSunnyFilter = () => {
+    setShowSunnyOnly(!showSunnyOnly);
+  };
+  
+  const toggleNearbyFilter = () => {
+    setShowNearbyOnly(!showNearbyOnly);
+  };
+  
   const filteredVenues = savedVenues.filter(venue => {
+    // Text search
     const nameMatch = venue.name.toLowerCase().includes(searchTerm.toLowerCase());
     const addressMatch = venue.address.toLowerCase().includes(searchTerm.toLowerCase());
     const cityMatch = venue.city?.toLowerCase().includes(searchTerm.toLowerCase()) || false;
     const areaMatch = venue.area?.toLowerCase().includes(searchTerm.toLowerCase()) || false;
+    const textMatch = nameMatch || addressMatch || cityMatch || areaMatch;
     
-    return nameMatch || addressMatch || cityMatch || areaMatch;
+    if (!textMatch) return false;
+    
+    // Venue type filter
+    if (!activeVenueFilters.all) {
+      const typeMatch = (
+        (activeVenueFilters.restaurant && venue.venueType === 'restaurant') ||
+        (activeVenueFilters.cafe && venue.venueType === 'cafe') ||
+        (activeVenueFilters.bar && venue.venueType === 'bar') ||
+        (activeVenueFilters.park && venue.venueType === 'park')
+      );
+      if (!typeMatch) return false;
+    }
+    
+    // Sunny filter
+    if (showSunnyOnly && !venue.hasSunnySpot) {
+      return false;
+    }
+    
+    // Nearby filter - considers venues within 3km as nearby
+    if (showNearbyOnly && (!venue.distance || venue.distance > 3)) {
+      return false;
+    }
+    
+    return true;
   });
   
   const toggleFilterPanel = () => {
     setIsFiltering(!isFiltering);
+  };
+  
+  const handleClearAll = () => {
+    if (getSavedCount() > 0) {
+      if (window.confirm('Are you sure you want to clear all saved locations?')) {
+        clearAllSaved();
+      }
+    } else {
+      toast({
+        title: "No saved locations",
+        description: "You don't have any saved locations to clear",
+        variant: "default",
+      });
+    }
   };
   
   // Navigation handler for bottom navigation
@@ -46,16 +143,41 @@ export default function SavedLocations() {
     }
   };
 
+  // Show loading state before initialization completes
+  if (!isInitialized) {
+    return (
+      <div className="container mx-auto px-4 py-12 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-amber-100 flex items-center justify-center">
+            <Bookmark className="h-8 w-8 text-amber-500 animate-pulse" />
+          </div>
+          <p className="text-gray-600">Loading saved locations...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto px-4 py-6 max-w-2xl pb-20">
-      <div className="flex items-center mb-6">
-        <button 
-          onClick={() => navigate("/")}
-          className="mr-3 p-2 rounded-full hover:bg-gray-100"
-        >
-          <ArrowLeft className="h-5 w-5 text-gray-700" />
-        </button>
-        <h1 className="text-2xl font-bold text-gray-900">Saved Locations</h1>
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center">
+          <button 
+            onClick={() => navigate("/")}
+            className="mr-3 p-2 rounded-full hover:bg-gray-100"
+          >
+            <ArrowLeft className="h-5 w-5 text-gray-700" />
+          </button>
+          <h1 className="text-2xl font-bold text-gray-900">Saved Locations</h1>
+        </div>
+        
+        {getSavedCount() > 0 && (
+          <button 
+            onClick={handleClearAll}
+            className="text-red-500 text-sm flex items-center px-2 py-1 rounded-md hover:bg-red-50"
+          >
+            <XCircle className="h-4 w-4 mr-1" /> Clear All
+          </button>
+        )}
       </div>
       
       {/* Search and filter */}
@@ -76,11 +198,11 @@ export default function SavedLocations() {
             {filteredVenues.length} saved {filteredVenues.length === 1 ? 'location' : 'locations'}
           </div>
           <button 
-            className="flex items-center text-sm text-amber-600 hover:text-amber-700"
+            className={`flex items-center text-sm ${isFiltering ? 'text-amber-700 font-medium' : 'text-amber-600'} hover:text-amber-700`}
             onClick={toggleFilterPanel}
           >
             <Filter className="h-4 w-4 mr-1" />
-            Filter
+            {isFiltering ? 'Hide Filters' : 'Filter'}
           </button>
         </div>
         
@@ -88,29 +210,78 @@ export default function SavedLocations() {
           <div className="bg-amber-50 p-4 rounded-lg">
             <h3 className="font-medium text-amber-800 mb-3">Filter Saved Locations</h3>
             <div className="flex flex-wrap gap-2">
-              <button className="px-3 py-1.5 bg-amber-100 text-amber-800 rounded-full text-sm font-medium">
+              <button 
+                onClick={() => handleFilterChange('all')}
+                className={`px-3 py-1.5 rounded-full text-sm font-medium ${
+                  activeVenueFilters.all 
+                    ? 'bg-amber-100 text-amber-800' 
+                    : 'bg-white border border-gray-200 text-gray-600'
+                }`}
+              >
                 All
               </button>
-              <button className="px-3 py-1.5 bg-white border border-gray-200 text-gray-600 rounded-full text-sm font-medium">
+              <button 
+                onClick={() => handleFilterChange('restaurant')}
+                className={`px-3 py-1.5 rounded-full text-sm font-medium ${
+                  activeVenueFilters.restaurant 
+                    ? 'bg-amber-100 text-amber-800' 
+                    : 'bg-white border border-gray-200 text-gray-600'
+                }`}
+              >
                 Restaurants
               </button>
-              <button className="px-3 py-1.5 bg-white border border-gray-200 text-gray-600 rounded-full text-sm font-medium">
+              <button 
+                onClick={() => handleFilterChange('cafe')}
+                className={`px-3 py-1.5 rounded-full text-sm font-medium ${
+                  activeVenueFilters.cafe 
+                    ? 'bg-amber-100 text-amber-800' 
+                    : 'bg-white border border-gray-200 text-gray-600'
+                }`}
+              >
                 Cafés
               </button>
-              <button className="px-3 py-1.5 bg-white border border-gray-200 text-gray-600 rounded-full text-sm font-medium">
+              <button 
+                onClick={() => handleFilterChange('bar')}
+                className={`px-3 py-1.5 rounded-full text-sm font-medium ${
+                  activeVenueFilters.bar 
+                    ? 'bg-amber-100 text-amber-800' 
+                    : 'bg-white border border-gray-200 text-gray-600'
+                }`}
+              >
                 Bars
               </button>
-              <button className="px-3 py-1.5 bg-white border border-gray-200 text-gray-600 rounded-full text-sm font-medium">
+              <button 
+                onClick={() => handleFilterChange('park')}
+                className={`px-3 py-1.5 rounded-full text-sm font-medium ${
+                  activeVenueFilters.park 
+                    ? 'bg-amber-100 text-amber-800' 
+                    : 'bg-white border border-gray-200 text-gray-600'
+                }`}
+              >
                 Parks
               </button>
             </div>
             <div className="flex flex-wrap gap-2 mt-3">
-              <button className="px-3 py-1.5 bg-white border border-gray-200 text-gray-600 rounded-full text-sm font-medium flex items-center">
-                <Sun className="h-3.5 w-3.5 mr-1.5 text-amber-500" />
+              <button 
+                onClick={toggleSunnyFilter}
+                className={`px-3 py-1.5 rounded-full text-sm font-medium flex items-center ${
+                  showSunnyOnly 
+                    ? 'bg-amber-100 text-amber-800' 
+                    : 'bg-white border border-gray-200 text-gray-600'
+                }`}
+              >
+                <Sun className={`h-3.5 w-3.5 mr-1.5 ${showSunnyOnly ? 'text-amber-700' : 'text-amber-500'}`} />
                 Sunny spots
               </button>
-              <button className="px-3 py-1.5 bg-white border border-gray-200 text-gray-600 rounded-full text-sm font-medium flex items-center">
-                <Home className="h-3.5 w-3.5 mr-1.5 text-blue-500" />
+              <button 
+                onClick={toggleNearbyFilter}
+                className={`px-3 py-1.5 rounded-full text-sm font-medium flex items-center ${
+                  showNearbyOnly 
+                    ? 'bg-blue-100 text-blue-800' 
+                    : 'bg-white border border-gray-200 text-gray-600'
+                }`}
+              >
+                <Home className={`h-3.5 w-3.5 mr-1.5 ${showNearbyOnly ? 'text-blue-700' : 'text-blue-500'}`} />
                 Nearby
               </button>
             </div>
@@ -122,15 +293,15 @@ export default function SavedLocations() {
       {filteredVenues.length > 0 ? (
         <div className="space-y-4">
           {filteredVenues.map((venue) => (
-            <div key={venue.id} className="relative">
+            <div key={venue.id} className="relative venue-card-container">
               <VenueCard
                 venue={venue}
                 isSunny={venue.hasSunnySpot}
                 onClick={() => handleVenueSelect(venue)}
               />
               <button 
-                className="absolute top-3 right-3 p-2 bg-white rounded-full shadow-md hover:bg-gray-100"
-                onClick={() => handleRemoveSaved(venue.id)}
+                className="absolute top-3 right-3 p-2 bg-white rounded-full shadow-md hover:bg-gray-100 transition-all duration-150 venue-delete-button"
+                onClick={(e) => handleRemoveSaved(venue.id, e)}
               >
                 <Trash2 className="h-4 w-4 text-red-500" />
               </button>
@@ -144,7 +315,9 @@ export default function SavedLocations() {
           </div>
           <h3 className="text-xl font-medium text-gray-800">No saved locations</h3>
           <p className="text-gray-600 max-w-xs mx-auto">
-            Save your favorite sunny spots to access them quickly later
+            {searchTerm || !activeVenueFilters.all || showSunnyOnly || showNearbyOnly
+              ? 'No results match your current filters'
+              : 'Save your favorite sunny spots to access them quickly later'}
           </p>
           <button 
             className="mt-4 px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 inline-flex items-center"
