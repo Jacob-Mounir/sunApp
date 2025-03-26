@@ -9,7 +9,6 @@ import { createSunnyTileLayer } from './SunnyMapStyle';
 import { useSavedVenues } from '@/hooks/useSavedVenues';
 import { WeatherEffects } from './WeatherEffects';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
 
 interface AirbnbMapViewProps {
   venues: Venue[];
@@ -24,24 +23,6 @@ export function AirbnbMapView({ venues, userLocation, weatherData, onVenueSelect
   const markers = useRef<L.Marker[]>([]);
   const userMarker = useRef<L.Marker | null>(null);
   const popovers = useRef<HTMLElement[]>([]);
-  const [scrollY, setScrollY] = useState(0);
-  
-  // Listen for scroll events to adjust map height
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrollY(window.scrollY);
-      
-      // Refresh the map size when scrolling to ensure proper rendering
-      if (mapRef.current) {
-        setTimeout(() => {
-          mapRef.current?.invalidateSize();
-        }, 0);
-      }
-    };
-    
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
   
   // Use saved venues hook to highlight saved locations
   const { isVenueSaved } = useSavedVenues();
@@ -649,15 +630,9 @@ export function AirbnbMapView({ venues, userLocation, weatherData, onVenueSelect
     });
   }, [venues, isCurrentlySunny, onVenueSelect, isVenueSaved, selectedVenue]);
 
-  // Calculate map height based on scroll position
-  const mapHeight = scrollY > 20 ? 'h-[70vh]' : 'h-[60vh]';
-
   return (
-    <div className={cn(
-      "relative w-full bg-white dark:bg-gray-800 transition-all duration-300", 
-      mapHeight
-    )}>
-      <div id="airbnb-map-container" className="w-full h-full transition-all duration-300" />
+    <div className="relative w-full h-full bg-white">
+      <div id="airbnb-map-container" className="w-full h-full" />
       
       {/* Weather effect overlay */}
       <WeatherEffects weatherData={weatherData} className="absolute inset-0 pointer-events-none" />

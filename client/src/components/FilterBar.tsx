@@ -39,7 +39,7 @@ export function FilterBar({
   };
   
   return (
-    <div className="bg-white dark:bg-gray-800 px-4 py-2 sticky top-[60px] z-30 border-b border-gray-100 dark:border-gray-700 transition-all duration-300">
+    <div className="bg-white dark:bg-gray-800 px-4 py-2 sticky top-[192px] z-10 border-b border-gray-100 dark:border-gray-700">
       <div className="max-w-xl mx-auto">
         <div className="flex overflow-x-auto pb-2 no-scrollbar gap-2">
           {/* Venue type filter chips */}
