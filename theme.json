@@ -1,6 +1,7 @@
 {
-  "variant": "tint",
-  "primary": "hsl(30, 95%, 55%)",
+  "variant": "glass",
+  "primary": "hsl(30, 95%, 60%)",
   "appearance": "light",
-  "radius": 1.8
+  "radius": 2.0,
+  "glassEffect": true
 }

@@ -13,6 +13,11 @@ export default {
       colors: {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
+        glass: {
+          DEFAULT: "rgba(255, 255, 255, 0.1)",
+          dark: "rgba(0, 0, 0, 0.1)",
+          border: "rgba(255, 255, 255, 0.2)",
+        },
         card: {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
