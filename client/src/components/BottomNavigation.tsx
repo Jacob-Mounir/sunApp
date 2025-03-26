@@ -12,13 +12,13 @@ interface BottomNavigationProps {
 export function BottomNavigation({ activeItem, onItemClick }: BottomNavigationProps) {
   const [location] = useLocation();
   return (
-    <div className="bg-white fixed bottom-0 left-0 right-0 border-t border-gray-100 shadow-lg z-50 bottom-nav-safe-area backdrop-blur-sm bg-white/95">
+    <div className="bg-white dark:bg-gray-900 fixed bottom-0 left-0 right-0 border-t border-gray-100 dark:border-gray-800 shadow-lg z-50 bottom-nav-safe-area backdrop-blur-sm bg-white/95 dark:bg-gray-900/95">
       <div className="max-w-xl mx-auto bottom-nav-container py-1.5">
         <div className="flex justify-around items-center h-14">
           <button 
             className={cn(
               "flex-1 h-full flex flex-col items-center justify-center relative",
-              activeItem === 'explore' ? 'text-amber-500' : 'text-gray-500 hover:text-gray-800'
+              activeItem === 'explore' ? 'text-amber-500' : 'text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-300'
             )}
             onClick={() => onItemClick('explore')}
           >
@@ -27,7 +27,7 @@ export function BottomNavigation({ activeItem, onItemClick }: BottomNavigationPr
                 "h-6 w-6 transition-all duration-200", 
                 activeItem === 'explore' 
                   ? 'text-amber-500 scale-110 drop-shadow-sm' 
-                  : 'text-gray-500'
+                  : 'text-gray-500 dark:text-gray-400'
               )} />
               {activeItem === 'explore' && (
                 <span className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-amber-500 rounded-full shadow-sm"></span>
@@ -35,7 +35,7 @@ export function BottomNavigation({ activeItem, onItemClick }: BottomNavigationPr
             </div>
             <span className={cn(
               "text-xs mt-1 transition-all duration-200",
-              activeItem === 'explore' ? 'font-semibold text-amber-500' : 'font-normal'
+              activeItem === 'explore' ? 'font-semibold text-amber-500' : 'font-normal dark:text-gray-400'
             )}>
               Explore
             </span>
@@ -48,7 +48,7 @@ export function BottomNavigation({ activeItem, onItemClick }: BottomNavigationPr
           <button 
             className={cn(
               "flex-1 h-full flex flex-col items-center justify-center relative",
-              activeItem === 'saved' ? 'text-amber-500' : 'text-gray-500 hover:text-gray-800'
+              activeItem === 'saved' ? 'text-amber-500' : 'text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-300'
             )}
             onClick={() => onItemClick('saved')}
           >
@@ -57,7 +57,7 @@ export function BottomNavigation({ activeItem, onItemClick }: BottomNavigationPr
                 "h-6 w-6 transition-all duration-200", 
                 activeItem === 'saved' 
                   ? 'text-amber-500 scale-110 drop-shadow-sm' 
-                  : 'text-gray-500'
+                  : 'text-gray-500 dark:text-gray-400'
               )} 
               fill={activeItem === 'saved' ? 'currentColor' : 'none'}
               />
@@ -80,7 +80,7 @@ export function BottomNavigation({ activeItem, onItemClick }: BottomNavigationPr
           <button 
             className={cn(
               "flex-1 h-full flex flex-col items-center justify-center relative",
-              activeItem === 'settings' ? 'text-amber-500' : 'text-gray-500 hover:text-gray-800'
+              activeItem === 'settings' ? 'text-amber-500' : 'text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-300'
             )}
             onClick={() => onItemClick('settings')}
           >
@@ -89,7 +89,7 @@ export function BottomNavigation({ activeItem, onItemClick }: BottomNavigationPr
                 "h-6 w-6 transition-all duration-200", 
                 activeItem === 'settings' 
                   ? 'text-amber-500 scale-110 drop-shadow-sm' 
-                  : 'text-gray-500'
+                  : 'text-gray-500 dark:text-gray-400'
               )} />
               {activeItem === 'settings' && (
                 <span className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-amber-500 rounded-full shadow-sm"></span>
