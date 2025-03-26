@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { ArrowLeft, Moon, Sun, Settings as SettingsIcon, Bell, MapPin, Globe, Lock, Info, LogOut, Sliders } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useTheme } from '@/hooks/useTheme';
 import { BottomNavigation } from '@/components/BottomNavigation';
 
 import {
@@ -20,20 +21,27 @@ import {
 export default function Settings() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
+  const { theme, toggleTheme } = useTheme();
   
   // Settings state
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(theme === 'dark');
   const [notifications, setNotifications] = useState(true);
   const [locationSharing, setLocationSharing] = useState(true);
   const [units, setUnits] = useState('metric');
   const [language, setLanguage] = useState('english');
   
+  // Update dark mode state when theme changes
+  useEffect(() => {
+    setDarkMode(theme === 'dark');
+  }, [theme]);
+  
   // Toggle dark mode
   const toggleDarkMode = () => {
+    toggleTheme();
     setDarkMode(!darkMode);
     toast({
       title: !darkMode ? "Dark mode enabled" : "Light mode enabled",
-      description: "Your preference has been saved",
+      description: darkMode ? "Perfect for sunny days!" : "Perfect for staying in the shadow",
     });
   };
   
@@ -98,11 +106,11 @@ export default function Settings() {
       <div className="flex items-center mb-6">
         <button 
           onClick={() => navigate("/")}
-          className="mr-3 p-2 rounded-full hover:bg-gray-100"
+          className="mr-3 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
         >
-          <ArrowLeft className="h-5 w-5 text-gray-700" />
+          <ArrowLeft className="h-5 w-5 text-gray-700 dark:text-gray-300" />
         </button>
-        <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Settings</h1>
       </div>
       
       <div className="space-y-6">
@@ -125,7 +133,11 @@ export default function Settings() {
                 </div>
                 <div>
                   <div className="font-medium">Dark Mode</div>
-                  <div className="text-sm text-gray-500">Switch between light and dark theme</div>
+                  <div className="text-sm text-gray-500 dark:text-gray-400">
+                    {darkMode 
+                      ? "Perfect for staying in the shadow (like in Dubai)"
+                      : "Switch between light and dark theme"}
+                  </div>
                 </div>
               </div>
               <Switch checked={darkMode} onCheckedChange={toggleDarkMode} />
@@ -152,7 +164,7 @@ export default function Settings() {
                 </div>
                 <div>
                   <div className="font-medium">Notifications</div>
-                  <div className="text-sm text-gray-500">Receive alerts and notifications</div>
+                  <div className="text-sm text-gray-500 dark:text-gray-400">Receive alerts and notifications</div>
                 </div>
               </div>
               <Switch checked={notifications} onCheckedChange={toggleNotifications} />
@@ -165,7 +177,7 @@ export default function Settings() {
                 </div>
                 <div>
                   <div className="font-medium">Location Sharing</div>
-                  <div className="text-sm text-gray-500">Allow app to access your location</div>
+                  <div className="text-sm text-gray-500 dark:text-gray-400">Allow app to access your location</div>
                 </div>
               </div>
               <Switch checked={locationSharing} onCheckedChange={toggleLocationSharing} />
@@ -179,7 +191,7 @@ export default function Settings() {
                 <div className="font-medium">Language</div>
               </div>
               <select 
-                className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
+                className="w-full p-2 border border-gray-300 dark:border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 transition-colors"
                 value={language}
                 onChange={handleLanguageChange}
               >
@@ -199,7 +211,7 @@ export default function Settings() {
                 <div className="font-medium">Units</div>
               </div>
               <select 
-                className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500" 
+                className="w-full p-2 border border-gray-300 dark:border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 transition-colors" 
                 value={units}
                 onChange={handleUnitsChange}
               >
@@ -223,7 +235,7 @@ export default function Settings() {
           </CardHeader>
           <CardContent className="space-y-2">
             <button 
-              className="w-full flex items-center justify-between py-3 px-4 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors"
+              className="w-full flex items-center justify-between py-3 px-4 border border-gray-200 dark:border-gray-700 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
               onClick={() => navigate("/profile")}
             >
               <span className="font-medium">Profile Settings</span>
@@ -231,7 +243,7 @@ export default function Settings() {
             </button>
             
             <button 
-              className="w-full flex items-center justify-between py-3 px-4 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors"
+              className="w-full flex items-center justify-between py-3 px-4 border border-gray-200 dark:border-gray-700 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
               onClick={() => navigate("/about")}
             >
               <span className="font-medium">About SunSpotter</span>
@@ -240,7 +252,7 @@ export default function Settings() {
           </CardContent>
           <CardFooter>
             <button 
-              className="w-full flex items-center justify-center py-2 px-4 bg-red-50 text-red-600 rounded-md hover:bg-red-100 transition-colors"
+              className="w-full flex items-center justify-center py-2 px-4 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-md hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
               onClick={handleLogout}
             >
               <LogOut className="h-4 w-4 mr-2" />
