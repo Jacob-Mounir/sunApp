@@ -14,7 +14,7 @@ import { useWeather } from '@/hooks/useWeather';
 import { useSunPosition, isVenueCurrentlySunny } from '@/hooks/useSunCalculation';
 import { isSunnyWeather } from '@/hooks/useWeather';
 import { Button } from '@/components/ui/button';
-import { RotateCw, Plus } from 'lucide-react';
+import { RotateCw, Plus, Sun } from 'lucide-react';
 import { AddVenueModal } from '@/components/AddVenueModal';
 
 export default function Home() {
@@ -224,11 +224,6 @@ export default function Home() {
       
       <SearchBar onSearch={handleSearch} />
       
-      <TabSelector 
-        activeTab={activeTab} 
-        onTabChange={setActiveTab} 
-      />
-      
       <FilterBar 
         filters={filters} 
         onFilterChange={handleFilterChange}
@@ -238,9 +233,10 @@ export default function Home() {
         onHeatersToggle={toggleHeatersFilter}
       />
       
-      <main className="flex-grow relative">
-        {/* Map View */}
-        <div className={activeTab === 'map' ? 'block absolute inset-0' : 'hidden'} style={{ height: '100%', width: '100%' }}>
+      {/* Airbnb-style split view */}
+      <main className="flex-grow relative flex flex-col md:flex-row">
+        {/* Map section (always visible on large screens, top section on mobile) */}
+        <div className="h-[50vh] md:h-auto md:flex-1 relative md:sticky md:top-0">
           <MapView
             venues={filteredVenues}
             userLocation={{
@@ -252,13 +248,56 @@ export default function Home() {
           />
         </div>
         
-        {/* List View */}
-        <div className={activeTab === 'list' ? 'block h-full w-full overflow-auto' : 'hidden'}>
-          <ListView
-            venues={filteredVenues}
-            weatherData={weatherData}
-            onVenueSelect={handleVenueSelect}
-          />
+        {/* Card list section (scrollable list of venues) */}
+        <div className="flex-1 overflow-auto bg-white rounded-t-3xl -mt-5 relative z-10 shadow-lg md:shadow-none md:mt-0 md:rounded-none md:max-w-md">
+          <div className="sticky top-0 z-20 bg-white pt-2 pb-4 px-4">
+            <div className="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-2 md:hidden"></div>
+            <TabSelector 
+              activeTab={activeTab} 
+              onTabChange={setActiveTab} 
+            />
+          </div>
+          
+          {activeTab === 'list' && (
+            <ListView
+              venues={filteredVenues}
+              weatherData={weatherData}
+              onVenueSelect={handleVenueSelect}
+            />
+          )}
+          
+          {activeTab === 'map' && (
+            <div className="p-4">
+              <h2 className="text-lg font-semibold mb-4">
+                {filteredVenues.length} sunny spots in the area
+              </h2>
+              <div className="grid grid-cols-1 gap-4">
+                {filteredVenues.map(venue => (
+                  <div 
+                    key={venue.id} 
+                    className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 cursor-pointer hover:shadow-md transition-shadow"
+                    onClick={() => handleVenueSelect(venue)}
+                  >
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h3 className="font-medium">{venue.name}</h3>
+                        <p className="text-sm text-gray-500">{venue.venueType} · {venue.distance ? `${(venue.distance / 1000).toFixed(1)} km away` : 'Distance unavailable'}</p>
+                        {venue.sunHoursStart && venue.sunHoursEnd && (
+                          <p className="text-sm text-amber-600 font-medium mt-1">
+                            Sunny {venue.sunHoursStart} - {venue.sunHoursEnd}
+                          </p>
+                        )}
+                      </div>
+                      <div className="flex items-center bg-amber-50 rounded-full px-2 py-1">
+                        <Sun className="h-4 w-4 text-amber-500 mr-1" />
+                        <span className="text-sm font-medium">{isVenueSunny(venue) ? 'Now' : 'Later'}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </main>
       

@@ -85,8 +85,23 @@ export type InsertWeatherData = z.infer<typeof insertWeatherDataSchema>;
 export type WeatherData = typeof weatherData.$inferSelect;
 export type InsertSunCalculation = z.infer<typeof insertSunCalculationSchema>;
 export type SunCalculation = typeof sunCalculations.$inferSelect;
-export type InsertSunPositionCache = z.infer<typeof insertSunPositionCacheSchema>;
-export type SunPositionCache = typeof sunPositionCache.$inferSelect;
+
+// SunPositionCache types for backwards compatibility
+export type InsertSunPositionCache = {
+  latitude: number;
+  longitude: number;
+  date: string;
+  hour: number;
+  azimuth: number;
+  elevation: number;
+  calculationTimestamp: string;
+  expiresAt: Date;
+};
+
+export type SunPositionCache = InsertSunPositionCache & {
+  id: number;
+  createdAt: Date;
+};
 
 // User interface
 export const users = pgTable("users", {

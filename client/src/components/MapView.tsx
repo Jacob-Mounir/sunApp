@@ -5,10 +5,11 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { isSunnyWeather } from '@/hooks/useWeather';
 import { useSunPosition } from '@/hooks/useSunCalculation';
-import { Sun } from 'lucide-react';
+import { Sun, Clock, MapPin } from 'lucide-react';
 import { addCustomMapStyles, createSunnyTileLayer } from './SunnyMapStyle';
 import { useSavedVenues } from '@/hooks/useSavedVenues';
 import { WeatherEffects } from './WeatherEffects';
+import { Button } from '@/components/ui/button';
 
 interface MapViewProps {
   venues: Venue[];
