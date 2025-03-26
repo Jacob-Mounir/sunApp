@@ -233,10 +233,10 @@ export default function Home() {
         onHeatersToggle={toggleHeatersFilter}
       />
       
-      {/* Airbnb-style split view */}
-      <main className="flex-grow relative flex flex-col md:flex-row">
-        {/* Map section (always visible on large screens, top section on mobile) */}
-        <div className="h-[50vh] md:h-auto md:flex-1 relative md:sticky md:top-0">
+      {/* Airbnb-style split view with fullscreen map and ascendable list */}
+      <main className="flex-grow relative flex flex-col">
+        {/* Map section (fullscreen) */}
+        <div className="absolute inset-0 w-full">
           <AirbnbMapView
             venues={filteredVenues}
             userLocation={{
@@ -248,8 +248,8 @@ export default function Home() {
           />
         </div>
         
-        {/* Card list section (scrollable list of venues) */}
-        <div className="flex-1 overflow-auto bg-white rounded-t-3xl -mt-5 relative z-10 shadow-lg md:shadow-none md:mt-0 md:rounded-none md:max-w-md">
+        {/* Card list section (scrollable list of venues that can ascend over map) */}
+        <div className="absolute bottom-0 left-0 right-0 max-h-[50vh] bg-white rounded-t-3xl relative z-10 shadow-lg overflow-auto">
           <div className="sticky top-0 z-20 bg-white pt-2 pb-4 px-4">
             <div className="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-2 md:hidden"></div>
             <TabSelector 
