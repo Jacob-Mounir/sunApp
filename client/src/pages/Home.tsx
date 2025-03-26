@@ -106,7 +106,8 @@ export default function Home() {
     }
     
     // Filter by venue type
-    if (!filters.all && venue.venueType && !(venue.venueType in filters) || !filters[venue.venueType as keyof FilterState]) {
+    if (!filters.all && venue.venueType && 
+        (!(venue.venueType in filters) || !filters[venue.venueType as keyof FilterState])) {
       return false;
     }
     
