@@ -83,7 +83,7 @@ export function useSunPosition(latitude: number, longitude: number, date?: Date)
     }),
     enabled: !isNaN(latitude) && !isNaN(longitude),
     refetchOnWindowFocus: false,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 2 * 60 * 60 * 1000, // 2 hours
   });
 }
 
