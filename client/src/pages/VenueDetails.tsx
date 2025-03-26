@@ -247,7 +247,7 @@ export default function VenueDetails() {
       <div className="relative w-full h-48 bg-amber-100">
         {venue.imageUrl ? (
           <img 
-            src={venue.imageUrl} 
+            src={`${window.location.origin}${venue.imageUrl}`}
             alt={venue.name} 
             className="w-full h-full object-cover"
             onError={(e) => {

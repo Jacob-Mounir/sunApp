@@ -139,9 +139,28 @@ export function VenueCard({ venue, isSunny, onClick }: VenueCardProps) {
         <div className="w-28 h-28 flex-shrink-0 relative">
           {venue.imageUrl ? (
             <img 
-              src={venue.imageUrl} 
+              src={`${window.location.origin}${venue.imageUrl}`} 
               alt={venue.name} 
               className="w-full h-full object-cover"
+              onError={(e) => {
+                console.error("VenueCard image failed to load:", venue.imageUrl);
+                const target = e.target as HTMLImageElement;
+                target.style.display = 'none';
+                const parent = target.parentElement;
+                if (parent) {
+                  // Add placeholder styling
+                  parent.classList.add(getPlaceholderStyle(), 'flex', 'items-center', 'justify-center');
+                  // Create placeholder content
+                  const placeholder = document.createElement('div');
+                  placeholder.className = 'w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm';
+                  placeholder.innerHTML = `<div class="h-5 w-5 text-gray-500">${
+                    venue.venueType === 'restaurant' ? '🍽️' : 
+                    venue.venueType === 'cafe' ? '☕' : 
+                    venue.venueType === 'bar' ? '🍸' : '🌳'
+                  }</div>`;
+                  parent.appendChild(placeholder);
+                }
+              }}
             />
           ) : (
             <div className={`w-full h-full ${getPlaceholderStyle()} flex items-center justify-center`}>
