@@ -403,8 +403,8 @@ export default function VenueDetails() {
           <div className="tab-content">
             {/* Sun Exposure */}
             <div className="mx-4 mt-4 bg-white dark:bg-gray-800 rounded-xl shadow-md p-5">
-              <h2 className="text-lg font-bold text-amber-800 flex items-center">
-                <Sun className="h-5 w-5 text-amber-500 mr-2" fill="currentColor" /> 
+              <h2 className="text-lg font-bold text-amber-800 dark:text-amber-300 flex items-center">
+                <Sun className="h-5 w-5 text-amber-500 dark:text-amber-400 mr-2" fill="currentColor" /> 
                 Sun Exposure
               </h2>
               
@@ -421,10 +421,10 @@ export default function VenueDetails() {
                     </div>
                   )}
                   <div>
-                    <p className="font-medium text-gray-800">
+                    <p className="font-medium text-gray-800 dark:text-gray-200">
                       {isCurrentlySunny ? 'Sunny right now!' : 'Not currently sunny'}
                     </p>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
                       {isCurrentlySunny 
                         ? 'This location has direct sunlight now' 
                         : 'Check back later for sunshine'}
@@ -465,8 +465,8 @@ export default function VenueDetails() {
               
               {/* Sunny spot description */}
               {venue.sunnySpotDescription && (
-                <div className="mt-4 p-3 border border-amber-200 rounded-lg">
-                  <p className="text-sm text-gray-700 italic">
+                <div className="mt-4 p-3 border border-amber-200 dark:border-amber-700 rounded-lg">
+                  <p className="text-sm text-gray-700 dark:text-gray-300 italic">
                     "{venue.sunnySpotDescription}"
                   </p>
                 </div>
@@ -483,7 +483,7 @@ export default function VenueDetails() {
                   `}>
                     <Flame className="h-4 w-4" />
                   </div>
-                  <p className="text-sm text-gray-700">
+                  <p className="text-sm text-gray-700 dark:text-gray-300">
                     {venue.hasHeaters 
                       ? 'Outdoor heating available' 
                       : 'No outdoor heating'}
@@ -494,7 +494,7 @@ export default function VenueDetails() {
             
             {/* Details & Amenities */}
             <div className="mx-4 mt-4 bg-white dark:bg-gray-800 rounded-xl shadow-md p-5">
-              <h2 className="text-lg font-bold text-gray-800 mb-4">
+              <h2 className="text-lg font-bold text-gray-800 dark:text-gray-200 mb-4">
                 Details & Amenities
               </h2>
               
@@ -549,7 +549,7 @@ export default function VenueDetails() {
             
             {/* Contact Information */}
             <div className="mx-4 mt-4 bg-white dark:bg-gray-800 rounded-xl shadow-md p-5">
-              <h2 className="text-lg font-bold text-gray-800 flex items-center mb-4">
+              <h2 className="text-lg font-bold text-gray-800 dark:text-gray-200 flex items-center mb-4">
                 <Phone className="h-5 w-5 text-gray-600 mr-2" /> 
                 Contact Information
               </h2>
@@ -636,8 +636,8 @@ export default function VenueDetails() {
           <div className="tab-content">
             {/* Sun Hours Content */}
             <div className="mx-4 bg-white dark:bg-gray-800 rounded-xl shadow-md p-5">
-              <h2 className="text-lg font-bold text-amber-800 flex items-center mb-4">
-                <Sun className="h-5 w-5 text-amber-500 mr-2" fill="currentColor" /> 
+              <h2 className="text-lg font-bold text-amber-800 dark:text-amber-300 flex items-center mb-4">
+                <Sun className="h-5 w-5 text-amber-500 dark:text-amber-400 mr-2" fill="currentColor" /> 
                 Sun Hours Detail
               </h2>
               
@@ -699,7 +699,7 @@ export default function VenueDetails() {
           <div className="tab-content">
             {/* Operating Hours */}
             <div className="mx-4 bg-white dark:bg-gray-800 rounded-xl shadow-md p-5">
-              <h2 className="text-lg font-bold text-gray-800 flex items-center mb-4">
+              <h2 className="text-lg font-bold text-gray-800 dark:text-gray-200 flex items-center mb-4">
                 <Clock className="h-5 w-5 text-gray-600 mr-2" /> 
                 Operating Hours
               </h2>
@@ -763,7 +763,7 @@ export default function VenueDetails() {
             
             {/* Best Seasons */}
             <div className="mx-4 mt-4 bg-white dark:bg-gray-800 rounded-xl shadow-md p-5">
-              <h2 className="text-lg font-bold text-gray-800 flex items-center mb-4">
+              <h2 className="text-lg font-bold text-gray-800 dark:text-gray-200 flex items-center mb-4">
                 <Calendar className="h-5 w-5 text-gray-600 mr-2" /> 
                 Best Times to Visit
               </h2>
@@ -821,7 +821,7 @@ export default function VenueDetails() {
         {activeTab === 'reviews' && (
           <div className="tab-content">
             <div className="mx-4 bg-white dark:bg-gray-800 rounded-xl shadow-md p-5">
-              <h2 className="text-lg font-bold text-gray-800 flex items-center mb-4">
+              <h2 className="text-lg font-bold text-gray-800 dark:text-gray-200 flex items-center mb-4">
                 <MessageSquare className="h-5 w-5 text-gray-600 mr-2" /> 
                 Reviews
               </h2>
