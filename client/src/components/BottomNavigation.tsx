@@ -12,31 +12,26 @@ interface BottomNavigationProps {
 export function BottomNavigation({ activeItem, onItemClick }: BottomNavigationProps) {
   const [location] = useLocation();
   return (
-    <div className="bg-white fixed bottom-0 left-0 right-0 border-t shadow-lg z-50 bottom-nav-safe-area">
-      <div className="max-w-xl mx-auto px-4 bottom-nav-container py-1">
+    <div className="bg-white fixed bottom-0 left-0 right-0 border-t border-gray-200 shadow-md z-50 bottom-nav-safe-area">
+      <div className="max-w-xl mx-auto bottom-nav-container">
         <div className="flex justify-around items-center h-16">
           <button 
             className={cn(
-              "py-3 flex flex-col items-center relative",
-              activeItem === 'explore' ? 'text-orange-500' : 'text-gray-500 hover:text-gray-700'
+              "flex-1 h-full flex flex-col items-center justify-center relative",
+              activeItem === 'explore' ? 'text-amber-500' : 'text-gray-400 hover:text-gray-700'
             )}
             onClick={() => onItemClick('explore')}
           >
             {activeItem === 'explore' && (
-              <span className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-12 h-1 bg-gradient-to-r from-orange-500 to-red-500 rounded-full"></span>
+              <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-10 h-0.5 bg-amber-500 rounded-full"></span>
             )}
-            <div className={cn(
-              "flex items-center justify-center w-10 h-10 mb-1 rounded-full bottom-nav-icon",
-              activeItem === 'explore' ? 'bg-orange-100' : 'bg-transparent'
-            )}>
-              <Sun className={cn(
-                "h-5 w-5", 
-                activeItem === 'explore' ? 'text-orange-500' : 'text-gray-500'
-              )} />
-            </div>
+            <Sun className={cn(
+              "h-6 w-6 mb-1", 
+              activeItem === 'explore' ? 'text-amber-500' : 'text-gray-400'
+            )} />
             <span className={cn(
-              "text-xs bottom-nav-label",
-              activeItem === 'explore' ? 'font-medium' : ''
+              "text-xs tracking-tight",
+              activeItem === 'explore' ? 'font-medium' : 'font-normal'
             )}>
               Explore
             </span>
@@ -44,26 +39,21 @@ export function BottomNavigation({ activeItem, onItemClick }: BottomNavigationPr
           
           <button 
             className={cn(
-              "py-3 flex flex-col items-center relative",
-              activeItem === 'saved' ? 'text-orange-500' : 'text-gray-500 hover:text-gray-700'
+              "flex-1 h-full flex flex-col items-center justify-center relative",
+              activeItem === 'saved' ? 'text-amber-500' : 'text-gray-400 hover:text-gray-700'
             )}
             onClick={() => onItemClick('saved')}
           >
             {activeItem === 'saved' && (
-              <span className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-12 h-1 bg-gradient-to-r from-orange-500 to-red-500 rounded-full"></span>
+              <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-10 h-0.5 bg-amber-500 rounded-full"></span>
             )}
-            <div className={cn(
-              "flex items-center justify-center w-10 h-10 mb-1 rounded-full bottom-nav-icon",
-              activeItem === 'saved' ? 'bg-orange-100' : 'bg-transparent'
-            )}>
-              <Bookmark className={cn(
-                "h-5 w-5", 
-                activeItem === 'saved' ? 'text-orange-500' : 'text-gray-500'
-              )} />
-            </div>
+            <Bookmark className={cn(
+              "h-6 w-6 mb-1", 
+              activeItem === 'saved' ? 'text-amber-500' : 'text-gray-400'
+            )} />
             <span className={cn(
-              "text-xs bottom-nav-label",
-              activeItem === 'saved' ? 'font-medium' : ''
+              "text-xs tracking-tight",
+              activeItem === 'saved' ? 'font-medium' : 'font-normal'
             )}>
               Saved
             </span>
@@ -71,26 +61,21 @@ export function BottomNavigation({ activeItem, onItemClick }: BottomNavigationPr
           
           <button 
             className={cn(
-              "py-3 flex flex-col items-center relative",
-              activeItem === 'settings' ? 'text-orange-500' : 'text-gray-500 hover:text-gray-700'
+              "flex-1 h-full flex flex-col items-center justify-center relative",
+              activeItem === 'settings' ? 'text-amber-500' : 'text-gray-400 hover:text-gray-700'
             )}
             onClick={() => onItemClick('settings')}
           >
             {activeItem === 'settings' && (
-              <span className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-12 h-1 bg-gradient-to-r from-orange-500 to-red-500 rounded-full"></span>
+              <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-10 h-0.5 bg-amber-500 rounded-full"></span>
             )}
-            <div className={cn(
-              "flex items-center justify-center w-10 h-10 mb-1 rounded-full bottom-nav-icon",
-              activeItem === 'settings' ? 'bg-orange-100' : 'bg-transparent'
-            )}>
-              <Settings className={cn(
-                "h-5 w-5", 
-                activeItem === 'settings' ? 'text-orange-500' : 'text-gray-500'
-              )} />
-            </div>
+            <Settings className={cn(
+              "h-6 w-6 mb-1", 
+              activeItem === 'settings' ? 'text-amber-500' : 'text-gray-400'
+            )} />
             <span className={cn(
-              "text-xs bottom-nav-label",
-              activeItem === 'settings' ? 'font-medium' : ''
+              "text-xs tracking-tight",
+              activeItem === 'settings' ? 'font-medium' : 'font-normal'
             )}>
               Settings
             </span>

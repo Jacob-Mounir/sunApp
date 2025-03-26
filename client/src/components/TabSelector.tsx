@@ -10,32 +10,32 @@ interface TabSelectorProps {
 
 export function TabSelector({ activeTab, onTabChange }: TabSelectorProps) {
   return (
-    <div className="bg-white px-4 py-3 sticky top-[106px] z-10 shadow-sm">
+    <div className="bg-white px-4 py-2 sticky top-[160px] z-10 border-b border-gray-100">
       <div className="max-w-xl mx-auto">
-        <div className="flex justify-center bg-gray-100 p-1 rounded-xl">
+        <div className="flex justify-center">
           <button 
             className={cn(
-              "flex-1 flex items-center justify-center py-2 px-4 text-sm font-medium rounded-lg transition-all", 
+              "flex items-center justify-center py-2 px-6 text-sm font-medium transition-all border-b-2 mx-1", 
               activeTab === 'map' 
-                ? "bg-white text-gray-800 shadow-sm" 
-                : "text-gray-600 hover:text-gray-800"
+                ? "text-amber-500 border-amber-500" 
+                : "text-gray-500 border-transparent hover:text-gray-800 hover:border-gray-200"
             )}
             onClick={() => onTabChange('map')}
           >
             <Map className="h-4 w-4 mr-2" />
-            Map View
+            Map
           </button>
           <button 
             className={cn(
-              "flex-1 flex items-center justify-center py-2 px-4 text-sm font-medium rounded-lg transition-all", 
+              "flex items-center justify-center py-2 px-6 text-sm font-medium transition-all border-b-2 mx-1", 
               activeTab === 'list' 
-                ? "bg-white text-gray-800 shadow-sm" 
-                : "text-gray-600 hover:text-gray-800"
+                ? "text-amber-500 border-amber-500" 
+                : "text-gray-500 border-transparent hover:text-gray-800 hover:border-gray-200"
             )}
             onClick={() => onTabChange('list')}
           >
             <List className="h-4 w-4 mr-2" />
-            List View
+            List
           </button>
         </div>
       </div>
