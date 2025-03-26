@@ -503,12 +503,12 @@ export default function VenueDetails() {
                   <div className="flex items-center">
                     <Globe className="h-5 w-5 text-gray-500 mr-3" />
                     <div>
-                      <p className="text-sm font-medium text-gray-700">Website</p>
+                      <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Website</p>
                       <a 
                         href={venue.website} 
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-xs text-blue-600 hover:underline flex items-center"
+                        className="text-xs text-blue-600 dark:text-blue-400 hover:underline flex items-center"
                       >
                         Visit website
                         <ExternalLink className="h-3 w-3 ml-1" />
@@ -520,16 +520,16 @@ export default function VenueDetails() {
                 <div className="flex items-center">
                   <Calendar className="h-5 w-5 text-gray-500 mr-3" />
                   <div>
-                    <p className="text-sm font-medium text-gray-700">Best Season</p>
-                    <p className="text-xs text-gray-600">Spring & Summer</p>
+                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Best Season</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">Spring & Summer</p>
                   </div>
                 </div>
                 
                 <div className="flex items-center">
                   <Users className="h-5 w-5 text-gray-500 mr-3" />
                   <div>
-                    <p className="text-sm font-medium text-gray-700">Crowds</p>
-                    <p className="text-xs text-gray-600">
+                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Crowds</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">
                       {venue.venueType === 'park' ? 'Usually spacious' : 'Moderate'}
                     </p>
                   </div>
@@ -538,8 +538,8 @@ export default function VenueDetails() {
                 <div className="flex items-center">
                   <ThumbsUp className="h-5 w-5 text-gray-500 mr-3" />
                   <div>
-                    <p className="text-sm font-medium text-gray-700">Recommended</p>
-                    <p className="text-xs text-gray-600">
+                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Recommended</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">
                       {getSunRating(venue) >= 4 ? 'Highly recommended' : 'Recommended'}
                     </p>
                   </div>
@@ -559,10 +559,10 @@ export default function VenueDetails() {
                   <div className="flex items-center">
                     <Phone className="h-5 w-5 text-gray-500 mr-3" />
                     <div>
-                      <p className="text-sm font-medium text-gray-700">Phone</p>
+                      <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Phone</p>
                       <a 
                         href={`tel:${venue.phoneNumber}`} 
-                        className="text-sm text-blue-600 hover:underline"
+                        className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
                       >
                         {venue.phoneNumber}
                       </a>
@@ -574,10 +574,10 @@ export default function VenueDetails() {
                   <div className="flex items-center">
                     <MessageSquare className="h-5 w-5 text-gray-500 mr-3" />
                     <div>
-                      <p className="text-sm font-medium text-gray-700">Email</p>
+                      <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Email</p>
                       <a 
                         href={`mailto:${venue.email}`}
-                        className="text-sm text-blue-600 hover:underline"
+                        className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
                       >
                         {venue.email}
                       </a>
@@ -591,7 +591,7 @@ export default function VenueDetails() {
                       href={venue.website} 
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-full text-sm flex items-center"
+                      className="bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 px-3 py-1.5 rounded-full text-sm flex items-center"
                     >
                       <Globe className="h-4 w-4 mr-1.5" />
                       Website
@@ -709,54 +709,54 @@ export default function VenueDetails() {
                 venue.sundayHours) ? (
                 <div className="space-y-2">
                   {venue.mondayHours && (
-                    <div className="flex justify-between items-center py-1.5 border-b border-gray-100">
-                      <span className="text-sm font-medium text-gray-700">Monday</span>
-                      <span className="text-sm text-gray-600">{venue.mondayHours}</span>
+                    <div className="flex justify-between items-center py-1.5 border-b border-gray-100 dark:border-gray-700">
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Monday</span>
+                      <span className="text-sm text-gray-600 dark:text-gray-400">{venue.mondayHours}</span>
                     </div>
                   )}
                   {venue.tuesdayHours && (
-                    <div className="flex justify-between items-center py-1.5 border-b border-gray-100">
-                      <span className="text-sm font-medium text-gray-700">Tuesday</span>
-                      <span className="text-sm text-gray-600">{venue.tuesdayHours}</span>
+                    <div className="flex justify-between items-center py-1.5 border-b border-gray-100 dark:border-gray-700">
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Tuesday</span>
+                      <span className="text-sm text-gray-600 dark:text-gray-400">{venue.tuesdayHours}</span>
                     </div>
                   )}
                   {venue.wednesdayHours && (
-                    <div className="flex justify-between items-center py-1.5 border-b border-gray-100">
-                      <span className="text-sm font-medium text-gray-700">Wednesday</span>
-                      <span className="text-sm text-gray-600">{venue.wednesdayHours}</span>
+                    <div className="flex justify-between items-center py-1.5 border-b border-gray-100 dark:border-gray-700">
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Wednesday</span>
+                      <span className="text-sm text-gray-600 dark:text-gray-400">{venue.wednesdayHours}</span>
                     </div>
                   )}
                   {venue.thursdayHours && (
-                    <div className="flex justify-between items-center py-1.5 border-b border-gray-100">
-                      <span className="text-sm font-medium text-gray-700">Thursday</span>
-                      <span className="text-sm text-gray-600">{venue.thursdayHours}</span>
+                    <div className="flex justify-between items-center py-1.5 border-b border-gray-100 dark:border-gray-700">
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Thursday</span>
+                      <span className="text-sm text-gray-600 dark:text-gray-400">{venue.thursdayHours}</span>
                     </div>
                   )}
                   {venue.fridayHours && (
-                    <div className="flex justify-between items-center py-1.5 border-b border-gray-100">
-                      <span className="text-sm font-medium text-gray-700">Friday</span>
-                      <span className="text-sm text-gray-600">{venue.fridayHours}</span>
+                    <div className="flex justify-between items-center py-1.5 border-b border-gray-100 dark:border-gray-700">
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Friday</span>
+                      <span className="text-sm text-gray-600 dark:text-gray-400">{venue.fridayHours}</span>
                     </div>
                   )}
                   {venue.saturdayHours && (
-                    <div className="flex justify-between items-center py-1.5 border-b border-gray-100">
-                      <span className="text-sm font-medium text-gray-700">Saturday</span>
-                      <span className="text-sm text-gray-600">{venue.saturdayHours}</span>
+                    <div className="flex justify-between items-center py-1.5 border-b border-gray-100 dark:border-gray-700">
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Saturday</span>
+                      <span className="text-sm text-gray-600 dark:text-gray-400">{venue.saturdayHours}</span>
                     </div>
                   )}
                   {venue.sundayHours && (
                     <div className="flex justify-between items-center py-1.5">
-                      <span className="text-sm font-medium text-gray-700">Sunday</span>
-                      <span className="text-sm text-gray-600">{venue.sundayHours}</span>
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Sunday</span>
+                      <span className="text-sm text-gray-600 dark:text-gray-400">{venue.sundayHours}</span>
                     </div>
                   )}
                 </div>
               ) : (
                 <div className="text-center py-6">
-                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <Clock className="h-8 w-8 text-gray-400" />
+                  <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <Clock className="h-8 w-8 text-gray-400 dark:text-gray-500" />
                   </div>
-                  <p className="text-gray-500">No operating hours available for this venue.</p>
+                  <p className="text-gray-500 dark:text-gray-400">No operating hours available for this venue.</p>
                 </div>
               )}
             </div>
@@ -827,11 +827,11 @@ export default function VenueDetails() {
               </h2>
               
               <div className="text-center py-10">
-                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <MessageSquare className="h-8 w-8 text-gray-400" />
+                <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <MessageSquare className="h-8 w-8 text-gray-400 dark:text-gray-500" />
                 </div>
-                <p className="text-gray-500 mb-2">No reviews yet</p>
-                <p className="text-sm text-gray-400">Be the first to share your experience!</p>
+                <p className="text-gray-500 dark:text-gray-400 mb-2">No reviews yet</p>
+                <p className="text-sm text-gray-400 dark:text-gray-500">Be the first to share your experience!</p>
                 
                 <button className="mt-4 bg-amber-500 text-white px-4 py-2 rounded-lg text-sm font-medium">
                   Write a review
