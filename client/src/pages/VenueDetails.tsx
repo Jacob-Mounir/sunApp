@@ -250,6 +250,28 @@ export default function VenueDetails() {
             src={venue.imageUrl} 
             alt={venue.name} 
             className="w-full h-full object-cover"
+            onError={(e) => {
+              console.error("Image failed to load:", venue.imageUrl);
+              const target = e.target as HTMLImageElement;
+              // Replace with gradient background if image fails to load
+              target.style.display = 'none';
+              // Show fallback content
+              const parent = target.parentElement;
+              if (parent) {
+                parent.classList.add('bg-gradient-to-r', 'from-amber-100', 'to-amber-300', 'flex', 'items-center', 'justify-center');
+                const fallback = document.createElement('div');
+                fallback.className = 'text-center';
+                fallback.innerHTML = `
+                  <div class="flex justify-center mb-2">
+                    <span class="h-8 w-8 text-amber-600">${venue.venueType === 'restaurant' ? '🍽️' : 
+                      venue.venueType === 'cafe' ? '☕' : 
+                      venue.venueType === 'bar' ? '🍸' : '🌳'}</span>
+                  </div>
+                  <span class="text-amber-800 text-xl font-medium">${venue.name}</span>
+                `;
+                parent.appendChild(fallback);
+              }
+            }}
           />
         ) : (
           <div className="w-full h-full bg-gradient-to-r from-amber-100 to-amber-300 flex items-center justify-center">
