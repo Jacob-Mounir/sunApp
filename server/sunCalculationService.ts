@@ -47,20 +47,33 @@ export class SunCalculationService {
   /**
    * Calculate sun position (azimuth and elevation) for a specific location and time
    * with in-memory caching to reduce repeated calculations
+   * 
+   * @param latitude - Latitude in decimal degrees
+   * @param longitude - Longitude in decimal degrees
+   * @param date - Date to calculate for
+   * @param enableLogging - Whether to enable logging (default: false to reduce noise)
    */
-  public static getSunPosition(latitude: number, longitude: number, date: Date) {
+  public static getSunPosition(latitude: number, longitude: number, date: Date, enableLogging = false) {
     const cacheKey = getCacheKey(latitude, longitude, date);
     const now = new Date();
     
     // Check if we have a valid cached entry
     const cachedEntry = this.sunPositionCache.get(cacheKey);
     if (cachedEntry && cachedEntry.expiresAt > now) {
-      console.log(`Using cached sun position for ${latitude},${longitude} at ${date.toISOString()}`);
+      // Only log when explicitly enabled to reduce noise
+      if (enableLogging) {
+        console.log(`Using cached sun position for ${latitude},${longitude} at ${date.toISOString()}`);
+      }
       return {
         azimuth: cachedEntry.azimuth,
         elevation: cachedEntry.elevation,
         timestamp: date
       };
+    }
+    
+    // Log only when we calculate a new position AND logging is enabled
+    if (enableLogging) {
+      console.log(`Calculating new sun position for ${latitude},${longitude} at ${date.toISOString()}`);
     }
     
     // Calculate new position

@@ -201,7 +201,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Invalid date format" });
       }
       
-      const sunPosition = SunCalculationService.getSunPosition(latitude, longitude, date);
+      // Disable logging for this high-frequency API endpoint
+      const sunPosition = SunCalculationService.getSunPosition(latitude, longitude, date, false);
       res.json(sunPosition);
     } catch (error) {
       console.error("Error calculating sun position:", error);
