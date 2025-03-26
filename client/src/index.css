@@ -853,6 +853,36 @@ html, body {
   }
 }
 
+/* Filter button active animation */
+.filter-button-active {
+  position: relative;
+  overflow: hidden;
+}
+
+.filter-button-active::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background: rgba(245, 158, 11, 0.15);
+  border-radius: inherit;
+  transform: scale(0);
+  animation: filterButtonActivate 0.4s ease-out forwards;
+}
+
+@keyframes filterButtonActivate {
+  0% {
+    transform: scale(0);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+
 /* Filter button animations */
 .filter-button-active {
   position: relative;
