@@ -127,7 +127,7 @@ export function VenueCard({ venue, isSunny, onClick }: VenueCardProps) {
     <div 
       className={`
         bg-white rounded-xl shadow-md mb-4 overflow-hidden cursor-pointer 
-        transition-all duration-300 hover:shadow-lg hover:-translate-y-1
+        transition-all duration-300 venue-card-container
         ${isSunny ? 'ring-2 ring-amber-200' : ''}
       `}
       onClick={() => {
@@ -181,8 +181,9 @@ export function VenueCard({ venue, isSunny, onClick }: VenueCardProps) {
           
           {/* Sun indicator for sunny venues */}
           {isSunny && (
-            <div className="absolute top-2 right-2 w-6 h-6 bg-amber-400 rounded-full flex items-center justify-center shadow-md">
+            <div className="absolute top-2 right-2 w-6 h-6 bg-gradient-to-r from-amber-400 to-amber-600 rounded-full flex items-center justify-center shadow-md relative overflow-hidden">
               <Sun className="h-4 w-4 text-white" />
+              <div className="absolute inset-0 rounded-full glow-animation"></div>
             </div>
           )}
         </div>

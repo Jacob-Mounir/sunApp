@@ -154,7 +154,28 @@ export default function VenueDetails() {
   // Toggle save status
   const toggleSaved = () => {
     if (venue) {
+      // Store the current saved state before toggling
+      const wasAlreadySaved = isSaved; 
+      
       toggleSavedVenue(venue);
+      
+      // Show appropriate toast message
+      if (!wasAlreadySaved) {
+        toast({
+          title: "Location saved",
+          description: `${venue.name} has been added to your favorites`,
+          variant: "default",
+        });
+      }
+      
+      // Add animation class to bookmark icon
+      const bookmarkIcon = document.querySelector('.bookmark-icon');
+      if (bookmarkIcon) {
+        bookmarkIcon.classList.add('bookmark-animation');
+        setTimeout(() => {
+          bookmarkIcon.classList.remove('bookmark-animation');
+        }, 300);
+      }
     }
   };
   
@@ -226,7 +247,7 @@ export default function VenueDetails() {
             onClick={toggleSaved}
             className="w-8 h-8 rounded-full flex items-center justify-center"
           >
-            <Bookmark className={`h-5 w-5 ${isSaved ? 'fill-amber-500 text-amber-500' : 'text-gray-500'}`} />
+            <Bookmark className={`bookmark-icon h-5 w-5 ${isSaved ? 'fill-amber-500 text-amber-500' : 'text-gray-500'}`} />
           </button>
         </div>
         
@@ -362,10 +383,14 @@ export default function VenueDetails() {
             <Navigation className="h-4 w-4 mr-1" /> Get Directions
           </button>
           <button 
-            className="bg-white border border-amber-300 text-amber-700 py-2 px-4 rounded-lg font-medium text-sm flex items-center justify-center hover:bg-amber-50 transition-colors"
+            className={`save-button-transition py-2 px-4 rounded-lg font-medium text-sm flex items-center justify-center ${
+              isSaved 
+                ? 'save-button-saved' 
+                : 'bg-white border border-amber-300 text-amber-700 hover:bg-amber-50'
+            }`}
             onClick={toggleSaved}
           >
-            <Bookmark className={`h-4 w-4 mr-1 ${isSaved ? 'fill-amber-500' : ''}`} />
+            <Bookmark className={`bookmark-icon h-4 w-4 mr-1 ${isSaved ? 'fill-white' : ''}`} />
             {isSaved ? 'Saved' : 'Save'}
           </button>
         </div>
