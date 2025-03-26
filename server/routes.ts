@@ -96,7 +96,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Invalid venue ID" });
       }
 
-      const venueData = insertVenueSchema.partial().parse(req.body);
+      const venueData = insertVenueSchema.partial().parse({
+        ...req.body,
+        imageUrl: req.body.imageUrl || "https://image.piccola-gondola.jpg" // Default elegent indoor image
+      });
       const venue = await storage.updateVenue(venueId, venueData);
       
       if (!venue) {
