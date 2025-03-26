@@ -649,9 +649,15 @@ export function AirbnbMapView({ venues, userLocation, weatherData, onVenueSelect
     });
   }, [venues, isCurrentlySunny, onVenueSelect, isVenueSaved, selectedVenue]);
 
+  // Calculate map height based on scroll position
+  const mapHeight = scrollY > 20 ? 'h-[300px]' : 'h-[220px]';
+
   return (
-    <div className="relative w-full h-full bg-white">
-      <div id="airbnb-map-container" className="w-full h-full" />
+    <div className={cn(
+      "relative w-full bg-white dark:bg-gray-800 transition-all duration-300", 
+      mapHeight
+    )}>
+      <div id="airbnb-map-container" className="w-full h-full transition-all duration-300" />
       
       {/* Weather effect overlay */}
       <WeatherEffects weatherData={weatherData} className="absolute inset-0 pointer-events-none" />
