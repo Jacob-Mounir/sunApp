@@ -276,7 +276,10 @@ export default function Home() {
                   <div 
                     key={venue.id} 
                     className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 cursor-pointer hover:shadow-md transition-shadow"
-                    onClick={() => handleVenueSelect(venue)}
+                    onClick={() => {
+                      console.log('Card clicked for venue:', venue.name);
+                      handleVenueSelect(venue);
+                    }}
                   >
                     <div className="flex justify-between items-start">
                       <div>

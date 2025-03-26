@@ -130,7 +130,10 @@ export function VenueCard({ venue, isSunny, onClick }: VenueCardProps) {
         transition-all duration-200 hover:shadow-md hover:-translate-y-0.5
         ${isSunny ? 'ring-1 ring-amber-200' : ''}
       `}
-      onClick={onClick}
+      onClick={() => {
+        console.log('VenueCard clicked for venue:', venue.name);
+        onClick();
+      }}
     >
       <div className="flex">
         <div className="w-24 h-24 flex-shrink-0 relative">

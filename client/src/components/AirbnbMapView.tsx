@@ -534,7 +534,11 @@ export function AirbnbMapView({ venues, userLocation, weatherData, onVenueSelect
       const detailsBtn = popoverElement.querySelector('.details-btn');
       detailsBtn?.addEventListener('click', (e) => {
         e.stopPropagation();
-        onVenueSelect(venue);
+        console.log('Details button clicked for venue:', venue.name);
+        // Use setTimeout to ensure the event completes before navigation
+        setTimeout(() => {
+          onVenueSelect(venue);
+        }, 10);
       });
       
       const directionsBtn = popoverElement.querySelector('.directions-btn');
@@ -619,7 +623,10 @@ export function AirbnbMapView({ venues, userLocation, weatherData, onVenueSelect
               <Button 
                 size="sm" 
                 className="bg-amber-500 hover:bg-amber-600 text-white rounded-full"
-                onClick={() => onVenueSelect(selectedVenue)}
+                onClick={() => {
+                  console.log('Mobile details button clicked for venue:', selectedVenue.name);
+                  onVenueSelect(selectedVenue);
+                }}
               >
                 Details
               </Button>
