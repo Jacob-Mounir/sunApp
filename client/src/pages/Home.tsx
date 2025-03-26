@@ -4,7 +4,7 @@ import { AppHeader } from '@/components/AppHeader';
 import { SearchBar } from '@/components/SearchBar';
 import { TabSelector, TabOption } from '@/components/TabSelector';
 import { FilterBar } from '@/components/FilterBar';
-import { MapView } from '@/components/MapView';
+import { AirbnbMapView } from '@/components/AirbnbMapView';
 import { ListView } from '@/components/ListView';
 import { BottomNavigation } from '@/components/BottomNavigation';
 import { FilterState, Venue } from '@/types';
@@ -237,7 +237,7 @@ export default function Home() {
       <main className="flex-grow relative flex flex-col md:flex-row">
         {/* Map section (always visible on large screens, top section on mobile) */}
         <div className="h-[50vh] md:h-auto md:flex-1 relative md:sticky md:top-0">
-          <MapView
+          <AirbnbMapView
             venues={filteredVenues}
             userLocation={{
               latitude: location.latitude,
