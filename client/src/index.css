@@ -160,10 +160,9 @@ html, body {
 }
 
 .sun-rating-marker.sunny {
-  background: linear-gradient(to right, rgba(245, 158, 11, 0.8), rgba(217, 119, 6, 0.8));
-  backdrop-filter: blur(8px);
+  background: linear-gradient(to right, #f59e0b, #fbbf24);
   color: white;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: none;
 }
 
 .venue-sun-rating {
@@ -229,7 +228,7 @@ html, body {
     /* Account for bottom navigation on mobile */
     height: calc(100% - 60px);
   }
-
+  
   /* Reduce number of elements on mobile for better performance */
   .rain-drop, .snow-flake, .cloud, .fog-patch {
     opacity: 0.7; /* Slightly reduce opacity for better visibility */
@@ -452,7 +451,7 @@ html, body {
   .map-container-wrapper {
     min-height: 250px;
   }
-
+  
   .leaflet-control-zoom {
     display: none; /* Hide zoom controls on small screens */
   }
@@ -517,7 +516,7 @@ html, body {
     font-size: 11px !important;
     padding: 4px 8px !important;
   }
-
+  
   .sun-icon-container svg {
     width: 14px !important;
     height: 14px !important;
@@ -529,11 +528,11 @@ html, body {
   .xs\:hidden {
     display: none;
   }
-
+  
   .xs\:inline {
     display: inline;
   }
-
+  
   .xs\:block {
     display: block;
   }
@@ -545,13 +544,13 @@ html, body {
   .bottom-nav-container {
     padding: 0.5rem 0;
   }
-
+  
   .bottom-nav-icon {
     width: 2rem;
     height: 2rem;
     margin-bottom: 0.25rem;
   }
-
+  
   .bottom-nav-label {
     font-size: 0.65rem;
   }
