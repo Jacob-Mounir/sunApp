@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { BottomNavigation } from '@/components/BottomNavigation';
+import { SunshineForecast } from '@/components/SunshineForecast';
 import { Venue } from '@/types';
 import { useVenue } from '@/hooks/useVenues';
 import { useWeather, isSunnyWeather } from '@/hooks/useWeather';
@@ -391,6 +392,11 @@ export default function VenueDetails() {
             </p>
           </div>
         )}
+      </div>
+      
+      {/* Sunshine Forecast */}
+      <div className="mx-4 mt-4">
+        <SunshineForecast venueId={venue.id} />
       </div>
       
       {/* Details & Amenities */}
