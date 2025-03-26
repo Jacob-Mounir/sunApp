@@ -111,24 +111,24 @@ export function VenueCard({ venue, isSunny, onClick }: VenueCardProps) {
   const getPlaceholderStyle = () => {
     switch (venue.venueType) {
       case 'restaurant':
-        return 'bg-gray-100';
+        return 'bg-gray-100 dark:bg-gray-700';
       case 'cafe':
-        return 'bg-gray-100';
+        return 'bg-gray-100 dark:bg-gray-700';
       case 'bar':
-        return 'bg-gray-100';
+        return 'bg-gray-100 dark:bg-gray-700';
       case 'park':
-        return 'bg-green-50';
+        return 'bg-green-50 dark:bg-green-900/30';
       default:
-        return 'bg-gray-100';
+        return 'bg-gray-100 dark:bg-gray-700';
     }
   };
 
   return (
     <div 
       className={`
-        bg-white rounded-xl shadow-md mb-4 overflow-hidden cursor-pointer 
+        bg-white dark:bg-gray-800 rounded-xl shadow-md mb-4 overflow-hidden cursor-pointer 
         transition-all duration-300 venue-card-container
-        ${isSunny ? 'ring-2 ring-amber-200' : ''}
+        ${isSunny ? 'ring-2 ring-amber-200 dark:ring-amber-500/40' : ''}
       `}
       onClick={() => {
         console.log('VenueCard clicked for venue:', venue.name);
@@ -152,7 +152,7 @@ export function VenueCard({ venue, isSunny, onClick }: VenueCardProps) {
                   parent.classList.add(getPlaceholderStyle(), 'flex', 'items-center', 'justify-center');
                   // Create placeholder content
                   const placeholder = document.createElement('div');
-                  placeholder.className = 'w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm';
+                  placeholder.className = 'w-12 h-12 bg-white dark:bg-gray-800 rounded-full flex items-center justify-center shadow-sm';
                   placeholder.innerHTML = `<div class="h-5 w-5 text-gray-500">${
                     venue.venueType === 'restaurant' ? '🍽️' : 
                     venue.venueType === 'cafe' ? '☕' : 
@@ -164,7 +164,7 @@ export function VenueCard({ venue, isSunny, onClick }: VenueCardProps) {
             />
           ) : (
             <div className={`w-full h-full ${getPlaceholderStyle()} flex items-center justify-center`}>
-              <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm">
+              <div className="w-12 h-12 bg-white dark:bg-gray-800 rounded-full flex items-center justify-center shadow-sm">
                 {getVenueIcon()}
               </div>
             </div>
@@ -190,7 +190,7 @@ export function VenueCard({ venue, isSunny, onClick }: VenueCardProps) {
         
         <div className="p-3 flex-1">
           <div className="flex justify-between items-start">
-            <h3 className="font-semibold text-gray-900 text-sm text-shadow-sm">{venue.name}</h3>
+            <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-sm text-shadow-sm">{venue.name}</h3>
             
             <SunIcon 
               rating={getSunRating(venue)} 
@@ -199,7 +199,7 @@ export function VenueCard({ venue, isSunny, onClick }: VenueCardProps) {
             />
           </div>
           
-          <div className="flex items-center text-xs text-gray-500 mt-1">
+          <div className="flex items-center text-xs text-gray-500 dark:text-gray-400 mt-1">
             <MapPin className="h-3 w-3 mr-1" />
             <span className="truncate">
               {venue.area || venue.city || 'Unknown location'}
@@ -215,7 +215,7 @@ export function VenueCard({ venue, isSunny, onClick }: VenueCardProps) {
               inline-flex items-center text-[10px] font-medium px-2 py-0.5 rounded-full
               ${isSunny 
                 ? 'bg-gradient-to-r from-amber-400 to-amber-500 text-white shadow-sm' 
-                : 'bg-gray-100 text-gray-600'}
+                : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'}
             `}>
               {isSunny 
                 ? <Sun className="h-3 w-3 mr-0.5" /> 
@@ -228,7 +228,7 @@ export function VenueCard({ venue, isSunny, onClick }: VenueCardProps) {
                 inline-flex items-center text-[10px] font-medium px-2 py-0.5 rounded-full
                 ${venue.hasHeaters 
                   ? 'bg-gradient-to-r from-red-400 to-red-500 text-white shadow-sm' 
-                  : 'bg-blue-50 text-blue-600'}
+                  : 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'}
               `}>
                 {venue.hasHeaters 
                   ? <Flame className="h-3 w-3 mr-0.5" />
@@ -238,7 +238,7 @@ export function VenueCard({ venue, isSunny, onClick }: VenueCardProps) {
             )}
             
             {venue.sunHoursStart && venue.sunHoursEnd && (
-              <span className="inline-flex items-center text-[10px] font-medium px-2 py-0.5 rounded-full bg-amber-50 text-amber-600 shadow-sm">
+              <span className="inline-flex items-center text-[10px] font-medium px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 shadow-sm">
                 <Clock className="h-3 w-3 mr-0.5" /> 
                 {venue.sunHoursStart} - {venue.sunHoursEnd}
               </span>
