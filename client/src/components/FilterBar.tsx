@@ -39,7 +39,7 @@ export function FilterBar({
   };
   
   return (
-    <div className="bg-white px-4 py-2 sticky top-[192px] z-10 border-b border-gray-100">
+    <div className="bg-white dark:bg-gray-800 px-4 py-2 sticky top-[192px] z-10 border-b border-gray-100 dark:border-gray-700">
       <div className="max-w-xl mx-auto">
         <div className="flex overflow-x-auto pb-2 no-scrollbar gap-2">
           {/* Venue type filter chips */}
@@ -47,14 +47,14 @@ export function FilterBar({
             className={cn(
               "flex flex-col items-center justify-center px-3 py-2 rounded-lg transition-colors min-w-[72px]",
               filters.all 
-                ? "bg-amber-50 text-amber-600" 
-                : "bg-gray-50 text-gray-500 hover:bg-gray-100"
+                ? "bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400" 
+                : "bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-600"
             )}
             onClick={() => onFilterChange('all')}
           >
             <div className={cn(
               "p-2 rounded-full mb-1",
-              filters.all ? "bg-amber-100" : "bg-gray-100"
+              filters.all ? "bg-amber-100 dark:bg-amber-800/50" : "bg-gray-100 dark:bg-gray-600"
             )}>
               {getTypeIcon('all')}
             </div>
@@ -65,14 +65,14 @@ export function FilterBar({
             className={cn(
               "flex flex-col items-center justify-center px-3 py-2 rounded-lg transition-colors min-w-[72px]",
               filters.restaurant 
-                ? "bg-amber-50 text-amber-600" 
-                : "bg-gray-50 text-gray-500 hover:bg-gray-100"
+                ? "bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400" 
+                : "bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-600"
             )}
             onClick={() => onFilterChange('restaurant')}
           >
             <div className={cn(
               "p-2 rounded-full mb-1",
-              filters.restaurant ? "bg-amber-100" : "bg-gray-100"
+              filters.restaurant ? "bg-amber-100 dark:bg-amber-800/50" : "bg-gray-100 dark:bg-gray-600"
             )}>
               {getTypeIcon('restaurant')}
             </div>
@@ -83,14 +83,14 @@ export function FilterBar({
             className={cn(
               "flex flex-col items-center justify-center px-3 py-2 rounded-lg transition-colors min-w-[72px]",
               filters.cafe 
-                ? "bg-amber-50 text-amber-600" 
-                : "bg-gray-50 text-gray-500 hover:bg-gray-100"
+                ? "bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400" 
+                : "bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-600"
             )}
             onClick={() => onFilterChange('cafe')}
           >
             <div className={cn(
               "p-2 rounded-full mb-1",
-              filters.cafe ? "bg-amber-100" : "bg-gray-100"
+              filters.cafe ? "bg-amber-100 dark:bg-amber-800/50" : "bg-gray-100 dark:bg-gray-600"
             )}>
               {getTypeIcon('cafe')}
             </div>
@@ -101,14 +101,14 @@ export function FilterBar({
             className={cn(
               "flex flex-col items-center justify-center px-3 py-2 rounded-lg transition-colors min-w-[72px]",
               filters.bar 
-                ? "bg-amber-50 text-amber-600" 
-                : "bg-gray-50 text-gray-500 hover:bg-gray-100"
+                ? "bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400" 
+                : "bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-600"
             )}
             onClick={() => onFilterChange('bar')}
           >
             <div className={cn(
               "p-2 rounded-full mb-1",
-              filters.bar ? "bg-amber-100" : "bg-gray-100"
+              filters.bar ? "bg-amber-100 dark:bg-amber-800/50" : "bg-gray-100 dark:bg-gray-600"
             )}>
               {getTypeIcon('bar')}
             </div>
@@ -119,14 +119,14 @@ export function FilterBar({
             className={cn(
               "flex flex-col items-center justify-center px-3 py-2 rounded-lg transition-colors min-w-[72px]",
               filters.park 
-                ? "bg-amber-50 text-amber-600" 
-                : "bg-gray-50 text-gray-500 hover:bg-gray-100"
+                ? "bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400" 
+                : "bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-600"
             )}
             onClick={() => onFilterChange('park')}
           >
             <div className={cn(
               "p-2 rounded-full mb-1",
-              filters.park ? "bg-amber-100" : "bg-gray-100"
+              filters.park ? "bg-amber-100 dark:bg-amber-800/50" : "bg-gray-100 dark:bg-gray-600"
             )}>
               {getTypeIcon('park')}
             </div>
@@ -143,7 +143,7 @@ export function FilterBar({
                   "px-3 py-1.5 text-xs rounded-full whitespace-nowrap font-medium flex items-center transition-colors flex-1 justify-center",
                   sunnyOnly
                     ? "bg-amber-500 text-white" 
-                    : "bg-amber-50 text-amber-600 hover:bg-amber-100"
+                    : "bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-800/40"
                 )}
                 onClick={onSunnyToggle}
               >
@@ -158,7 +158,7 @@ export function FilterBar({
                   "px-3 py-1.5 text-xs rounded-full whitespace-nowrap font-medium flex items-center transition-colors flex-1 justify-center",
                   heatersOnly
                     ? "bg-red-500 text-white" 
-                    : "bg-red-50 text-red-600 hover:bg-red-100"
+                    : "bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-800/40"
                 )}
                 onClick={onHeatersToggle}
               >

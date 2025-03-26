@@ -210,7 +210,7 @@ export function SelectedLocationCard({ venue, weatherData, onClose }: SelectedLo
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-lg overflow-hidden max-w-md mx-auto pointer-events-auto z-30">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden max-w-md mx-auto pointer-events-auto z-30">
       <div className="relative">
         {venue.imageUrl ? (
           <img 
@@ -272,7 +272,7 @@ export function SelectedLocationCard({ venue, weatherData, onClose }: SelectedLo
       
       <div className="p-3 sm:p-4">
         <div className="flex justify-between items-start mb-2 sm:mb-3">
-          <h3 className="font-bold text-lg sm:text-xl text-amber-900 truncate max-w-[75%]">{venue.name}</h3>
+          <h3 className="font-bold text-lg sm:text-xl text-amber-900 dark:text-amber-300 truncate max-w-[75%]">{venue.name}</h3>
           {venue.rating && (
             <div className="flex items-center bg-amber-100 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded">
               <span className="text-xs sm:text-sm font-medium text-amber-800 flex items-center">
@@ -284,7 +284,7 @@ export function SelectedLocationCard({ venue, weatherData, onClose }: SelectedLo
         </div>
         
         <div className="flex flex-wrap gap-1 sm:gap-2 mb-3 sm:mb-4">
-          <div className="inline-flex items-center bg-amber-50 text-amber-800 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md text-[10px] sm:text-xs">
+          <div className="inline-flex items-center bg-amber-50 dark:bg-amber-900/30 text-amber-800 dark:text-amber-400 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md text-[10px] sm:text-xs">
             <span className="truncate max-w-[150px]">
               {venue.city || ''}
               {venue.area && ` · ${venue.area}`}
