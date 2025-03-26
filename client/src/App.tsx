@@ -6,6 +6,7 @@ import NotFound from "@/pages/not-found";
 import Home from "@/pages/Home";
 import Login from "@/pages/Login";
 import Settings from "@/pages/Settings";
+import Profile from "@/pages/Profile";
 import SavedLocations from "@/pages/SavedLocations";
 import About from "@/pages/About";
 import VenueDetails from "@/pages/VenueDetails";
@@ -20,6 +21,7 @@ function Router() {
     <Switch>
       <Route path="/login" component={Login} />
       <Route path="/settings" component={Settings} />
+      <Route path="/profile" component={Profile} />
       <Route path="/saved" component={SavedLocations} />
       <Route path="/about" component={About} />
       <Route path="/venue/:id" component={VenueDetails} />
