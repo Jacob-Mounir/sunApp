@@ -10,6 +10,7 @@ import Profile from "@/pages/Profile";
 import SavedLocations from "@/pages/SavedLocations";
 import About from "@/pages/About";
 import VenueDetails from "@/pages/VenueDetails";
+import { ThemeProvider } from "@/hooks/useTheme";
 
 function Router() {
   const [location] = useLocation();
@@ -34,8 +35,10 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <Router />
-      <Toaster />
+      <ThemeProvider>
+        <Router />
+        <Toaster />
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }

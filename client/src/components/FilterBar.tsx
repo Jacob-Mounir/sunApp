@@ -1,6 +1,7 @@
 import { FilterState } from '@/types';
 import { cn } from '@/lib/utils';
-import { Sun, Flame, Utensils, Coffee, Beer, TreePine, MapPin } from 'lucide-react';
+import { Sun, Flame, Utensils, Coffee, Beer, TreePine, MapPin, Cloud, Umbrella } from 'lucide-react';
+import { useTheme } from '@/hooks/useTheme';
 
 interface FilterBarProps {
   filters: FilterState;
@@ -19,6 +20,7 @@ export function FilterBar({
   onSunnyToggle, 
   onHeatersToggle 
 }: FilterBarProps) {
+  const { filterTerminology, isSunMode } = useTheme();
   
   // Helper function to get icon for each type
   const getTypeIcon = (type: string) => {
@@ -134,7 +136,7 @@ export function FilterBar({
           </button>
         </div>
         
-        {/* Special feature filters */}
+        {/* Special feature filters - adapt to current theme */}
         {(onSunnyToggle || onHeatersToggle) && (
           <div className="flex space-x-2 py-2">
             {onSunnyToggle && (
@@ -142,13 +144,19 @@ export function FilterBar({
                 className={cn(
                   "px-3 py-1.5 text-xs rounded-full whitespace-nowrap font-medium flex items-center transition-colors flex-1 justify-center",
                   sunnyOnly
-                    ? "bg-amber-500 text-white" 
-                    : "bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-800/40"
+                    ? isSunMode ? "bg-amber-500 text-white" : "bg-indigo-500 text-white"
+                    : isSunMode 
+                      ? "bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-800/40"
+                      : "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-800/40"
                 )}
                 onClick={onSunnyToggle}
               >
-                <Sun size={14} className="mr-1.5" />
-                Sunny Now
+                {isSunMode ? (
+                  <Sun size={14} className="mr-1.5" />
+                ) : (
+                  <Umbrella size={14} className="mr-1.5" />
+                )}
+                {filterTerminology.sunny}
               </button>
             )}
             

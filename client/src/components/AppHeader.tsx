@@ -1,6 +1,8 @@
 import { useWeather, isSunnyWeather } from '@/hooks/useWeather';
-import { Sun, Cloud, CloudSun, MapPin, ChevronDown } from 'lucide-react';
+import { Sun, Cloud, CloudSun, MapPin, ChevronDown, Moon } from 'lucide-react';
 import { Link } from 'wouter';
+import { useTheme } from '@/hooks/useTheme';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface AppHeaderProps {
   latitude: number;
@@ -9,6 +11,7 @@ interface AppHeaderProps {
 
 export function AppHeader({ latitude, longitude }: AppHeaderProps) {
   const { data: weather, isLoading } = useWeather(latitude, longitude);
+  const { theme, toggleTheme, modeName, isSunMode } = useTheme();
 
   // Determine weather icon
   const renderWeatherIcon = () => {
@@ -43,6 +46,28 @@ export function AppHeader({ latitude, longitude }: AppHeaderProps) {
           
           {/* Weather & Status */}
           <div className="flex items-center space-x-4">
+            {/* Quick Theme Toggle */}
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button 
+                    onClick={toggleTheme}
+                    className="p-2 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                    aria-label={`Switch to ${isSunMode ? 'Shade' : 'Sun'} Mode`}
+                  >
+                    {isSunMode ? (
+                      <Moon className="h-4 w-4 text-indigo-500" />
+                    ) : (
+                      <Sun className="h-4 w-4 text-amber-500" />
+                    )}
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Switch to {isSunMode ? 'Shade' : 'Sun'} Mode</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            
             {/* Weather Status */}
             <div className="flex items-center">
               {renderWeatherIcon()}
@@ -61,13 +86,18 @@ export function AppHeader({ latitude, longitude }: AppHeaderProps) {
             <ChevronDown className="h-4 w-4 ml-1 text-gray-500 dark:text-gray-400" />
           </button>
           
-          {/* Current date */}
-          <div className="text-xs text-gray-500 dark:text-gray-400">
-            {new Date().toLocaleDateString('en-SE', { 
-              weekday: 'short', 
-              month: 'short', 
-              day: 'numeric' 
-            })}
+          {/* Current date and mode indicator */}
+          <div className="flex items-center space-x-2">
+            <span className="text-xs text-gray-900 dark:text-gray-100 font-medium bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded-full">
+              {modeName}
+            </span>
+            <div className="text-xs text-gray-500 dark:text-gray-400">
+              {new Date().toLocaleDateString('en-SE', { 
+                weekday: 'short', 
+                month: 'short', 
+                day: 'numeric' 
+              })}
+            </div>
           </div>
         </div>
       </div>
