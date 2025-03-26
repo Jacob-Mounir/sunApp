@@ -212,50 +212,50 @@ export default function SavedLocations() {
             <div className="flex flex-wrap gap-2">
               <button 
                 onClick={() => handleFilterChange('all')}
-                className={`px-3 py-1.5 rounded-full text-sm font-medium ${
+                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
                   activeVenueFilters.all 
-                    ? 'bg-amber-100 text-amber-800' 
-                    : 'bg-white border border-gray-200 text-gray-600'
+                    ? 'bg-amber-100 text-amber-800 filter-button-active shadow-sm' 
+                    : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
                 }`}
               >
                 All
               </button>
               <button 
                 onClick={() => handleFilterChange('restaurant')}
-                className={`px-3 py-1.5 rounded-full text-sm font-medium ${
+                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
                   activeVenueFilters.restaurant 
-                    ? 'bg-amber-100 text-amber-800' 
-                    : 'bg-white border border-gray-200 text-gray-600'
+                    ? 'bg-amber-100 text-amber-800 filter-button-active shadow-sm' 
+                    : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
                 }`}
               >
                 Restaurants
               </button>
               <button 
                 onClick={() => handleFilterChange('cafe')}
-                className={`px-3 py-1.5 rounded-full text-sm font-medium ${
+                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
                   activeVenueFilters.cafe 
-                    ? 'bg-amber-100 text-amber-800' 
-                    : 'bg-white border border-gray-200 text-gray-600'
+                    ? 'bg-amber-100 text-amber-800 filter-button-active shadow-sm' 
+                    : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
                 }`}
               >
                 Cafés
               </button>
               <button 
                 onClick={() => handleFilterChange('bar')}
-                className={`px-3 py-1.5 rounded-full text-sm font-medium ${
+                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
                   activeVenueFilters.bar 
-                    ? 'bg-amber-100 text-amber-800' 
-                    : 'bg-white border border-gray-200 text-gray-600'
+                    ? 'bg-amber-100 text-amber-800 filter-button-active shadow-sm' 
+                    : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
                 }`}
               >
                 Bars
               </button>
               <button 
                 onClick={() => handleFilterChange('park')}
-                className={`px-3 py-1.5 rounded-full text-sm font-medium ${
+                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
                   activeVenueFilters.park 
-                    ? 'bg-amber-100 text-amber-800' 
-                    : 'bg-white border border-gray-200 text-gray-600'
+                    ? 'bg-amber-100 text-amber-800 filter-button-active shadow-sm' 
+                    : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
                 }`}
               >
                 Parks
@@ -264,10 +264,10 @@ export default function SavedLocations() {
             <div className="flex flex-wrap gap-2 mt-3">
               <button 
                 onClick={toggleSunnyFilter}
-                className={`px-3 py-1.5 rounded-full text-sm font-medium flex items-center ${
+                className={`px-3 py-1.5 rounded-full text-sm font-medium flex items-center transition-all ${
                   showSunnyOnly 
-                    ? 'bg-amber-100 text-amber-800' 
-                    : 'bg-white border border-gray-200 text-gray-600'
+                    ? 'bg-amber-100 text-amber-800 filter-button-active shadow-sm' 
+                    : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
                 }`}
               >
                 <Sun className={`h-3.5 w-3.5 mr-1.5 ${showSunnyOnly ? 'text-amber-700' : 'text-amber-500'}`} />
@@ -275,10 +275,10 @@ export default function SavedLocations() {
               </button>
               <button 
                 onClick={toggleNearbyFilter}
-                className={`px-3 py-1.5 rounded-full text-sm font-medium flex items-center ${
+                className={`px-3 py-1.5 rounded-full text-sm font-medium flex items-center transition-all ${
                   showNearbyOnly 
-                    ? 'bg-blue-100 text-blue-800' 
-                    : 'bg-white border border-gray-200 text-gray-600'
+                    ? 'bg-blue-100 text-blue-800 filter-button-active shadow-sm' 
+                    : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
                 }`}
               >
                 <Home className={`h-3.5 w-3.5 mr-1.5 ${showNearbyOnly ? 'text-blue-700' : 'text-blue-500'}`} />
