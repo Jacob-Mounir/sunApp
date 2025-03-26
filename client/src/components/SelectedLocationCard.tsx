@@ -250,7 +250,7 @@ export function SelectedLocationCard({ venue, weatherData, onClose }: SelectedLo
         </div>
         
         {/* Venue type badge */}
-        <div className="absolute bottom-2 left-2 text-[10px] sm:text-xs font-bold px-2 sm:px-3 py-1 sm:py-1.5 rounded-full flex items-center bg-white bg-opacity-90 text-amber-700 shadow-sm z-10">
+        <div className="absolute bottom-2 left-2 text-[10px] sm:text-xs font-bold px-2 sm:px-3 py-1 sm:py-1.5 rounded-full flex items-center bg-white dark:bg-gray-800 bg-opacity-90 dark:bg-opacity-90 text-amber-700 dark:text-amber-400 shadow-sm z-10">
           {getVenueTypeIcon()}
           <span className="truncate max-w-[80px] sm:max-w-none">{getVenueTypeLabel()}</span>
         </div>
@@ -291,7 +291,7 @@ export function SelectedLocationCard({ venue, weatherData, onClose }: SelectedLo
             </span>
           </div>
           
-          <div className="inline-flex items-center bg-blue-50 text-blue-800 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md text-[10px] sm:text-xs">
+          <div className="inline-flex items-center bg-blue-50 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md text-[10px] sm:text-xs">
             <Route className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-0.5 sm:mr-1 flex-shrink-0" />
             <span className="truncate">{formatDistance(venue.distance)}</span>
           </div>
@@ -299,8 +299,8 @@ export function SelectedLocationCard({ venue, weatherData, onClose }: SelectedLo
         
         {/* Weather information - more compact on mobile */}
         {weatherData && (
-          <div className="px-2 sm:px-3 py-1.5 sm:py-2 bg-blue-50 rounded-lg mt-2 sm:mt-3">
-            <h4 className="text-xs sm:text-sm font-semibold text-blue-700 mb-0.5 sm:mb-1">Current Weather</h4>
+          <div className="px-2 sm:px-3 py-1.5 sm:py-2 bg-blue-50 dark:bg-blue-900/30 rounded-lg mt-2 sm:mt-3">
+            <h4 className="text-xs sm:text-sm font-semibold text-blue-700 dark:text-blue-300 mb-0.5 sm:mb-1">Current Weather</h4>
             <div className="flex items-center">
               {weatherData.icon && (
                 <img 
@@ -310,9 +310,9 @@ export function SelectedLocationCard({ venue, weatherData, onClose }: SelectedLo
                 />
               )}
               <div>
-                <p className="text-blue-700 font-medium text-xs sm:text-sm truncate max-w-[180px]">{weatherData.weatherCondition}</p>
+                <p className="text-blue-700 dark:text-blue-300 font-medium text-xs sm:text-sm truncate max-w-[180px]">{weatherData.weatherCondition}</p>
                 {weatherData.temperature !== undefined && (
-                  <p className="text-xs sm:text-sm text-blue-600">{weatherData.temperature.toFixed(1)}°C</p>
+                  <p className="text-xs sm:text-sm text-blue-600 dark:text-blue-400">{weatherData.temperature.toFixed(1)}°C</p>
                 )}
               </div>
             </div>
@@ -320,27 +320,27 @@ export function SelectedLocationCard({ venue, weatherData, onClose }: SelectedLo
         )}
         
         {/* Sun hours information - more compact on mobile */}
-        <div className="px-2 sm:px-3 py-1.5 sm:py-2 bg-amber-50 rounded-lg mt-2 sm:mt-3">
-          <h4 className="text-xs sm:text-sm font-semibold text-amber-700 mb-0.5 sm:mb-1 flex items-center">
-            <Sun className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 text-amber-500 flex-shrink-0" fill="currentColor" /> 
+        <div className="px-2 sm:px-3 py-1.5 sm:py-2 bg-amber-50 dark:bg-amber-900/30 rounded-lg mt-2 sm:mt-3">
+          <h4 className="text-xs sm:text-sm font-semibold text-amber-700 dark:text-amber-300 mb-0.5 sm:mb-1 flex items-center">
+            <Sun className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 text-amber-500 dark:text-amber-400 flex-shrink-0" fill="currentColor" /> 
             Sun Exposure
           </h4>
           
           {/* Sun rating display with numeric value */}
           <div className="flex items-center mb-1 sm:mb-2">
-            <span className="text-[10px] sm:text-xs font-medium text-amber-700 mr-1 sm:mr-2">Rating:</span>
-            <div className="flex items-center bg-amber-200 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full">
-              <Sun className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-amber-600 mr-1 sm:mr-1.5 flex-shrink-0" fill="currentColor" />
-              <span className="text-xs sm:text-sm font-bold text-amber-800">{getSunRating(venue).toFixed(1)}</span>
+            <span className="text-[10px] sm:text-xs font-medium text-amber-700 dark:text-amber-400 mr-1 sm:mr-2">Rating:</span>
+            <div className="flex items-center bg-amber-200 dark:bg-amber-800 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full">
+              <Sun className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-amber-600 dark:text-amber-400 mr-1 sm:mr-1.5 flex-shrink-0" fill="currentColor" />
+              <span className="text-xs sm:text-sm font-bold text-amber-800 dark:text-amber-300">{getSunRating(venue).toFixed(1)}</span>
             </div>
           </div>
           
-          <p className="text-[10px] sm:text-xs text-amber-800 flex items-center mb-0.5 sm:mb-1">
-            <CalendarClock className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-1 sm:mr-1.5 text-amber-600 flex-shrink-0" />
+          <p className="text-[10px] sm:text-xs text-amber-800 dark:text-amber-400 flex items-center mb-0.5 sm:mb-1">
+            <CalendarClock className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-1 sm:mr-1.5 text-amber-600 dark:text-amber-500 flex-shrink-0" />
             <span className="truncate">{getSunHours()}</span>
           </p>
           {venue.sunnySpotDescription && (
-            <p className="text-[10px] sm:text-xs text-amber-700 mt-0.5 sm:mt-1 italic line-clamp-2 sm:line-clamp-3">
+            <p className="text-[10px] sm:text-xs text-amber-700 dark:text-amber-400 mt-0.5 sm:mt-1 italic line-clamp-2 sm:line-clamp-3">
               "{venue.sunnySpotDescription}"
             </p>
           )}
@@ -348,19 +348,19 @@ export function SelectedLocationCard({ venue, weatherData, onClose }: SelectedLo
         
         {/* Location details - more compact */}
         <div className="mt-3 sm:mt-4 space-y-1 sm:space-y-2">
-          <p className="text-[10px] sm:text-xs text-gray-700 flex items-center">
-            <MapPin className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 sm:mr-2 text-gray-500 flex-shrink-0" />
+          <p className="text-[10px] sm:text-xs text-gray-700 dark:text-gray-300 flex items-center">
+            <MapPin className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 sm:mr-2 text-gray-500 dark:text-gray-400 flex-shrink-0" />
             <span className="truncate">{venue.address}</span>
           </p>
           
           {venue.website && (
-            <p className="text-[10px] sm:text-xs text-gray-700 flex items-center">
-              <Globe className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 sm:mr-2 text-gray-500 flex-shrink-0" />
+            <p className="text-[10px] sm:text-xs text-gray-700 dark:text-gray-300 flex items-center">
+              <Globe className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 sm:mr-2 text-gray-500 dark:text-gray-400 flex-shrink-0" />
               <a 
                 href={venue.website} 
                 target="_blank" 
                 rel="noopener noreferrer" 
-                className="text-blue-600 hover:underline flex items-center truncate"
+                className="text-blue-600 dark:text-blue-400 hover:underline flex items-center truncate"
               >
                 <span className="truncate max-w-[150px]">{venue.website.replace(/^https?:\/\/(www\.)?/, '')}</span>
                 <ExternalLink className="h-2.5 w-2.5 sm:h-3 sm:w-3 ml-1 flex-shrink-0" />
@@ -382,8 +382,8 @@ export function SelectedLocationCard({ venue, weatherData, onClose }: SelectedLo
             className={`
               py-1.5 sm:py-2.5 px-2 sm:px-4 rounded-lg font-medium text-[10px] sm:text-sm flex items-center justify-center transition-colors
               ${isVenueSaved(venue.id) 
-                ? 'bg-amber-100 text-amber-700 hover:bg-amber-200' 
-                : 'bg-white border border-amber-300 text-amber-700 hover:bg-amber-50'}
+                ? 'bg-amber-100 dark:bg-amber-900/60 text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-800/80' 
+                : 'bg-white dark:bg-gray-700 border border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-300 hover:bg-amber-50 dark:hover:bg-gray-600'}
             `}
             onClick={saveLocation}
           >
@@ -395,7 +395,7 @@ export function SelectedLocationCard({ venue, weatherData, onClose }: SelectedLo
         
         <div className="mt-2 sm:mt-3 flex space-x-2 sm:space-x-3">
           <button 
-            className="flex-1 bg-gray-100 text-gray-800 py-1.5 sm:py-2 px-2 sm:px-4 rounded-lg text-center font-medium text-[10px] sm:text-sm flex items-center justify-center hover:bg-gray-200 transition-colors"
+            className="flex-1 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 py-1.5 sm:py-2 px-2 sm:px-4 rounded-lg text-center font-medium text-[10px] sm:text-sm flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
             onClick={shareVenue}
           >
             <Share2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 flex-shrink-0" /> 
@@ -404,7 +404,7 @@ export function SelectedLocationCard({ venue, weatherData, onClose }: SelectedLo
           
           {venue.website ? (
             <button 
-              className="flex-1 bg-gray-100 text-gray-800 py-1.5 sm:py-2 px-2 sm:px-4 rounded-lg text-center font-medium text-[10px] sm:text-sm flex items-center justify-center hover:bg-gray-200 transition-colors"
+              className="flex-1 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 py-1.5 sm:py-2 px-2 sm:px-4 rounded-lg text-center font-medium text-[10px] sm:text-sm flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
               onClick={openWebsite}
             >
               <ExternalLink className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 flex-shrink-0" /> 
@@ -412,7 +412,7 @@ export function SelectedLocationCard({ venue, weatherData, onClose }: SelectedLo
             </button>
           ) : (
             <button 
-              className="flex-1 bg-amber-100 text-amber-800 py-1.5 sm:py-2 px-2 sm:px-4 rounded-lg text-center font-medium text-[10px] sm:text-sm flex items-center justify-center hover:bg-amber-200 transition-colors"
+              className="flex-1 bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-300 py-1.5 sm:py-2 px-2 sm:px-4 rounded-lg text-center font-medium text-[10px] sm:text-sm flex items-center justify-center hover:bg-amber-200 dark:hover:bg-amber-800/80 transition-colors"
               onClick={() => navigate(`/venue/${venue.id}`)}
             >
               <Info className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 flex-shrink-0" /> 
