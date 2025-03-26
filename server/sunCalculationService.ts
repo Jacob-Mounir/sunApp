@@ -1,7 +1,13 @@
 import SunCalc from 'suncalc';
-import { InsertSunCalculation, SunCalculation, sunCalculations } from '@shared/schema';
+import { 
+  InsertSunCalculation, 
+  SunCalculation, 
+  sunCalculations, 
+  sunPositionCache,
+  InsertSunPositionCache
+} from '@shared/schema';
 import { db } from './db';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, lte, gte } from 'drizzle-orm';
 
 interface BuildingData {
   height: number;     // in meters
@@ -17,11 +23,88 @@ interface SunlightPeriod {
   end: Date;
 }
 
+// Helper function to round coordinates to reduce number of cache entries
+function roundCoordinate(coord: number): number {
+  // Round to 3 decimal places (approximately 100 meters precision)
+  return Math.round(coord * 1000) / 1000;
+}
+
+// Helper function to format date as YYYY-MM-DD
+function formatDate(date: Date): string {
+  return date.toISOString().split('T')[0];
+}
+
 export class SunCalculationService {
   /**
    * Calculate sun position (azimuth and elevation) for a specific location and time
+   * with caching to reduce repeated calculations
    */
-  public static getSunPosition(latitude: number, longitude: number, date: Date) {
+  public static async getSunPosition(latitude: number, longitude: number, date: Date) {
+    // Round coordinates for caching purposes
+    const roundedLat = roundCoordinate(latitude);
+    const roundedLng = roundCoordinate(longitude);
+    const dateString = formatDate(date);
+    const hour = date.getUTCHours();
+    
+    try {
+      // Check if we have a cached value that's still valid
+      const [cachedPosition] = await db
+        .select()
+        .from(sunPositionCache)
+        .where(
+          and(
+            eq(sunPositionCache.latitude, roundedLat),
+            eq(sunPositionCache.longitude, roundedLng),
+            eq(sunPositionCache.date, dateString),
+            eq(sunPositionCache.hour, hour),
+            gte(sunPositionCache.expiresAt, new Date())
+          )
+        );
+      
+      if (cachedPosition) {
+        // Use cached value
+        console.log(`Using cached sun position for ${roundedLat},${roundedLng} at ${dateString} hour ${hour}`);
+        return {
+          azimuth: cachedPosition.azimuth,
+          elevation: cachedPosition.elevation,
+          timestamp: date
+        };
+      }
+      
+      // Calculate new position
+      const sunPosition = this.calculateSunPosition(latitude, longitude, date);
+      
+      // Cache the result for 24 hours
+      const expiryDate = new Date();
+      expiryDate.setHours(expiryDate.getHours() + 24);
+      
+      const cacheEntry: InsertSunPositionCache = {
+        latitude: roundedLat,
+        longitude: roundedLng,
+        date: dateString,
+        hour: hour,
+        azimuth: sunPosition.azimuth,
+        elevation: sunPosition.elevation,
+        calculationTimestamp: new Date().toISOString(),
+        expiresAt: expiryDate
+      };
+      
+      // Store in cache
+      await db.insert(sunPositionCache).values(cacheEntry);
+      
+      return sunPosition;
+    } catch (error) {
+      console.error("Error with sun position cache:", error);
+      // Fallback to direct calculation if database operation fails
+      return this.calculateSunPosition(latitude, longitude, date);
+    }
+  }
+  
+  /**
+   * Direct calculation of sun position without caching
+   * This is used as a fallback and by the caching method
+   */
+  private static calculateSunPosition(latitude: number, longitude: number, date: Date) {
     const sunPosition = SunCalc.getPosition(date, latitude, longitude);
     
     // Convert altitude to elevation angle in degrees (0-90)
@@ -51,14 +134,14 @@ export class SunCalculationService {
   /**
    * Determine if a venue is currently in sunlight based on the sun position and nearby buildings
    */
-  public static isVenueInSunlight(
+  public static async isVenueInSunlight(
     latitude: number, 
     longitude: number, 
     date: Date, 
     buildings: BuildingData[] = []
-  ): boolean {
+  ): Promise<boolean> {
     // Get sun position for the current time
-    const { azimuth, elevation } = this.getSunPosition(latitude, longitude, date);
+    const { azimuth, elevation } = await this.getSunPosition(latitude, longitude, date);
     
     // If sun is below horizon (elevation <= 0), there's no sunlight
     if (elevation <= 0) {
