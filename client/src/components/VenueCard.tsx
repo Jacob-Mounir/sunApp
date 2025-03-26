@@ -126,9 +126,9 @@ export function VenueCard({ venue, isSunny, onClick }: VenueCardProps) {
   return (
     <div 
       className={`
-        bg-white rounded-lg shadow-sm mb-3 overflow-hidden cursor-pointer 
-        transition-all duration-200 hover:shadow-md hover:-translate-y-0.5
-        ${isSunny ? 'ring-1 ring-amber-200' : ''}
+        bg-white rounded-xl shadow-md mb-4 overflow-hidden cursor-pointer 
+        transition-all duration-300 hover:shadow-lg hover:-translate-y-1
+        ${isSunny ? 'ring-2 ring-amber-200' : ''}
       `}
       onClick={() => {
         console.log('VenueCard clicked for venue:', venue.name);
@@ -136,7 +136,7 @@ export function VenueCard({ venue, isSunny, onClick }: VenueCardProps) {
       }}
     >
       <div className="flex">
-        <div className="w-24 h-24 flex-shrink-0 relative">
+        <div className="w-28 h-28 flex-shrink-0 relative">
           {venue.imageUrl ? (
             <img 
               src={venue.imageUrl} 
@@ -145,25 +145,32 @@ export function VenueCard({ venue, isSunny, onClick }: VenueCardProps) {
             />
           ) : (
             <div className={`w-full h-full ${getPlaceholderStyle()} flex items-center justify-center`}>
-              <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
+              <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm">
                 {getVenueIcon()}
               </div>
             </div>
           )}
           
           {/* Venue type indicator */}
-          <div className="absolute bottom-0 left-0 right-0 bg-black/40 backdrop-blur-sm py-1 px-2">
+          <div className="absolute bottom-0 left-0 right-0 bg-black/50 backdrop-blur-xs py-1 px-2">
             <div className="flex items-center justify-center">
               <span className="text-[10px] text-white font-medium">
                 {getVenueTypeLabel()}
               </span>
             </div>
           </div>
+          
+          {/* Sun indicator for sunny venues */}
+          {isSunny && (
+            <div className="absolute top-2 right-2 w-6 h-6 bg-amber-400 rounded-full flex items-center justify-center shadow-md">
+              <Sun className="h-4 w-4 text-white" />
+            </div>
+          )}
         </div>
         
         <div className="p-3 flex-1">
           <div className="flex justify-between items-start">
-            <h3 className="font-medium text-gray-900 text-sm">{venue.name}</h3>
+            <h3 className="font-semibold text-gray-900 text-sm text-shadow-sm">{venue.name}</h3>
             
             <SunIcon 
               rating={getSunRating(venue)} 
@@ -183,11 +190,11 @@ export function VenueCard({ venue, isSunny, onClick }: VenueCardProps) {
             <span>{formatDistance(venue.distance)}</span>
           </div>
           
-          <div className="flex flex-wrap gap-1.5 mt-2">
+          <div className="flex flex-wrap gap-1.5 mt-2.5">
             <span className={`
-              inline-flex items-center text-[10px] font-medium px-1.5 py-0.5 rounded-full
+              inline-flex items-center text-[10px] font-medium px-2 py-0.5 rounded-full
               ${isSunny 
-                ? 'bg-amber-100 text-amber-700' 
+                ? 'bg-gradient-to-r from-amber-400 to-amber-500 text-white shadow-sm' 
                 : 'bg-gray-100 text-gray-600'}
             `}>
               {isSunny 
@@ -198,9 +205,9 @@ export function VenueCard({ venue, isSunny, onClick }: VenueCardProps) {
             
             {venue.hasHeaters !== undefined && (
               <span className={`
-                inline-flex items-center text-[10px] font-medium px-1.5 py-0.5 rounded-full
+                inline-flex items-center text-[10px] font-medium px-2 py-0.5 rounded-full
                 ${venue.hasHeaters 
-                  ? 'bg-red-50 text-red-600' 
+                  ? 'bg-gradient-to-r from-red-400 to-red-500 text-white shadow-sm' 
                   : 'bg-blue-50 text-blue-600'}
               `}>
                 {venue.hasHeaters 
@@ -211,7 +218,7 @@ export function VenueCard({ venue, isSunny, onClick }: VenueCardProps) {
             )}
             
             {venue.sunHoursStart && venue.sunHoursEnd && (
-              <span className="inline-flex items-center text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-amber-50 text-amber-600">
+              <span className="inline-flex items-center text-[10px] font-medium px-2 py-0.5 rounded-full bg-amber-50 text-amber-600 shadow-sm">
                 <Clock className="h-3 w-3 mr-0.5" /> 
                 {venue.sunHoursStart} - {venue.sunHoursEnd}
               </span>

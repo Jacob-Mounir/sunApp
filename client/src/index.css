@@ -11,6 +11,44 @@
   .no-scrollbar::-webkit-scrollbar {
     display: none;  /* Chrome, Safari and Opera */
   }
+  
+  /* Custom text shadows for headings */
+  .text-shadow-sm {
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  }
+  
+  .text-shadow-md {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  }
+  
+  /* Gradient text for emphasis */
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-amber-500 to-amber-600;
+  }
+  
+  /* Styled scrollbar for non-mobile devices */
+  .styled-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+  }
+  
+  .styled-scrollbar::-webkit-scrollbar {
+    width: 5px;
+  }
+  
+  .styled-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .styled-scrollbar::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 20px;
+  }
+  
+  /* Custom blur effects */
+  .backdrop-blur-xs {
+    backdrop-filter: blur(2px);
+  }
 }
 
 /* Z-index Management */
@@ -123,9 +161,15 @@ html, body {
   font-size: 13px;
   font-weight: 600;
   color: #333;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
   white-space: nowrap;
   border: 1px solid rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease-in-out;
+}
+
+.sun-rating-marker:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 /* New marker style based on screenshot */
@@ -139,30 +183,48 @@ html, body {
   font-size: 14px;
   font-weight: 500;
   color: #333;
-  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   white-space: nowrap;
-  height: 26px;
+  height: 28px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.sun-rating-marker-new:hover,
+.sun-rating-marker-new:active {
+  transform: translateY(-1px) scale(1.03);
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.2);
 }
 
 .sun-icon-container {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
-  background-color: #f59e0b;
+  background: linear-gradient(135deg, #f59e0b, #fbbf24);
   display: inline-block;
+  position: relative;
+}
+
+.sun-icon-container.active {
+  animation: pulse-sun 1.5s infinite alternate;
+}
+
+@keyframes pulse-sun {
+  0% { transform: scale(1); opacity: 0.9; }
+  100% { transform: scale(1.2); opacity: 1; }
 }
 
 .rating-value {
-  font-weight: 500;
+  font-weight: 600;
   font-size: 14px;
   color: #333;
-  margin-left: 0;
+  margin-left: 1px;
 }
 
 .sun-rating-marker.sunny {
-  background: linear-gradient(to right, #f59e0b, #fbbf24);
+  background: linear-gradient(135deg, #f59e0b, #fbbf24);
   color: white;
   border: none;
+  box-shadow: 0 3px 8px rgba(245, 158, 11, 0.3);
 }
 
 .venue-sun-rating {
