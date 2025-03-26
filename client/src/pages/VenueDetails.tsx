@@ -204,8 +204,47 @@ export default function VenueDetails() {
   
   return (
     <div className="pb-24 venue-details-page">
-      {/* Header Image */}
-      <div className="relative w-full h-64 bg-amber-100">
+      {/* Header with Back Button and Venue Name */}
+      <div className="sticky top-0 z-50 bg-white shadow-sm border-b border-gray-100">
+        <div className="flex items-center justify-between py-3 px-4">
+          <div className="flex items-center">
+            <button 
+              onClick={() => navigate("/")}
+              className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-700 hover:bg-gray-200 transition-colors mr-3"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </button>
+            <h1 className="font-semibold text-lg">{venue.name}</h1>
+          </div>
+          
+          {/* Saved button */}
+          <button 
+            onClick={toggleSaved}
+            className="w-8 h-8 rounded-full flex items-center justify-center"
+          >
+            <Bookmark className={`h-5 w-5 ${isSaved ? 'fill-amber-500 text-amber-500' : 'text-gray-500'}`} />
+          </button>
+        </div>
+        
+        {/* Category Tabs - Sticky */}
+        <div className="flex items-center justify-between px-4 py-2 overflow-x-auto no-scrollbar">
+          <button className="px-3 py-1.5 bg-amber-100 text-amber-800 rounded-full text-sm font-medium flex items-center">
+            <Info className="h-4 w-4 mr-1.5" /> Overview
+          </button>
+          <button className="px-3 py-1.5 text-gray-600 rounded-full text-sm font-medium flex items-center">
+            <Sun className="h-4 w-4 mr-1.5" /> Sun Hours
+          </button>
+          <button className="px-3 py-1.5 text-gray-600 rounded-full text-sm font-medium flex items-center">
+            <Clock className="h-4 w-4 mr-1.5" /> Schedule
+          </button>
+          <button className="px-3 py-1.5 text-gray-600 rounded-full text-sm font-medium flex items-center">
+            <MessageSquare className="h-4 w-4 mr-1.5" /> Reviews
+          </button>
+        </div>
+      </div>
+      
+      {/* Header Image (Smaller) */}
+      <div className="relative w-full h-48 bg-amber-100">
         {venue.imageUrl ? (
           <img 
             src={venue.imageUrl} 
@@ -222,29 +261,12 @@ export default function VenueDetails() {
             </div>
           </div>
         )}
-        
-        {/* Back button */}
-        <button 
-          onClick={() => navigate("/")}
-          className="absolute top-4 left-4 w-10 h-10 bg-white bg-opacity-90 rounded-full flex items-center justify-center text-gray-700 hover:bg-opacity-100 transition-colors shadow-md"
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </button>
-        
-        {/* Saved button */}
-        <button 
-          onClick={toggleSaved}
-          className="absolute top-4 right-4 w-10 h-10 bg-white bg-opacity-90 rounded-full flex items-center justify-center text-gray-700 hover:bg-opacity-100 transition-colors shadow-md"
-        >
-          <Bookmark className={`h-5 w-5 ${isSaved ? 'fill-amber-500 text-amber-500' : ''}`} />
-        </button>
       </div>
       
       {/* Basic Info Card */}
-      <div className="mx-4 -mt-10 relative bg-white rounded-xl shadow-lg p-5">
+      <div className="mx-4 -mt-6 relative bg-white rounded-xl shadow-md p-4">
         <div className="flex justify-between items-start">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">{venue.name}</h1>
             <div className="flex items-center mt-1">
               <div className="flex items-center bg-gray-100 px-2 py-1 rounded-full text-xs">
                 {getVenueIcon()}
@@ -273,31 +295,31 @@ export default function VenueDetails() {
         </div>
         
         {/* Address */}
-        <div className="mt-4 flex items-start">
-          <MapPin className="h-5 w-5 text-gray-500 mt-0.5 mr-2 flex-shrink-0" />
+        <div className="mt-3 flex items-start">
+          <MapPin className="h-4 w-4 text-gray-500 mt-0.5 mr-2 flex-shrink-0" />
           <p className="text-sm text-gray-600">{venue.address}</p>
         </div>
         
         {/* Distance */}
         {venue.distance && (
-          <p className="mt-1 ml-7 text-sm text-gray-500">
+          <p className="mt-1 ml-6 text-xs text-gray-500">
             {formatDistance(venue.distance)}
           </p>
         )}
         
         {/* Action buttons */}
-        <div className="mt-5 grid grid-cols-2 gap-3">
+        <div className="mt-4 grid grid-cols-2 gap-3">
           <button 
-            className="bg-gradient-to-r from-amber-500 to-amber-600 text-white py-2.5 px-4 rounded-lg font-medium text-sm flex items-center justify-center shadow-sm hover:from-amber-600 hover:to-amber-700 transition-colors"
+            className="bg-gradient-to-r from-amber-500 to-amber-600 text-white py-2 px-4 rounded-lg font-medium text-sm flex items-center justify-center shadow-sm hover:from-amber-600 hover:to-amber-700 transition-colors"
             onClick={getDirections}
           >
-            <Navigation className="h-4 w-4 mr-2" /> Get Directions
+            <Navigation className="h-4 w-4 mr-1" /> Get Directions
           </button>
           <button 
-            className="bg-white border border-amber-300 text-amber-700 py-2.5 px-4 rounded-lg font-medium text-sm flex items-center justify-center hover:bg-amber-50 transition-colors"
+            className="bg-white border border-amber-300 text-amber-700 py-2 px-4 rounded-lg font-medium text-sm flex items-center justify-center hover:bg-amber-50 transition-colors"
             onClick={toggleSaved}
           >
-            <Bookmark className={`h-4 w-4 mr-2 ${isSaved ? 'fill-amber-500' : ''}`} />
+            <Bookmark className={`h-4 w-4 mr-1 ${isSaved ? 'fill-amber-500' : ''}`} />
             {isSaved ? 'Saved' : 'Save'}
           </button>
         </div>
