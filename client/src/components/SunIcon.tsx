@@ -56,7 +56,7 @@ export const SunIcon: React.FC<SunIconProps> = ({
       </div>
       
       {showRating && rating !== undefined && (
-        <span className="ml-1.5 text-xs font-semibold text-gradient">{rating.toFixed(1)}</span>
+        <span className="ml-1.5 text-xs font-semibold text-gradient dark:text-amber-400">{rating.toFixed(1)}</span>
       )}
     </div>
   );

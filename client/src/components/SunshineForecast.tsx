@@ -33,7 +33,7 @@ export function SunshineForecast({ venueId, className }: SunshineForecastProps) 
     if (percentage >= 60) return 'bg-gradient-to-br from-yellow-200 to-amber-400 text-black';
     if (percentage >= 40) return 'bg-amber-300 text-black';
     if (percentage >= 20) return 'bg-amber-200 text-black';
-    return 'bg-gray-200 text-gray-700';
+    return 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200';
   };
 
   // Helper function to format time from ISO string
@@ -112,8 +112,10 @@ export function SunshineForecast({ venueId, className }: SunshineForecastProps) 
               <div 
                 key={day.date} 
                 className={cn(
-                  "rounded-md p-3 transition-all hover:bg-gray-50", 
-                  index % 2 === 0 ? 'bg-gray-50' : 'bg-white'
+                  "rounded-md p-3 transition-all hover:bg-gray-50 dark:hover:bg-gray-800", 
+                  index % 2 === 0 
+                    ? 'bg-gray-50 dark:bg-gray-800/50' 
+                    : 'bg-white dark:bg-gray-800'
                 )}
               >
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
@@ -134,7 +136,7 @@ export function SunshineForecast({ venueId, className }: SunshineForecastProps) 
                       </Badge>
                     </div>
                     
-                    <div className="text-xs text-gray-500 mt-1">
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                       <span className="inline-block mr-4">
                         ☀️ {formatTime(day.sunriseTime)} - {formatTime(day.sunsetTime)}
                       </span>
@@ -153,7 +155,7 @@ export function SunshineForecast({ venueId, className }: SunshineForecastProps) 
                         <div className="space-y-2">
                           <h4 className="font-semibold">Sunny Periods</h4>
                           {day.sunnyPeriods.length === 0 ? (
-                            <p className="text-sm text-gray-500">No sunny periods predicted</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">No sunny periods predicted</p>
                           ) : (
                             <ul className="text-sm space-y-1">
                               {day.sunnyPeriods.map((period, i) => (
@@ -163,7 +165,7 @@ export function SunshineForecast({ venueId, className }: SunshineForecastProps) 
                               ))}
                             </ul>
                           )}
-                          <div className="mt-2 pt-2 border-t text-xs text-gray-500">
+                          <div className="mt-2 pt-2 border-t text-xs text-gray-500 dark:text-gray-400">
                             <div>Day length: {formatDuration(day.dayLengthMinutes)}</div>
                             <div>Sunshine: {formatDuration(day.sunshineMinutes)} ({day.sunshinePercentage}%)</div>
                           </div>

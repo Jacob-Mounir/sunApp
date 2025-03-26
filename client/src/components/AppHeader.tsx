@@ -32,7 +32,7 @@ export function AppHeader({ latitude, longitude }: AppHeaderProps) {
   };
 
   return (
-    <header className="bg-white shadow-sm z-10 sticky top-0">
+    <header className="bg-white dark:bg-gray-800 shadow-sm z-10 sticky top-0">
       <div className="max-w-xl mx-auto px-4 py-4">
         {/* Main row with logo and weather */}
         <div className="flex items-center justify-between">
@@ -46,7 +46,7 @@ export function AppHeader({ latitude, longitude }: AppHeaderProps) {
             {/* Weather Status */}
             <div className="flex items-center">
               {renderWeatherIcon()}
-              <span className="ml-1 text-sm font-medium text-gray-700">
+              <span className="ml-1 text-sm font-medium text-gray-700 dark:text-gray-200">
                 {weather?.temperature ? `${Math.round(weather.temperature)}°` : '--°'}
               </span>
             </div>
@@ -54,15 +54,15 @@ export function AppHeader({ latitude, longitude }: AppHeaderProps) {
         </div>
         
         {/* Location selector (like Uber Eats location bar) */}
-        <div className="mt-3 flex items-center justify-between py-2 border-b border-gray-100">
-          <button className="flex items-center text-gray-900 font-medium text-sm">
+        <div className="mt-3 flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-700">
+          <button className="flex items-center text-gray-900 dark:text-gray-100 font-medium text-sm">
             <MapPin className="h-4 w-4 mr-2 text-amber-500" />
             <span>{formatLocation()}</span>
-            <ChevronDown className="h-4 w-4 ml-1 text-gray-500" />
+            <ChevronDown className="h-4 w-4 ml-1 text-gray-500 dark:text-gray-400" />
           </button>
           
           {/* Current date */}
-          <div className="text-xs text-gray-500">
+          <div className="text-xs text-gray-500 dark:text-gray-400">
             {new Date().toLocaleDateString('en-SE', { 
               weekday: 'short', 
               month: 'short', 
