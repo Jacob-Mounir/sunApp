@@ -181,10 +181,11 @@ export default function Home() {
   const handleVenueSelect = (venue: Venue) => {
     setSelectedVenue(venue);
     
-    // Switch to map view if in list view
-    if (activeTab === 'list') {
-      setActiveTab('map');
-    }
+    // Log venue selection for debugging
+    console.log('Venue selected in Home component:', venue.name, venue.id);
+    
+    // Navigate to the venue details page
+    navigate(`/venue/${venue.id}`);
   };
 
   // Handle bottom navigation item click
