@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { ArrowLeft, Moon, Sun, Settings as SettingsIcon, Bell, MapPin, Globe, Lock, Info, LogOut, Sliders } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useTheme } from '@/hooks/useTheme';
+import { ThemeProvider, useTheme } from '@/hooks/useTheme';
 import { BottomNavigation } from '@/components/BottomNavigation';
 
 import {
@@ -18,7 +18,7 @@ import {
   Switch
 } from "@/components/ui/switch";
 
-export default function Settings() {
+function SettingsContent() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const { theme, toggleTheme } = useTheme();
@@ -267,5 +267,14 @@ export default function Settings() {
         onItemClick={handleNavItemClick} 
       />
     </div>
+  );
+}
+
+// Export the settings component wrapped in ThemeProvider
+export default function Settings() {
+  return (
+    <ThemeProvider>
+      <SettingsContent />
+    </ThemeProvider>
   );
 }
