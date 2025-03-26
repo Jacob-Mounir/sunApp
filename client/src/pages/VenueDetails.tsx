@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useRoute, useLocation } from 'wouter';
 import { 
   ArrowLeft, Sun, MapPin, Star, Navigation, Bookmark, Share2, 
@@ -14,7 +14,6 @@ import { useVenue } from '@/hooks/useVenues';
 import { useWeather, isSunnyWeather } from '@/hooks/useWeather';
 import { useVenueSunshine, getSunshinePercentage } from '@/hooks/useSunCalculation';
 import { useSavedVenues } from '@/hooks/useSavedVenues';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function VenueDetails() {
   const [, navigate] = useLocation();
@@ -372,318 +371,450 @@ export default function VenueDetails() {
         </div>
       </div>
       
-      {/* Sun Exposure */}
-      <div className="mx-4 mt-4 bg-white rounded-xl shadow-md p-5">
-        <h2 className="text-lg font-bold text-amber-800 flex items-center">
-          <Sun className="h-5 w-5 text-amber-500 mr-2" fill="currentColor" /> 
-          Sun Exposure
-        </h2>
-        
-        <div className="mt-4 flex items-center justify-between">
-          <div className="flex items-center">
-            {isCurrentlySunny ? (
-              <div className="w-10 h-10 bg-gradient-to-r from-amber-400 to-amber-500 rounded-full flex items-center justify-center mr-3 shadow-md relative overflow-hidden">
-                <Sun className="h-6 w-6 text-white" />
-                <div className="absolute inset-0 rounded-full glow-animation"></div>
+      {/* Tabbed Content */}
+      <div className="mt-4">
+        {/* Overview Tab */}
+        {activeTab === 'overview' && (
+          <div className="tab-content">
+            {/* Sun Exposure */}
+            <div className="mx-4 mt-4 bg-white rounded-xl shadow-md p-5">
+              <h2 className="text-lg font-bold text-amber-800 flex items-center">
+                <Sun className="h-5 w-5 text-amber-500 mr-2" fill="currentColor" /> 
+                Sun Exposure
+              </h2>
+              
+              <div className="mt-4 flex items-center justify-between">
+                <div className="flex items-center">
+                  {isCurrentlySunny ? (
+                    <div className="w-10 h-10 bg-gradient-to-r from-amber-400 to-amber-500 rounded-full flex items-center justify-center mr-3 shadow-md relative overflow-hidden">
+                      <Sun className="h-6 w-6 text-white" />
+                      <div className="absolute inset-0 rounded-full glow-animation"></div>
+                    </div>
+                  ) : (
+                    <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center mr-3">
+                      <Sun className="h-6 w-6 text-gray-400" />
+                    </div>
+                  )}
+                  <div>
+                    <p className="font-medium text-gray-800">
+                      {isCurrentlySunny ? 'Sunny right now!' : 'Not currently sunny'}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      {isCurrentlySunny 
+                        ? 'This location has direct sunlight now' 
+                        : 'Check back later for sunshine'}
+                    </p>
+                  </div>
+                </div>
               </div>
-            ) : (
-              <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center mr-3">
-                <Sun className="h-6 w-6 text-gray-400" />
-              </div>
-            )}
-            <div>
-              <p className="font-medium text-gray-800">
-                {isCurrentlySunny ? 'Sunny right now!' : 'Not currently sunny'}
-              </p>
-              <p className="text-sm text-gray-500">
-                {isCurrentlySunny 
-                  ? 'This location has direct sunlight now' 
-                  : 'Check back later for sunshine'}
-              </p>
-            </div>
-          </div>
-        </div>
-        
-        {/* Sun hours */}
-        {venue.sunHoursStart && venue.sunHoursEnd && (
-          <div className="mt-4 bg-amber-50 rounded-lg p-3">
-            <div className="flex items-center">
-              <Clock className="h-4 w-4 text-amber-600 mr-2" />
-              <p className="text-sm font-medium text-amber-800">
-                Sun Hours: {venue.sunHoursStart} - {venue.sunHoursEnd}
-              </p>
-            </div>
-            
-            {/* Sunshine percentage */}
-            {sunshineData && (
-              <div className="mt-2">
-                <div className="flex items-center justify-between mb-1">
-                  <p className="text-xs text-amber-700">Sunshine coverage</p>
-                  <p className="text-xs font-medium text-amber-800">
-                    {getSunshinePercentage(sunshineData)}%
+              
+              {/* Sun hours */}
+              {venue.sunHoursStart && venue.sunHoursEnd && (
+                <div className="mt-4 bg-amber-50 rounded-lg p-3">
+                  <div className="flex items-center">
+                    <Clock className="h-4 w-4 text-amber-600 mr-2" />
+                    <p className="text-sm font-medium text-amber-800">
+                      Sun Hours: {venue.sunHoursStart} - {venue.sunHoursEnd}
+                    </p>
+                  </div>
+                  
+                  {/* Sunshine percentage */}
+                  {sunshineData && (
+                    <div className="mt-2">
+                      <div className="flex items-center justify-between mb-1">
+                        <p className="text-xs text-amber-700">Sunshine coverage</p>
+                        <p className="text-xs font-medium text-amber-800">
+                          {getSunshinePercentage(sunshineData)}%
+                        </p>
+                      </div>
+                      <div className="w-full bg-amber-200 rounded-full h-1.5">
+                        <div 
+                          className="bg-gradient-to-r from-amber-400 to-amber-500 h-1.5 rounded-full" 
+                          style={{ width: `${getSunshinePercentage(sunshineData)}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+              
+              {/* Sunny spot description */}
+              {venue.sunnySpotDescription && (
+                <div className="mt-4 p-3 border border-amber-200 rounded-lg">
+                  <p className="text-sm text-gray-700 italic">
+                    "{venue.sunnySpotDescription}"
                   </p>
                 </div>
-                <div className="w-full bg-amber-200 rounded-full h-1.5">
-                  <div 
-                    className="bg-gradient-to-r from-amber-400 to-amber-500 h-1.5 rounded-full" 
-                    style={{ width: `${getSunshinePercentage(sunshineData)}%` }}
-                  ></div>
+              )}
+              
+              {/* Outdoor heating */}
+              {venue.hasHeaters !== undefined && (
+                <div className="mt-4 flex items-center">
+                  <div className={`
+                    w-8 h-8 rounded-full flex items-center justify-center mr-3
+                    ${venue.hasHeaters 
+                      ? 'bg-gradient-to-r from-red-400 to-red-500 text-white' 
+                      : 'bg-gray-200 text-gray-400'}
+                  `}>
+                    <Flame className="h-4 w-4" />
+                  </div>
+                  <p className="text-sm text-gray-700">
+                    {venue.hasHeaters 
+                      ? 'Outdoor heating available' 
+                      : 'No outdoor heating'}
+                  </p>
+                </div>
+              )}
+            </div>
+            
+            {/* Details & Amenities */}
+            <div className="mx-4 mt-4 bg-white rounded-xl shadow-md p-5">
+              <h2 className="text-lg font-bold text-gray-800 mb-4">
+                Details & Amenities
+              </h2>
+              
+              <div className="grid grid-cols-2 gap-4">
+                {venue.website && (
+                  <div className="flex items-center">
+                    <Globe className="h-5 w-5 text-gray-500 mr-3" />
+                    <div>
+                      <p className="text-sm font-medium text-gray-700">Website</p>
+                      <a 
+                        href={venue.website} 
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-blue-600 hover:underline flex items-center"
+                      >
+                        Visit website
+                        <ExternalLink className="h-3 w-3 ml-1" />
+                      </a>
+                    </div>
+                  </div>
+                )}
+                
+                <div className="flex items-center">
+                  <Calendar className="h-5 w-5 text-gray-500 mr-3" />
+                  <div>
+                    <p className="text-sm font-medium text-gray-700">Best Season</p>
+                    <p className="text-xs text-gray-600">Spring & Summer</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center">
+                  <Users className="h-5 w-5 text-gray-500 mr-3" />
+                  <div>
+                    <p className="text-sm font-medium text-gray-700">Crowds</p>
+                    <p className="text-xs text-gray-600">
+                      {venue.venueType === 'park' ? 'Usually spacious' : 'Moderate'}
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center">
+                  <ThumbsUp className="h-5 w-5 text-gray-500 mr-3" />
+                  <div>
+                    <p className="text-sm font-medium text-gray-700">Recommended</p>
+                    <p className="text-xs text-gray-600">
+                      {getSunRating(venue) >= 4 ? 'Highly recommended' : 'Recommended'}
+                    </p>
+                  </div>
                 </div>
               </div>
-            )}
-          </div>
-        )}
-        
-        {/* Sunny spot description */}
-        {venue.sunnySpotDescription && (
-          <div className="mt-4 p-3 border border-amber-200 rounded-lg">
-            <p className="text-sm text-gray-700 italic">
-              "{venue.sunnySpotDescription}"
-            </p>
-          </div>
-        )}
-        
-        {/* Outdoor heating */}
-        {venue.hasHeaters !== undefined && (
-          <div className="mt-4 flex items-center">
-            <div className={`
-              w-8 h-8 rounded-full flex items-center justify-center mr-3
-              ${venue.hasHeaters 
-                ? 'bg-gradient-to-r from-red-400 to-red-500 text-white' 
-                : 'bg-gray-200 text-gray-400'}
-            `}>
-              <Flame className="h-4 w-4" />
             </div>
-            <p className="text-sm text-gray-700">
-              {venue.hasHeaters 
-                ? 'Outdoor heating available' 
-                : 'No outdoor heating'}
-            </p>
-          </div>
-        )}
-      </div>
-      
-      {/* Sunshine Forecast */}
-      <div className="mx-4 mt-4">
-        <SunshineForecast venueId={venue.id} />
-      </div>
-      
-      {/* Details & Amenities */}
-      <div className="mx-4 mt-4 bg-white rounded-xl shadow-md p-5">
-        <h2 className="text-lg font-bold text-gray-800 mb-4">
-          Details & Amenities
-        </h2>
-        
-        <div className="grid grid-cols-2 gap-4">
-          {venue.website && (
-            <div className="flex items-center">
-              <Globe className="h-5 w-5 text-gray-500 mr-3" />
-              <div>
-                <p className="text-sm font-medium text-gray-700">Website</p>
-                <a 
-                  href={venue.website} 
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs text-blue-600 hover:underline flex items-center"
-                >
-                  Visit website
-                  <ExternalLink className="h-3 w-3 ml-1" />
-                </a>
-              </div>
-            </div>
-          )}
-          
-          <div className="flex items-center">
-            <Calendar className="h-5 w-5 text-gray-500 mr-3" />
-            <div>
-              <p className="text-sm font-medium text-gray-700">Best Season</p>
-              <p className="text-xs text-gray-600">Spring & Summer</p>
-            </div>
-          </div>
-          
-          <div className="flex items-center">
-            <Users className="h-5 w-5 text-gray-500 mr-3" />
-            <div>
-              <p className="text-sm font-medium text-gray-700">Crowds</p>
-              <p className="text-xs text-gray-600">
-                {venue.venueType === 'park' ? 'Usually spacious' : 'Moderate'}
-              </p>
-            </div>
-          </div>
-          
-          <div className="flex items-center">
-            <ThumbsUp className="h-5 w-5 text-gray-500 mr-3" />
-            <div>
-              <p className="text-sm font-medium text-gray-700">Recommended</p>
-              <p className="text-xs text-gray-600">
-                {getSunRating(venue) >= 4 ? 'Highly recommended' : 'Recommended'}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      {/* Operating Hours */}
-      <div className="mx-4 mt-4 bg-white rounded-xl shadow-md p-5">
-        <h2 className="text-lg font-bold text-gray-800 flex items-center mb-4">
-          <Clock className="h-5 w-5 text-gray-600 mr-2" /> 
-          Operating Hours
-        </h2>
-        
-        {(venue.mondayHours || venue.tuesdayHours || venue.wednesdayHours || 
-          venue.thursdayHours || venue.fridayHours || venue.saturdayHours || 
-          venue.sundayHours) ? (
-          <div className="space-y-2">
-            {venue.mondayHours && (
-              <div className="flex justify-between items-center py-1.5 border-b border-gray-100">
-                <span className="text-sm font-medium text-gray-700">Monday</span>
-                <span className="text-sm text-gray-600">{venue.mondayHours}</span>
-              </div>
-            )}
-            {venue.tuesdayHours && (
-              <div className="flex justify-between items-center py-1.5 border-b border-gray-100">
-                <span className="text-sm font-medium text-gray-700">Tuesday</span>
-                <span className="text-sm text-gray-600">{venue.tuesdayHours}</span>
-              </div>
-            )}
-            {venue.wednesdayHours && (
-              <div className="flex justify-between items-center py-1.5 border-b border-gray-100">
-                <span className="text-sm font-medium text-gray-700">Wednesday</span>
-                <span className="text-sm text-gray-600">{venue.wednesdayHours}</span>
-              </div>
-            )}
-            {venue.thursdayHours && (
-              <div className="flex justify-between items-center py-1.5 border-b border-gray-100">
-                <span className="text-sm font-medium text-gray-700">Thursday</span>
-                <span className="text-sm text-gray-600">{venue.thursdayHours}</span>
-              </div>
-            )}
-            {venue.fridayHours && (
-              <div className="flex justify-between items-center py-1.5 border-b border-gray-100">
-                <span className="text-sm font-medium text-gray-700">Friday</span>
-                <span className="text-sm text-gray-600">{venue.fridayHours}</span>
-              </div>
-            )}
-            {venue.saturdayHours && (
-              <div className="flex justify-between items-center py-1.5 border-b border-gray-100">
-                <span className="text-sm font-medium text-gray-700">Saturday</span>
-                <span className="text-sm text-gray-600">{venue.saturdayHours}</span>
-              </div>
-            )}
-            {venue.sundayHours && (
-              <div className="flex justify-between items-center py-1.5">
-                <span className="text-sm font-medium text-gray-700">Sunday</span>
-                <span className="text-sm text-gray-600">{venue.sundayHours}</span>
-              </div>
-            )}
-          </div>
-        ) : (
-          <p className="text-sm text-gray-500 italic">Operating hours not available</p>
-        )}
-      </div>
-      
-      {/* Contact Information */}
-      <div className="mx-4 mt-4 bg-white rounded-xl shadow-md p-5">
-        <h2 className="text-lg font-bold text-gray-800 flex items-center mb-4">
-          <Phone className="h-5 w-5 text-gray-600 mr-2" /> 
-          Contact Information
-        </h2>
-        
-        <div className="space-y-4">
-          {venue.phoneNumber && (
-            <div className="flex items-center">
-              <Phone className="h-5 w-5 text-gray-500 mr-3" />
-              <div>
-                <p className="text-sm font-medium text-gray-700">Phone</p>
-                <a 
-                  href={`tel:${venue.phoneNumber}`} 
-                  className="text-sm text-blue-600 hover:underline"
-                >
-                  {venue.phoneNumber}
-                </a>
-              </div>
-            </div>
-          )}
-          
-          {venue.email && (
-            <div className="flex items-center">
-              <MessageSquare className="h-5 w-5 text-gray-500 mr-3" />
-              <div>
-                <p className="text-sm font-medium text-gray-700">Email</p>
-                <a 
-                  href={`mailto:${venue.email}`}
-                  className="text-sm text-blue-600 hover:underline"
-                >
-                  {venue.email}
-                </a>
-              </div>
-            </div>
-          )}
-          
-          <div className="flex flex-wrap gap-3 mt-4">
-            {venue.website && (
-              <a 
-                href={venue.website} 
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-full text-sm flex items-center"
-              >
-                <Globe className="h-4 w-4 mr-1.5" />
-                Website
-              </a>
-            )}
             
-            {venue.instagramUrl && (
-              <a 
-                href={venue.instagramUrl} 
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-3 py-1.5 rounded-full text-sm flex items-center"
-              >
-                <svg className="h-4 w-4 mr-1.5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
-                </svg>
-                Instagram
-              </a>
-            )}
-            
-            {venue.facebookUrl && (
-              <a 
-                href={venue.facebookUrl} 
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-blue-600 text-white px-3 py-1.5 rounded-full text-sm flex items-center"
-              >
-                <svg className="h-4 w-4 mr-1.5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z" />
-                </svg>
-                Facebook
-              </a>
-            )}
+            {/* Contact Information */}
+            <div className="mx-4 mt-4 bg-white rounded-xl shadow-md p-5">
+              <h2 className="text-lg font-bold text-gray-800 flex items-center mb-4">
+                <Phone className="h-5 w-5 text-gray-600 mr-2" /> 
+                Contact Information
+              </h2>
+              
+              <div className="space-y-4">
+                {venue.phoneNumber && (
+                  <div className="flex items-center">
+                    <Phone className="h-5 w-5 text-gray-500 mr-3" />
+                    <div>
+                      <p className="text-sm font-medium text-gray-700">Phone</p>
+                      <a 
+                        href={`tel:${venue.phoneNumber}`} 
+                        className="text-sm text-blue-600 hover:underline"
+                      >
+                        {venue.phoneNumber}
+                      </a>
+                    </div>
+                  </div>
+                )}
+                
+                {venue.email && (
+                  <div className="flex items-center">
+                    <MessageSquare className="h-5 w-5 text-gray-500 mr-3" />
+                    <div>
+                      <p className="text-sm font-medium text-gray-700">Email</p>
+                      <a 
+                        href={`mailto:${venue.email}`}
+                        className="text-sm text-blue-600 hover:underline"
+                      >
+                        {venue.email}
+                      </a>
+                    </div>
+                  </div>
+                )}
+                
+                <div className="flex flex-wrap gap-3 mt-4">
+                  {venue.website && (
+                    <a 
+                      href={venue.website} 
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-full text-sm flex items-center"
+                    >
+                      <Globe className="h-4 w-4 mr-1.5" />
+                      Website
+                    </a>
+                  )}
+                  
+                  {venue.instagramUrl && (
+                    <a 
+                      href={venue.instagramUrl} 
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-3 py-1.5 rounded-full text-sm flex items-center"
+                    >
+                      <svg className="h-4 w-4 mr-1.5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" />
+                      </svg>
+                      Instagram
+                    </a>
+                  )}
+                  
+                  {venue.facebookUrl && (
+                    <a 
+                      href={venue.facebookUrl} 
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-full text-sm flex items-center"
+                    >
+                      <svg className="h-4 w-4 mr-1.5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z" />
+                      </svg>
+                      Facebook
+                    </a>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
-      
-      {/* Photos & Reviews Placeholder */}
-      <div className="mx-4 mt-4 bg-white rounded-xl shadow-md p-5">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-bold text-gray-800">
-            Photos & Reviews
-          </h2>
-          <button className="text-sm text-amber-600 hover:text-amber-700">
-            See all
-          </button>
-        </div>
+        )}
         
-        <div className="text-center py-8">
-          <div className="mx-auto w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-3">
-            <Camera className="h-6 w-6 text-gray-400" />
+        {/* Sun Hours Tab */}
+        {activeTab === 'sun' && (
+          <div className="tab-content">
+            {/* Sun Hours Content */}
+            <div className="mx-4 bg-white rounded-xl shadow-md p-5">
+              <h2 className="text-lg font-bold text-amber-800 flex items-center mb-4">
+                <Sun className="h-5 w-5 text-amber-500 mr-2" fill="currentColor" /> 
+                Sun Hours Detail
+              </h2>
+              
+              {venue.sunHoursStart && venue.sunHoursEnd ? (
+                <div className="space-y-4">
+                  <div className="bg-amber-50 rounded-lg p-4 border border-amber-200">
+                    <div className="flex items-center">
+                      <div className="w-10 h-10 bg-gradient-to-r from-amber-400 to-amber-500 rounded-full flex items-center justify-center mr-3 shadow-md">
+                        <Sun className="h-6 w-6 text-white" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-amber-800">
+                          Daily Sun Hours
+                        </p>
+                        <p className="text-sm text-amber-600">
+                          {venue.sunHoursStart} - {venue.sunHoursEnd}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Sunshine percentage */}
+                  {sunshineData && (
+                    <div className="mt-2">
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="text-sm text-gray-700 font-medium">Sunshine coverage</p>
+                        <p className="text-sm font-medium text-amber-800">
+                          {getSunshinePercentage(sunshineData)}%
+                        </p>
+                      </div>
+                      <div className="w-full bg-amber-200 rounded-full h-2.5">
+                        <div 
+                          className="bg-gradient-to-r from-amber-400 to-amber-500 h-2.5 rounded-full" 
+                          style={{ width: `${getSunshinePercentage(sunshineData)}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="text-center py-6">
+                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <Sun className="h-8 w-8 text-gray-400" />
+                  </div>
+                  <p className="text-gray-500">No detailed sun hours available for this venue.</p>
+                </div>
+              )}
+            </div>
+            
+            {/* Sunshine Forecast */}
+            <div className="mx-4 mt-4">
+              <SunshineForecast venueId={venue.id} />
+            </div>
           </div>
-          <p className="text-gray-600 mb-2">No photos yet</p>
-          <button className="text-sm text-amber-600 hover:text-amber-700 font-medium">
-            Add a photo
-          </button>
-        </div>
+        )}
+        
+        {/* Schedule Tab */}
+        {activeTab === 'schedule' && (
+          <div className="tab-content">
+            {/* Operating Hours */}
+            <div className="mx-4 bg-white rounded-xl shadow-md p-5">
+              <h2 className="text-lg font-bold text-gray-800 flex items-center mb-4">
+                <Clock className="h-5 w-5 text-gray-600 mr-2" /> 
+                Operating Hours
+              </h2>
+              
+              {(venue.mondayHours || venue.tuesdayHours || venue.wednesdayHours || 
+                venue.thursdayHours || venue.fridayHours || venue.saturdayHours || 
+                venue.sundayHours) ? (
+                <div className="space-y-2">
+                  {venue.mondayHours && (
+                    <div className="flex justify-between items-center py-1.5 border-b border-gray-100">
+                      <span className="text-sm font-medium text-gray-700">Monday</span>
+                      <span className="text-sm text-gray-600">{venue.mondayHours}</span>
+                    </div>
+                  )}
+                  {venue.tuesdayHours && (
+                    <div className="flex justify-between items-center py-1.5 border-b border-gray-100">
+                      <span className="text-sm font-medium text-gray-700">Tuesday</span>
+                      <span className="text-sm text-gray-600">{venue.tuesdayHours}</span>
+                    </div>
+                  )}
+                  {venue.wednesdayHours && (
+                    <div className="flex justify-between items-center py-1.5 border-b border-gray-100">
+                      <span className="text-sm font-medium text-gray-700">Wednesday</span>
+                      <span className="text-sm text-gray-600">{venue.wednesdayHours}</span>
+                    </div>
+                  )}
+                  {venue.thursdayHours && (
+                    <div className="flex justify-between items-center py-1.5 border-b border-gray-100">
+                      <span className="text-sm font-medium text-gray-700">Thursday</span>
+                      <span className="text-sm text-gray-600">{venue.thursdayHours}</span>
+                    </div>
+                  )}
+                  {venue.fridayHours && (
+                    <div className="flex justify-between items-center py-1.5 border-b border-gray-100">
+                      <span className="text-sm font-medium text-gray-700">Friday</span>
+                      <span className="text-sm text-gray-600">{venue.fridayHours}</span>
+                    </div>
+                  )}
+                  {venue.saturdayHours && (
+                    <div className="flex justify-between items-center py-1.5 border-b border-gray-100">
+                      <span className="text-sm font-medium text-gray-700">Saturday</span>
+                      <span className="text-sm text-gray-600">{venue.saturdayHours}</span>
+                    </div>
+                  )}
+                  {venue.sundayHours && (
+                    <div className="flex justify-between items-center py-1.5">
+                      <span className="text-sm font-medium text-gray-700">Sunday</span>
+                      <span className="text-sm text-gray-600">{venue.sundayHours}</span>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="text-center py-6">
+                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <Clock className="h-8 w-8 text-gray-400" />
+                  </div>
+                  <p className="text-gray-500">No operating hours available for this venue.</p>
+                </div>
+              )}
+            </div>
+            
+            {/* Best Seasons */}
+            <div className="mx-4 mt-4 bg-white rounded-xl shadow-md p-5">
+              <h2 className="text-lg font-bold text-gray-800 flex items-center mb-4">
+                <Calendar className="h-5 w-5 text-gray-600 mr-2" /> 
+                Best Times to Visit
+              </h2>
+              
+              <div className="grid grid-cols-2 gap-3">
+                <div className="p-3 rounded-lg bg-green-50">
+                  <p className="text-sm font-medium text-green-700">Spring</p>
+                  <p className="text-xs text-green-600 mt-1">Early sunshine in pleasant temperatures</p>
+                  <div className="mt-2 flex items-center">
+                    <span className="text-green-500 text-xs mr-1">Mar-May</span>
+                    <div className="flex-1 h-1.5 bg-green-200 rounded-full">
+                      <div className="h-1.5 bg-green-400 rounded-full" style={{ width: '85%' }}></div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="p-3 rounded-lg bg-amber-50">
+                  <p className="text-sm font-medium text-amber-700">Summer</p>
+                  <p className="text-xs text-amber-600 mt-1">Maximum sunshine hours</p>
+                  <div className="mt-2 flex items-center">
+                    <span className="text-amber-500 text-xs mr-1">Jun-Aug</span>
+                    <div className="flex-1 h-1.5 bg-amber-200 rounded-full">
+                      <div className="h-1.5 bg-amber-400 rounded-full" style={{ width: '100%' }}></div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="p-3 rounded-lg bg-orange-50">
+                  <p className="text-sm font-medium text-orange-700">Autumn</p>
+                  <p className="text-xs text-orange-600 mt-1">Soft afternoon light</p>
+                  <div className="mt-2 flex items-center">
+                    <span className="text-orange-500 text-xs mr-1">Sep-Nov</span>
+                    <div className="flex-1 h-1.5 bg-orange-200 rounded-full">
+                      <div className="h-1.5 bg-orange-400 rounded-full" style={{ width: '70%' }}></div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="p-3 rounded-lg bg-blue-50">
+                  <p className="text-sm font-medium text-blue-700">Winter</p>
+                  <p className="text-xs text-blue-600 mt-1">Limited sunshine</p>
+                  <div className="mt-2 flex items-center">
+                    <span className="text-blue-500 text-xs mr-1">Dec-Feb</span>
+                    <div className="flex-1 h-1.5 bg-blue-200 rounded-full">
+                      <div className="h-1.5 bg-blue-400 rounded-full" style={{ width: '35%' }}></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {/* Reviews Tab */}
+        {activeTab === 'reviews' && (
+          <div className="tab-content">
+            <div className="mx-4 bg-white rounded-xl shadow-md p-5">
+              <h2 className="text-lg font-bold text-gray-800 flex items-center mb-4">
+                <MessageSquare className="h-5 w-5 text-gray-600 mr-2" /> 
+                Reviews
+              </h2>
+              
+              <div className="text-center py-10">
+                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <MessageSquare className="h-8 w-8 text-gray-400" />
+                </div>
+                <p className="text-gray-500 mb-2">No reviews yet</p>
+                <p className="text-sm text-gray-400">Be the first to share your experience!</p>
+                
+                <button className="mt-4 bg-amber-500 text-white px-4 py-2 rounded-lg text-sm font-medium">
+                  Write a review
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
       
       {/* Bottom Navigation */}
