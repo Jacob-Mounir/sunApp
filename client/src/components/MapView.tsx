@@ -10,6 +10,8 @@ import { addCustomMapStyles, createSunnyTileLayer } from './SunnyMapStyle';
 import { useSavedVenues } from '@/hooks/useSavedVenues';
 import { WeatherEffects } from './WeatherEffects';
 import { Button } from '@/components/ui/button';
+import { SunIcon } from '@/components/SunIcon';
+import ReactDOMServer from 'react-dom/server';
 
 interface MapViewProps {
   venues: Venue[];
@@ -18,19 +20,86 @@ interface MapViewProps {
   onVenueSelect: (venue: Venue) => void;
 }
 
+// Helper function to convert venue rating to percentage
+const ratingToPercentage = (rating: number): number => {
+  return Math.round((rating / 5) * 100);
+};
+
+// Calculate sun rating (1-5) based on venue data
+const getSunRating = (venue: Venue): number => {
+  if (!venue.hasSunnySpot) return 1;
+
+  let rating = 3; // Default middle rating
+
+  // If venue has specified sun hours, use that to calculate rating
+  if (venue.sunHoursStart && venue.sunHoursEnd) {
+    try {
+      const startHour = parseInt(venue.sunHoursStart.split(':')[0]);
+      const endHour = parseInt(venue.sunHoursEnd.split(':')[0]);
+      const sunHours = endHour - startHour;
+
+      if (sunHours <= 2) rating = 1;
+      else if (sunHours <= 4) rating = 2;
+      else if (sunHours <= 6) rating = 3;
+      else if (sunHours <= 8) rating = 4;
+      else rating = 5;
+    } catch (e) {
+      rating = venue.hasSunnySpot ? 3 : 1;
+    }
+  } else {
+    switch (venue.venueType) {
+      case 'park':
+        rating = 4;
+        break;
+      case 'restaurant':
+        rating = venue.hasHeaters ? 4 : 3;
+        break;
+      case 'cafe':
+        rating = 3;
+        break;
+      case 'bar':
+        rating = venue.hasHeaters ? 4 : 2;
+        break;
+      default:
+        rating = 3;
+    }
+  }
+
+  return rating;
+};
+
+// Create a React component for the marker content
+const MarkerContent = ({ rating, isSunny, isSaved }: { rating: number, isSunny: boolean, isSaved: boolean }) => {
+  const percentage = ratingToPercentage(rating);
+  return `
+    <div class="marker-container">
+      <div class="sun-rating-marker ${isSunny ? 'sunny' : ''} ${isSaved ? 'saved' : ''}">
+        ${ReactDOMServer.renderToString(
+          <SunIcon
+            rating={percentage}
+            type={isSunny ? 'sun' : 'cloudy'}
+            size={20}
+            showRating={true}
+          />
+        )}
+      </div>
+    </div>
+  `;
+};
+
 export function MapView({ venues, userLocation, weatherData, onVenueSelect }: MapViewProps) {
   const mapRef = useRef<L.Map | null>(null);
   const [selectedVenue, setSelectedVenue] = useState<Venue | null>(null);
   const markers = useRef<L.Marker[]>([]);
   const userMarker = useRef<L.Marker | null>(null);
   const [mapReady, setMapReady] = useState(false);
-  
+
   // Use saved venues hook to highlight saved locations
   const { isVenueSaved } = useSavedVenues();
-  
+
   // Get sun position for determining sunshine
   const { data: sunPosition } = useSunPosition(userLocation.latitude, userLocation.longitude);
-  
+
   // Determine if it's currently sunny based on weather and sun position
   const isSunnyWeatherNow = isSunnyWeather(weatherData?.weatherCondition, weatherData?.icon);
   const isSunAboveHorizon = sunPosition ? sunPosition.elevation > 0 : false;
@@ -44,7 +113,7 @@ export function MapView({ venues, userLocation, weatherData, onVenueSelect }: Ma
       console.error("Map container not found");
       return;
     }
-    
+
     if (!mapRef.current) {
       // Create map
       try {
@@ -58,33 +127,33 @@ export function MapView({ venues, userLocation, weatherData, onVenueSelect }: Ma
           // @ts-ignore - tap is a valid Leaflet option but not typed correctly
           tap: true // Enables mobile touch events
         }).setView(
-          [userLocation.latitude, userLocation.longitude], 
+          [userLocation.latitude, userLocation.longitude],
           13  // Lower zoom level to see more venues
         );
-        
+
         // Add clean light tile layer
         createSunnyTileLayer().addTo(map);
-        
+
         // Apply custom styling to match the clean light style
         addCustomMapStyles(map);
-        
+
         mapRef.current = map;
-        
+
         // Handle window resize events
         const handleResize = () => {
           if (mapRef.current) {
             mapRef.current.invalidateSize();
           }
         };
-        
+
         window.addEventListener('resize', handleResize);
-        
+
         // Force a resize to ensure the map renders correctly
         setTimeout(() => {
           map.invalidateSize();
           setMapReady(true);
         }, 250);
-        
+
         // Return cleanup function
         return () => {
           window.removeEventListener('resize', handleResize);
@@ -93,7 +162,7 @@ export function MapView({ venues, userLocation, weatherData, onVenueSelect }: Ma
         console.error("Error initializing map:", error);
       }
     }
-    
+
     return () => {
       if (mapRef.current) {
         mapRef.current.remove();
@@ -107,7 +176,7 @@ export function MapView({ venues, userLocation, weatherData, onVenueSelect }: Ma
   useEffect(() => {
     if (mapRef.current) {
       mapRef.current.setView([userLocation.latitude, userLocation.longitude], 13);
-      
+
       // Update user marker
       if (userMarker.current) {
         userMarker.current.setLatLng([userLocation.latitude, userLocation.longitude]);
@@ -119,12 +188,12 @@ export function MapView({ venues, userLocation, weatherData, onVenueSelect }: Ma
           iconSize: [20, 20],
           iconAnchor: [10, 10]
         });
-        
+
         userMarker.current = L.marker(
           [userLocation.latitude, userLocation.longitude],
           { icon: userIcon }
         ).addTo(mapRef.current);
-        
+
         // Add marker animations
         const style = document.createElement('style');
         style.textContent = `
@@ -157,12 +226,12 @@ export function MapView({ venues, userLocation, weatherData, onVenueSelect }: Ma
               opacity: 0;
             }
           }
-          
+
           /* Better hovering effects for map elements */
           .leaflet-marker-icon:hover {
             z-index: 1000 !important;
           }
-          
+
           /* Venue marker styles */
           .sun-rating-marker {
             display: flex;
@@ -181,30 +250,30 @@ export function MapView({ venues, userLocation, weatherData, onVenueSelect }: Ma
             height: 24px;
             position: relative;
           }
-          
+
           .sun-rating-marker.sunny {
             background: linear-gradient(to right, #f59e0b, #d97706);
             color: white;
             border: none;
           }
-          
+
           .sun-rating-marker:hover {
             transform: scale(1.05);
             box-shadow: 0 4px 8px rgba(0,0,0,0.15);
           }
-          
+
           .venue-icon {
             display: inline-flex;
             align-items: center;
             justify-content: center;
             margin-right: 4px;
           }
-          
+
           .price-marker .icon {
             stroke-width: 2px;
             stroke: currentColor;
           }
-          
+
           .sun-icon {
             display: inline-flex;
             align-items: center;
@@ -212,11 +281,11 @@ export function MapView({ venues, userLocation, weatherData, onVenueSelect }: Ma
             margin-left: 4px;
             stroke: white;
           }
-          
+
           .glow-animation {
             position: relative;
           }
-          
+
           .glow-animation::after {
             content: '';
             position: absolute;
@@ -229,7 +298,7 @@ export function MapView({ venues, userLocation, weatherData, onVenueSelect }: Ma
             z-index: -1;
             animation: glow 1.5s infinite alternate;
           }
-          
+
           @keyframes glow {
             0% {
               transform: scale(1);
@@ -240,14 +309,14 @@ export function MapView({ venues, userLocation, weatherData, onVenueSelect }: Ma
               opacity: 0;
             }
           }
-          
+
           /* Marker container with price and sun rating */
           .marker-container {
             display: flex;
             flex-direction: column;
             align-items: center;
           }
-          
+
           /* Sun rating styles */
           .sun-rating {
             display: flex;
@@ -258,31 +327,31 @@ export function MapView({ venues, userLocation, weatherData, onVenueSelect }: Ma
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             border: 1px solid rgba(0,0,0,0.05);
           }
-          
+
           .sun-rating-icon {
             width: 10px;
             height: 10px;
             margin: 0 1px;
           }
-          
+
           .sun-rating-icon.filled {
             color: #f59e0b; /* amber-500 */
             stroke: #f59e0b;
             fill: #f59e0b;
           }
-          
+
           .sun-rating-icon.empty {
             color: #d1d5db; /* gray-300 */
             stroke: #d1d5db;
             fill: none;
           }
-          
+
           /* Saved marker styles */
           .sun-rating-marker.saved {
             border: 2px solid #f59e0b; /* amber-500 */
             box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.3), 0 2px 4px rgba(0,0,0,0.15);
           }
-          
+
           .bookmark-icon {
             position: absolute;
             top: -2px;
@@ -306,185 +375,41 @@ export function MapView({ venues, userLocation, weatherData, onVenueSelect }: Ma
   // Update markers when venues change
   useEffect(() => {
     if (!mapRef.current) return;
-    
+
     // Clear existing markers
     markers.current.forEach(marker => marker.remove());
     markers.current = [];
-    
+
     // Add venue markers
     venues.forEach(venue => {
       // Check if venue is sunny based on sun position and weather
       const isSunny = venue.hasSunnySpot && isCurrentlySunny;
-      
+
       // Calculate the sun rating (1-5) based on venue data
-      const getSunRating = (): number => {
-        if (!venue.hasSunnySpot) return 1;
-        
-        let rating = 3; // Default middle rating
-        
-        // If venue has specified sun hours, use that to calculate rating
-        if (venue.sunHoursStart && venue.sunHoursEnd) {
-          try {
-            const startHour = parseInt(venue.sunHoursStart.split(':')[0]);
-            const endHour = parseInt(venue.sunHoursEnd.split(':')[0]);
-            const sunHours = endHour - startHour;
-            
-            if (sunHours <= 2) rating = 1;
-            else if (sunHours <= 4) rating = 2;
-            else if (sunHours <= 6) rating = 3;
-            else if (sunHours <= 8) rating = 4;
-            else rating = 5;
-          } catch (e) {
-            rating = venue.hasSunnySpot ? 3 : 1;
-          }
-        } else {
-          switch (venue.venueType) {
-            case 'park':
-              rating = 4;
-              break;
-            case 'restaurant':
-              rating = venue.hasHeaters ? 4 : 3;
-              break;
-            case 'cafe':
-              rating = 3;
-              break;
-            case 'bar':
-              rating = venue.hasHeaters ? 4 : 2;
-              break;
-            default:
-              rating = 3;
-          }
-        }
-        
-        return rating;
-      };
-      
-      const sunRating = getSunRating();
-      
-      // Get the appropriate icon for venue type
-      const getVenueIconHtml = () => {
-        let iconHtml = '';
-        switch (venue.venueType) {
-          case 'restaurant':
-            iconHtml = `<svg class="icon" viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" fill="none">
-              <path d="M3 11L22 11"></path>
-              <path d="M18 17L21 17"></path>
-              <path d="M21 11L21 19C21 20 20 21 19 21L5 21C4 21 3 20 3 19L3 11"></path>
-              <path d="M12.01 7.88888L12 4"></path>
-              <path d="M8.01 7.88888L8 4"></path>
-              <path d="M16.01 7.88888L16 4"></path>
-            </svg>`;
-            break;
-          case 'cafe':
-            iconHtml = `<svg class="icon" viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" fill="none">
-              <path d="M17 8h1a4 4 0 1 1 0 8h-1"></path>
-              <path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4z"></path>
-              <line x1="6" y1="2" x2="6" y2="4"></line>
-              <line x1="10" y1="2" x2="10" y2="4"></line>
-              <line x1="14" y1="2" x2="14" y2="4"></line>
-            </svg>`;
-            break;
-          case 'bar':
-            iconHtml = `<svg class="icon" viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" fill="none">
-              <path d="M17 8h1a4 4 0 1 1 0 8h-1"></path>
-              <path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4z"></path>
-            </svg>`;
-            break;
-          case 'park':
-            iconHtml = `<svg class="icon" viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" fill="none">
-              <path d="M7 21L7 9"></path>
-              <path d="M20 12L20 18"></path>
-              <path d="M12 12C12 12 8 18 4 18"></path>
-              <path d="M12 12C12 12 16 18 20 18"></path>
-              <path d="M12 3L12 12"></path>
-            </svg>`;
-            break;
-          default:
-            iconHtml = `<svg class="icon" viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" fill="none">
-              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-              <circle cx="12" cy="10" r="3"></circle>
-            </svg>`;
-        }
-        return iconHtml;
-      };
-      
-      // Function to generate the sun rating HTML (1-5 suns)
-      const getSunRatingHtml = () => {
-        const sunIcon = `<svg class="sun-rating-icon" viewBox="0 0 24 24" width="10" height="10" fill="currentColor">
-          <circle cx="12" cy="12" r="5"></circle>
-          <line x1="12" y1="1" x2="12" y2="3"></line>
-          <line x1="12" y1="21" x2="12" y2="23"></line>
-          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-          <line x1="1" y1="12" x2="3" y2="12"></line>
-          <line x1="21" y1="12" x2="23" y2="12"></line>
-          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-        </svg>`;
-        
-        // Generate filled and empty sun icons based on rating
-        let ratingHtml = '<div class="sun-rating">';
-        for (let i = 1; i <= 5; i++) {
-          if (i <= sunRating) {
-            ratingHtml += `<span class="sun-rating-icon filled">${sunIcon}</span>`;
-          } else {
-            ratingHtml += `<span class="sun-rating-icon empty">${sunIcon}</span>`;
-          }
-        }
-        ratingHtml += '</div>';
-        
-        return ratingHtml;
-      };
-      
-      // Format sun rating to one decimal place
-      const formattedRating = sunRating.toFixed(1);
-      
+      const sunRating = getSunRating(venue);
+
       // Check if this venue is saved
       const isSaved = isVenueSaved(venue.id);
-      
-      // Create bookmark icon HTML for saved venues
-      const bookmarkIconHtml = isSaved ? 
-        `<span class="bookmark-icon"><svg viewBox="0 0 24 24" width="12" height="12" stroke="#ff8c00" fill="#ff8c00" stroke-width="2">
-          <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
-        </svg></span>` : '';
-      
-      // Create responsive Airbnb-style marker with sun rating
+
+      // Create marker with SunIcon
       const venueIcon = L.divIcon({
-        html: `<div class="marker-container">
-                <div class="sun-rating-marker-new ${isSaved ? 'saved' : ''}">
-                  <div class="sun-icon-container">
-                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" stroke="currentColor" stroke-width="0.5">
-                      <circle cx="12" cy="12" r="5"></circle>
-                      <line x1="12" y1="1" x2="12" y2="3"></line>
-                      <line x1="12" y1="21" x2="12" y2="23"></line>
-                      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-                      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-                      <line x1="1" y1="12" x2="3" y2="12"></line>
-                      <line x1="21" y1="12" x2="23" y2="12"></line>
-                      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-                      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-                    </svg>
-                  </div>
-                  <span class="rating-value">${formattedRating}</span>
-                  ${bookmarkIconHtml}
-                </div>
-              </div>`,
+        html: MarkerContent({ rating: sunRating, isSunny, isSaved }),
         className: '',
-        iconSize: [70, 30], // Default size
-        iconAnchor: [35, 15] // Default anchor
+        iconSize: [40, 40],
+        iconAnchor: [20, 40]
       });
-      
+
       const marker = L.marker(
         [venue.latitude, venue.longitude],
         { icon: venueIcon }
       ).addTo(mapRef.current!);
-      
+
       // Add click handler
       marker.on('click', () => {
         setSelectedVenue(venue);
         onVenueSelect(venue);
       });
-      
+
       markers.current.push(marker);
     });
   }, [venues, onVenueSelect, mapRef, weatherData, isCurrentlySunny, isVenueSaved]);
@@ -505,12 +430,12 @@ export function MapView({ venues, userLocation, weatherData, onVenueSelect }: Ma
           </div>
         </div>
       )}
-      
-      <div 
-        id="map-container" 
+
+      <div
+        id="map-container"
         className="leaflet-container-responsive"
-        style={{ 
-          width: '100%', 
+        style={{
+          width: '100%',
           height: '100%',
           minHeight: '300px',
           visibility: mapReady ? 'visible' : 'hidden'
@@ -518,10 +443,10 @@ export function MapView({ venues, userLocation, weatherData, onVenueSelect }: Ma
       >
         {/* The map will be rendered here */}
       </div>
-      
+
       {/* Weather animations */}
       <WeatherEffects weatherData={weatherData} />
-      
+
       {/* Sun position indicator - responsive for different screen sizes */}
       {isCurrentlySunny && (
         <div className="absolute top-3 sm:top-4 right-3 sm:right-4 flex items-center gap-1 sm:gap-2 bg-amber-100 px-2 sm:px-3 py-1 sm:py-2 rounded-full shadow-md z-50 text-xs sm:text-sm">
@@ -531,7 +456,7 @@ export function MapView({ venues, userLocation, weatherData, onVenueSelect }: Ma
           </div>
         </div>
       )}
-      
+
       {/* Selected location card - responsive for different screens */}
       {selectedVenue && (
         <div className="absolute bottom-0 left-0 right-0 p-2 sm:p-4 pointer-events-none location-card-overlay z-50">

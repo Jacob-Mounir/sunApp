@@ -42,7 +42,7 @@ interface VenueSunshineData {
   sunnyPeriods: string; // JSON string of sunny periods
   calculationTimestamp: string;
   createdAt: string;
-  
+
   // Additional properties not stored in DB but added in API response
   currentSunPosition: SunPosition;
   isCurrentlySunny: boolean;
@@ -70,20 +70,51 @@ interface SunshineForecast {
  * Hook to get the current sun position for a specific location
  */
 export function useSunPosition(latitude: number, longitude: number, date?: Date) {
-  const dateParam = date ? date.toISOString() : new Date().toISOString();
-  const queryUrl = `/api/sun/position?latitude=${latitude}&longitude=${longitude}&date=${dateParam}`;
-  
+  // Round the date to the nearest minute to reduce unnecessary requests
+  const roundedDate = date ? new Date(Math.round(date.getTime() / 60000) * 60000) : new Date(Math.round(Date.now() / 60000) * 60000);
+  const dateParam = roundedDate.toISOString();
+
+  // Round coordinates to 5 decimal places (about 1.1m precision) to reduce variations
+  const roundedLat = Math.round(latitude * 100000) / 100000;
+  const roundedLon = Math.round(longitude * 100000) / 100000;
+
+  const queryUrl = `/api/sun/position?latitude=${roundedLat}&longitude=${roundedLon}&date=${dateParam}`;
+
   return useQuery<SunPosition>({
-    queryKey: ['sunPosition', latitude, longitude, dateParam],
+    queryKey: ['sunPosition', roundedLat, roundedLon, dateParam],
     queryFn: () => fetch(queryUrl).then(res => {
       if (!res.ok) {
+        if (res.status === 429) {
+          throw new Error('Rate limit exceeded');
+        }
         throw new Error(`Sun position API error: ${res.status}`);
       }
       return res.json();
     }),
     enabled: !isNaN(latitude) && !isNaN(longitude),
     refetchOnWindowFocus: false,
-    staleTime: 2 * 60 * 60 * 1000, // 2 hours
+    staleTime: 15 * 60 * 1000, // 15 minutes
+    gcTime: 30 * 60 * 1000, // 30 minutes
+    retry: (failureCount, error) => {
+      if (error.message === 'Rate limit exceeded') {
+        return failureCount < 5; // More retries for rate limit
+      }
+      return failureCount < 2;
+    },
+    retryDelay: (attemptIndex) => {
+      // Exponential backoff with much longer delays
+      const baseDelay = 2000 * Math.pow(3, attemptIndex); // 2s, 6s, 18s, 54s, etc.
+      const jitter = Math.random() * 2000; // Up to 2s of jitter
+      return Math.min(baseDelay + jitter, 60000); // Cap at 1 minute
+    },
+    // Add refetch interval with jitter to prevent synchronized requests
+    refetchInterval: (data) => {
+      if (!data) return false;
+      const jitter = Math.random() * 300000; // Random delay up to 5 minutes
+      return 15 * 60 * 1000 + jitter; // Base interval of 15 minutes plus jitter
+    },
+    // Use stale data while revalidating
+    placeholderData: (previousData) => previousData
   });
 }
 
@@ -93,7 +124,7 @@ export function useSunPosition(latitude: number, longitude: number, date?: Date)
 export function useSunTimes(latitude: number, longitude: number, date?: Date) {
   const dateParam = date ? date.toISOString() : new Date().toISOString();
   const queryUrl = `/api/sun/times?latitude=${latitude}&longitude=${longitude}&date=${dateParam}`;
-  
+
   return useQuery<SunTimes>({
     queryKey: ['sunTimes', latitude, longitude, dateParam],
     queryFn: () => fetch(queryUrl).then(res => {
@@ -114,7 +145,7 @@ export function useSunTimes(latitude: number, longitude: number, date?: Date) {
 export function useVenueSunshine(venueId: number, date?: Date) {
   const dateParam = date ? date.toISOString() : new Date().toISOString();
   const queryUrl = `/api/venues/${venueId}/sunshine?date=${dateParam}`;
-  
+
   return useQuery<VenueSunshineData>({
     queryKey: ['venueSunshine', venueId, dateParam],
     queryFn: () => fetch(queryUrl).then(res => {
@@ -154,10 +185,10 @@ export function isVenueCurrentlySunny(sunshineData?: VenueSunshineData): boolean
  */
 export function getNextSunnyPeriod(sunshineData?: VenueSunshineData): SunnyPeriod | null {
   if (!sunshineData?.sunnyPeriods) return null;
-  
+
   const now = new Date();
   const periods = parseSunnyPeriods(sunshineData.sunnyPeriods);
-  
+
   // Find the next sunny period that starts after now
   for (const period of periods) {
     const startTime = new Date(period.start);
@@ -165,7 +196,7 @@ export function getNextSunnyPeriod(sunshineData?: VenueSunshineData): SunnyPerio
       return period;
     }
   }
-  
+
   return null;
 }
 
@@ -174,12 +205,12 @@ export function getNextSunnyPeriod(sunshineData?: VenueSunshineData): SunnyPerio
  */
 export function formatSunnyPeriod(period?: SunnyPeriod): string {
   if (!period) return 'No sunshine data available';
-  
+
   const startTime = new Date(period.start);
   const endTime = new Date(period.end);
-  
+
   // Format as "HH:MM - HH:MM"
-  return `${startTime.getHours().toString().padStart(2, '0')}:${startTime.getMinutes().toString().padStart(2, '0')} - 
+  return `${startTime.getHours().toString().padStart(2, '0')}:${startTime.getMinutes().toString().padStart(2, '0')} -
           ${endTime.getHours().toString().padStart(2, '0')}:${endTime.getMinutes().toString().padStart(2, '0')}`;
 }
 
@@ -190,22 +221,22 @@ export function getSunshinePercentage(sunshineData?: VenueSunshineData): number 
   if (!sunshineData?.sunnyPeriods || !sunshineData.sunriseTime || !sunshineData.sunsetTime) {
     return 0;
   }
-  
+
   const sunrise = new Date(sunshineData.sunriseTime);
   const sunset = new Date(sunshineData.sunsetTime);
   const totalDaylight = sunset.getTime() - sunrise.getTime();
-  
+
   if (totalDaylight <= 0) return 0;
-  
+
   const periods = parseSunnyPeriods(sunshineData.sunnyPeriods);
   let totalSunshine = 0;
-  
+
   for (const period of periods) {
     const start = new Date(period.start);
     const end = new Date(period.end);
     totalSunshine += end.getTime() - start.getTime();
   }
-  
+
   return Math.min(100, Math.max(0, (totalSunshine / totalDaylight) * 100));
 }
 
@@ -215,7 +246,7 @@ export function getSunshinePercentage(sunshineData?: VenueSunshineData): number 
 export function useVenueSunshineForecast(venueId: number, days: number = 7, startDate?: Date) {
   const dateParam = startDate ? startDate.toISOString() : new Date().toISOString();
   const queryUrl = `/api/venues/${venueId}/sunshine/forecast?days=${days}&startDate=${dateParam}`;
-  
+
   return useQuery<SunshineForecast>({
     queryKey: ['venueSunshineForecast', venueId, days, dateParam],
     queryFn: () => fetch(queryUrl).then(res => {

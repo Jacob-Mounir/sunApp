@@ -1,7 +1,5 @@
 import SunCalc from 'suncalc';
-import { InsertSunCalculation, SunCalculation, sunCalculations } from '@shared/schema';
-import { db } from './db';
-import { eq, and } from 'drizzle-orm';
+import { InsertSunCalculation, SunCalculation } from '@shared/schema';
 
 interface BuildingData {
   height: number;     // in meters
@@ -43,11 +41,11 @@ function getCacheKey(latitude: number, longitude: number, date: Date): string {
 export class SunCalculationService {
   // In-memory cache
   private static sunPositionCache: Map<string, SunPositionCacheEntry> = new Map();
-  
+
   /**
    * Calculate sun position (azimuth and elevation) for a specific location and time
    * with in-memory caching to reduce repeated calculations
-   * 
+   *
    * @param latitude - Latitude in decimal degrees
    * @param longitude - Longitude in decimal degrees
    * @param date - Date to calculate for
@@ -56,7 +54,7 @@ export class SunCalculationService {
   public static getSunPosition(latitude: number, longitude: number, date: Date, enableLogging = false) {
     const cacheKey = getCacheKey(latitude, longitude, date);
     const now = new Date();
-    
+
     // Check if we have a valid cached entry
     const cachedEntry = this.sunPositionCache.get(cacheKey);
     if (cachedEntry && cachedEntry.expiresAt > now) {
@@ -70,43 +68,43 @@ export class SunCalculationService {
         timestamp: date
       };
     }
-    
+
     // Log only when we calculate a new position AND logging is enabled
     if (enableLogging) {
       console.log(`Calculating new sun position for ${latitude},${longitude} at ${date.toISOString()}`);
     }
-    
+
     // Calculate new position
     const sunPosition = this.calculateSunPosition(latitude, longitude, date);
-    
+
     // Cache for 24 hours
     const expiryDate = new Date();
     expiryDate.setHours(expiryDate.getHours() + 24);
-    
+
     // Store in cache
     this.sunPositionCache.set(cacheKey, {
       ...sunPosition,
       expiresAt: expiryDate
     });
-    
+
     // Clean up expired entries periodically (if cache grows too large)
     if (this.sunPositionCache.size > 1000) {
       this.cleanupCache();
     }
-    
+
     return sunPosition;
   }
-  
+
   /**
    * Clean up expired cache entries
    */
   private static cleanupCache() {
     const now = new Date();
     const keysToDelete: string[] = [];
-    
+
     // Create an array of keys for iteration
     const cacheKeys = Array.from(this.sunPositionCache.keys());
-    
+
     // First identify expired keys
     for (const key of cacheKeys) {
       const entry = this.sunPositionCache.get(key);
@@ -114,35 +112,35 @@ export class SunCalculationService {
         keysToDelete.push(key);
       }
     }
-    
+
     // Then delete them
     for (const key of keysToDelete) {
       this.sunPositionCache.delete(key);
     }
   }
-  
+
   /**
    * Direct calculation of sun position
    */
   private static calculateSunPosition(latitude: number, longitude: number, date: Date) {
     const sunPosition = SunCalc.getPosition(date, latitude, longitude);
-    
+
     // Convert altitude to elevation angle in degrees (0-90)
     const elevation = sunPosition.altitude * (180 / Math.PI);
-    
+
     // Convert azimuth from radians to degrees (0-360)
     let azimuth = sunPosition.azimuth * (180 / Math.PI);
-    
+
     // Adjust azimuth to be 0-360 degrees (0 = North, 90 = East, 180 = South, 270 = West)
     azimuth = (azimuth + 180) % 360;
-    
-    return { 
-      azimuth, 
+
+    return {
+      azimuth,
       elevation,
-      timestamp: date 
+      timestamp: date
     };
   }
-  
+
   /**
    * Calculate sun times for a specific location and date
    * Returns various sun position times including sunrise, sunset, dawn, dusk, etc.
@@ -150,46 +148,46 @@ export class SunCalculationService {
   public static getSunTimes(latitude: number, longitude: number, date: Date) {
     return SunCalc.getTimes(date, latitude, longitude);
   }
-  
+
   /**
    * Determine if a venue is currently in sunlight based on the sun position and nearby buildings
    */
   public static async isVenueInSunlight(
-    latitude: number, 
-    longitude: number, 
-    date: Date, 
+    latitude: number,
+    longitude: number,
+    date: Date,
     buildings: BuildingData[] = []
   ): Promise<boolean> {
     // Get sun position for the current time
     const { azimuth, elevation } = await this.getSunPosition(latitude, longitude, date);
-    
+
     // If sun is below horizon (elevation <= 0), there's no sunlight
     if (elevation <= 0) {
       return false;
     }
-    
+
     // If no buildings provided, assume there's direct sunlight
     if (!buildings.length) {
       return true;
     }
-    
+
     // Check if any building blocks the sun
     for (const building of buildings) {
       if (this.isBuildingBlockingSun(building, azimuth, elevation)) {
         return false;
       }
     }
-    
+
     // No buildings blocking the sun
     return true;
   }
-  
+
   /**
    * Calculate the period when a venue receives direct sunlight throughout the day
    */
   public static async calculateSunnyPeriods(
-    latitude: number, 
-    longitude: number, 
+    latitude: number,
+    longitude: number,
     date: Date,
     buildings: BuildingData[] = []
   ): Promise<SunlightPeriod[]> {
@@ -197,124 +195,103 @@ export class SunCalculationService {
     const sunTimes = this.getSunTimes(latitude, longitude, date);
     const sunrise = sunTimes.sunrise;
     const sunset = sunTimes.sunset;
-    
-    const sunnyPeriods: SunlightPeriod[] = [];
-    
-    // If no buildings, return the full day's sunlight period
+
+    // If no buildings, return the entire day period
     if (!buildings.length) {
-      sunnyPeriods.push({
+      return [{
         start: sunrise,
         end: sunset
-      });
-      return sunnyPeriods;
+      }];
     }
-    
-    // Check sunlight every 15 minutes
-    const timeStep = 15 * 60 * 1000; // 15 minutes in milliseconds
+
+    const sunnyPeriods: SunlightPeriod[] = [];
     let currentPeriod: SunlightPeriod | null = null;
-    
-    for (let time = sunrise.getTime(); time <= sunset.getTime(); time += timeStep) {
-      const currentTime = new Date(time);
-      const inSunlight = await this.isVenueInSunlight(latitude, longitude, currentTime, buildings);
-      
-      if (inSunlight && !currentPeriod) {
-        // Start a new sunny period
+
+    // Check sun position every 15 minutes
+    for (let time = sunrise; time <= sunset; time = new Date(time.getTime() + 15 * 60000)) {
+      const isInSun = await this.isVenueInSunlight(latitude, longitude, time, buildings);
+
+      if (isInSun && !currentPeriod) {
+        // Start of a new sunny period
         currentPeriod = {
-          start: currentTime,
-          end: currentTime
+          start: time,
+          end: time
         };
-      } else if (inSunlight && currentPeriod) {
-        // Extend the current sunny period
-        currentPeriod.end = currentTime;
-      } else if (!inSunlight && currentPeriod) {
-        // End of a sunny period
-        sunnyPeriods.push({...currentPeriod});
+      } else if (!isInSun && currentPeriod) {
+        // End of current sunny period
+        currentPeriod.end = new Date(time.getTime() - 15 * 60000);
+        sunnyPeriods.push(currentPeriod);
         currentPeriod = null;
+      } else if (isInSun && currentPeriod) {
+        // Update end time of current period
+        currentPeriod.end = time;
       }
     }
-    
-    // Add the last period if it exists
+
+    // Add the last period if it's still sunny at sunset
     if (currentPeriod) {
+      currentPeriod.end = sunset;
       sunnyPeriods.push(currentPeriod);
     }
-    
+
     return sunnyPeriods;
   }
-  
+
   /**
-   * Calculate if a building blocks the sun based on its position relative to the venue
-   * and the current sun position
+   * Check if a building blocks the sun at a given sun position
    */
   private static isBuildingBlockingSun(
     building: BuildingData,
     sunAzimuth: number,
     sunElevation: number
   ): boolean {
-    // Calculate the angular difference between the sun azimuth and building direction
-    const azimuthDiff = Math.abs((sunAzimuth - building.direction + 180) % 360 - 180);
-    
-    // If the sun is coming from a different direction than the building, it doesn't block
-    if (azimuthDiff > 90) {
+    // Calculate the relative angle between the sun and the building
+    const relativeAngle = Math.abs(building.direction - sunAzimuth);
+
+    // If the sun is not in the direction of the building, it can't be blocked
+    if (relativeAngle > 90) {
       return false;
     }
-    
-    // Calculate the elevation angle required to clear the building
-    const requiredElevation = Math.atan2(building.height, building.distance) * (180 / Math.PI);
-    
-    // If the sun's elevation is lower than required, the building blocks the sun
-    return sunElevation < requiredElevation;
+
+    // Calculate the shadow length
+    const shadowLength = this.calculateShadowLength(building.height, sunElevation);
+
+    // If the shadow is shorter than the distance to the building, sun is not blocked
+    return shadowLength >= building.distance;
   }
-  
+
   /**
-   * Store sun calculation results in the database
+   * Store sun calculation data in the database
    */
   public static async storeSunCalculation(calculation: InsertSunCalculation): Promise<SunCalculation> {
-    const [result] = await db
-      .insert(sunCalculations)
-      .values(calculation)
-      .returning();
-    return result;
+    return await SunCalculation.create(calculation);
   }
-  
+
   /**
-   * Get stored sun calculation for a venue and date
+   * Retrieve sun calculation data from the database
    */
-  public static async getSunCalculation(venueId: number, date: Date): Promise<SunCalculation | undefined> {
-    // Format the date to compare just the day (ignoring time)
-    const dateString = date.toISOString().split('T')[0];
-    
-    const [result] = await db
-      .select()
-      .from(sunCalculations)
-      .where(
-        and(
-          eq(sunCalculations.venueId, venueId),
-          eq(sunCalculations.date, dateString as any) // Type assertion to fix compatibility issue
-        )
-      );
-    
-    return result;
+  public static async getSunCalculation(venueId: string, date: Date): Promise<SunCalculation | null> {
+    const dateStr = date.toISOString().split('T')[0];
+    return await SunCalculation.findOne({
+      venueId,
+      date: dateStr
+    }).sort({ createdAt: -1 });
   }
-  
+
   /**
-   * Calculate shadow lengths cast by a building at a given time
+   * Calculate shadow length based on building height and sun elevation
    */
   public static calculateShadowLength(buildingHeight: number, sunElevation: number): number {
-    // If sun is below horizon, shadow is infinitely long
-    if (sunElevation <= 0) {
-      return Infinity;
-    }
-    
-    // Convert elevation to radians
+    // Convert sun elevation to radians
     const elevationRad = sunElevation * (Math.PI / 180);
-    
+
     // Calculate shadow length using trigonometry
+    // Shadow length = building height / tan(elevation)
     return buildingHeight / Math.tan(elevationRad);
   }
-  
+
   /**
-   * Estimate whether a venue has sunshine at a given time based on surrounding buildings
-   * This is a simplified version of the full 3D shadow calculation described in the provided file
+   * Estimate the probability of sunshine at a given location and time
    */
   public static estimateSunshineProbability(
     latitude: number,
@@ -322,34 +299,19 @@ export class SunCalculationService {
     date: Date,
     buildings: BuildingData[] = []
   ): number {
-    // Using direct calculation to avoid Promise issues
-    const sunPosition = this.calculateSunPosition(latitude, longitude, date);
-    
-    if (!buildings.length) {
-      // No buildings, full sunshine (if sun is up)
-      return sunPosition.elevation > 0 ? 1.0 : 0.0;
+    // Get sun position
+    const { elevation } = this.getSunPosition(latitude, longitude, date);
+
+    // Base probability on sun elevation
+    let probability = elevation / 90; // 0 to 1 based on elevation
+
+    // Reduce probability based on buildings
+    if (buildings.length > 0) {
+      // Simple reduction based on number of nearby buildings
+      probability *= Math.max(0, 1 - (buildings.length * 0.1));
     }
-    
-    if (sunPosition.elevation <= 0) {
-      // Sun is below horizon
-      return 0.0;
-    }
-    
-    // Count how many buildings are potentially blocking the sun
-    let blockingBuildings = 0;
-    
-    for (const building of buildings) {
-      if (this.isBuildingBlockingSun(building, sunPosition.azimuth, sunPosition.elevation)) {
-        blockingBuildings++;
-      }
-    }
-    
-    // Simple probability based on number of blocking buildings
-    // This is a very simplified model - a real model would use actual 3D geometry
-    if (blockingBuildings > 0) {
-      return Math.max(0, 1 - (blockingBuildings * 0.2));
-    }
-    
-    return 1.0; // Full sunshine
+
+    // Ensure probability is between 0 and 1
+    return Math.max(0, Math.min(1, probability));
   }
 }

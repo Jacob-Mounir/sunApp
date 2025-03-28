@@ -1,24 +1,26 @@
 import { Venue } from '@/types';
 import { Utensils, Coffee, Beer, TreePine, Star, MapPin, Sun, CloudSun, Clock, Thermometer, Home, Flame, Route, ThermometerSnowflake } from 'lucide-react';
 import { SunIcon } from './SunIcon';
+import { useState } from 'react';
+import { motion } from 'framer-motion';
 
 // Calculate sun rating (1-5) based on venue data
 const getSunRating = (venue: Venue): number => {
   // This is a simplified algorithm - in a real app, this would be based on actual sun data
   if (!venue.hasSunnySpot) return 1;
-  
+
   // Use various venue properties to determine rating
   let rating = 3; // Default middle rating
-  
+
   // If venue has specified sun hours, use that to calculate rating
   if (venue.sunHoursStart && venue.sunHoursEnd) {
     try {
       const startHour = parseInt(venue.sunHoursStart.split(':')[0]);
       const endHour = parseInt(venue.sunHoursEnd.split(':')[0]);
       const sunHours = endHour - startHour;
-      
+
       // 1-2 hours: 1 sun
-      // 3-4 hours: 2 suns  
+      // 3-4 hours: 2 suns
       // 5-6 hours: 3 suns
       // 7-8 hours: 4 suns
       // 9+ hours: 5 suns
@@ -51,7 +53,7 @@ const getSunRating = (venue: Venue): number => {
         rating = 3;
     }
   }
-  
+
   return rating;
 };
 
@@ -59,9 +61,13 @@ interface VenueCardProps {
   venue: Venue;
   isSunny: boolean;
   onClick: () => void;
+  isLoading?: boolean;
 }
 
-export function VenueCard({ venue, isSunny, onClick }: VenueCardProps) {
+export function VenueCard({ venue, isSunny, onClick, isLoading = false }: VenueCardProps) {
+  const [isHovered, setIsHovered] = useState(false);
+  const sunRating = getSunRating(venue);
+
   // Get the appropriate icon for venue type
   const getVenueIcon = () => {
     switch (venue.venueType) {
@@ -97,155 +103,103 @@ export function VenueCard({ venue, isSunny, onClick }: VenueCardProps) {
   // Format distance
   const formatDistance = (distance?: number) => {
     if (!distance) return 'Unknown';
-    
-    if (distance < 1) {
-      // Convert to meters
-      const meters = Math.round(distance * 1000);
-      return `${meters}m`;
-    }
-    
-    return `${distance.toFixed(1)}km`;
-  };
-
-  // Get a placeholder background style based on venue type
-  const getPlaceholderStyle = () => {
-    switch (venue.venueType) {
-      case 'restaurant':
-        return 'bg-gray-100 dark:bg-gray-700';
-      case 'cafe':
-        return 'bg-gray-100 dark:bg-gray-700';
-      case 'bar':
-        return 'bg-gray-100 dark:bg-gray-700';
-      case 'park':
-        return 'bg-green-50 dark:bg-green-900/30';
-      default:
-        return 'bg-gray-100 dark:bg-gray-700';
-    }
+    return distance < 1 ? `${Math.round(distance * 1000)}m` : `${distance.toFixed(1)}km`;
   };
 
   return (
-    <div 
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
       className={`
-        bg-white dark:bg-gray-800 rounded-xl shadow-md mb-4 overflow-hidden cursor-pointer 
-        transition-all duration-300 venue-card-container
-        ${isSunny ? 'ring-2 ring-amber-200 dark:ring-amber-500/40' : ''}
+        relative bg-white rounded-xl shadow-sm overflow-hidden cursor-pointer
+        transition-all duration-200
+        ${isLoading ? 'animate-pulse' : ''}
+        ${isHovered ? 'shadow-md ring-2 ring-amber-200' : 'hover:shadow-md'}
       `}
-      onClick={() => {
-        console.log('VenueCard clicked for venue:', venue.name);
+      onClick={onClick}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      role="button"
+      tabIndex={0}
+      aria-label={`${venue.name} - ${getVenueTypeLabel()} - ${sunRating} sun rating`}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
         onClick();
+        }
       }}
     >
-      <div className="flex">
-        <div className="w-28 h-28 flex-shrink-0 relative">
+      {/* Venue Image */}
+      <div className="relative aspect-[4/3] bg-gray-100">
           {venue.imageUrl ? (
-            <img 
-              src={`${window.location.origin}${venue.imageUrl}`} 
-              alt={venue.name} 
+            <img
+            src={venue.imageUrl}
+            alt={`${venue.name} venue`}
               className="w-full h-full object-cover"
-              onError={(e) => {
-                console.error("VenueCard image failed to load:", venue.imageUrl);
-                const target = e.target as HTMLImageElement;
-                target.style.display = 'none';
-                const parent = target.parentElement;
-                if (parent) {
-                  // Add placeholder styling
-                  parent.classList.add(getPlaceholderStyle(), 'flex', 'items-center', 'justify-center');
-                  // Create placeholder content
-                  const placeholder = document.createElement('div');
-                  placeholder.className = 'w-12 h-12 bg-white dark:bg-gray-800 rounded-full flex items-center justify-center shadow-sm';
-                  placeholder.innerHTML = `<div class="h-5 w-5 text-gray-500">${
-                    venue.venueType === 'restaurant' ? '🍽️' : 
-                    venue.venueType === 'cafe' ? '☕' : 
-                    venue.venueType === 'bar' ? '🍸' : '🌳'
-                  }</div>`;
-                  parent.appendChild(placeholder);
-                }
-              }}
+            loading="lazy"
             />
           ) : (
-            <div className={`w-full h-full ${getPlaceholderStyle()} flex items-center justify-center`}>
-              <div className="w-12 h-12 bg-white dark:bg-gray-800 rounded-full flex items-center justify-center shadow-sm">
-                {getVenueIcon()}
+          <div className="w-full h-full flex items-center justify-center bg-gray-100">
+            <Home className="h-8 w-8 text-gray-400" />
               </div>
+        )}
+        {isSunny && (
+          <div className="absolute top-2 right-2 bg-amber-500/90 text-white px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1">
+            <Sun className="h-3 w-3" />
+            Sunny Now
             </div>
           )}
-          
-          {/* Venue type indicator */}
-          <div className="absolute bottom-0 left-0 right-0 bg-black/50 backdrop-blur-xs py-1 px-2">
-            <div className="flex items-center justify-center">
-              <span className="text-[10px] text-white font-medium">
-                {getVenueTypeLabel()}
-              </span>
-            </div>
-          </div>
-          
-          {/* Sun indicator for sunny venues */}
-          {isSunny && (
-            <div className="absolute top-2 right-2 w-6 h-6 bg-gradient-to-r from-amber-400 to-amber-600 rounded-full flex items-center justify-center shadow-md relative overflow-hidden">
-              <Sun className="h-4 w-4 text-white" />
-              <div className="absolute inset-0 rounded-full glow-animation"></div>
-            </div>
-          )}
-        </div>
-        
-        <div className="p-3 flex-1">
-          <div className="flex justify-between items-start">
-            <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-sm text-shadow-sm">{venue.name}</h3>
-            
-            <SunIcon 
-              rating={getSunRating(venue)} 
-              showRating={true} 
-              className="ml-1" 
-            />
-          </div>
-          
-          <div className="flex items-center text-xs text-gray-500 dark:text-gray-400 mt-1">
-            <MapPin className="h-3 w-3 mr-1" />
-            <span className="truncate">
-              {venue.area || venue.city || 'Unknown location'}
-            </span>
-            
-            <span className="mx-1.5">•</span>
-            
-            <span>{formatDistance(venue.distance)}</span>
-          </div>
-          
-          <div className="flex flex-wrap gap-1.5 mt-2.5">
-            <span className={`
-              inline-flex items-center text-[10px] font-medium px-2 py-0.5 rounded-full
-              ${isSunny 
-                ? 'bg-gradient-to-r from-amber-400 to-amber-500 text-white shadow-sm' 
-                : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'}
-            `}>
-              {isSunny 
-                ? <Sun className="h-3 w-3 mr-0.5" /> 
-                : <CloudSun className="h-3 w-3 mr-0.5" />}
-              {isSunny ? 'Sunny now' : 'Sun later'}
-            </span>
-            
-            {venue.hasHeaters !== undefined && (
-              <span className={`
-                inline-flex items-center text-[10px] font-medium px-2 py-0.5 rounded-full
-                ${venue.hasHeaters 
-                  ? 'bg-gradient-to-r from-red-400 to-red-500 text-white shadow-sm' 
-                  : 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'}
-              `}>
-                {venue.hasHeaters 
-                  ? <Flame className="h-3 w-3 mr-0.5" />
-                  : <ThermometerSnowflake className="h-3 w-3 mr-0.5" />}
-                {venue.hasHeaters ? 'Heated' : 'No heaters'}
-              </span>
-            )}
-            
-            {venue.sunHoursStart && venue.sunHoursEnd && (
-              <span className="inline-flex items-center text-[10px] font-medium px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 shadow-sm">
-                <Clock className="h-3 w-3 mr-0.5" /> 
-                {venue.sunHoursStart} - {venue.sunHoursEnd}
-              </span>
-            )}
-          </div>
-        </div>
       </div>
-    </div>
+
+      {/* Venue Info */}
+      <div className="p-4">
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex-1">
+            <h3 className="font-semibold text-gray-900 truncate">{venue.name}</h3>
+            <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
+              {getVenueIcon()}
+              <span>{getVenueTypeLabel()}</span>
+              <span>•</span>
+              <span>{formatDistance(venue.distance)}</span>
+            </div>
+          </div>
+          <div className="flex items-center gap-1">
+            <SunIcon rating={sunRating} />
+            </div>
+        </div>
+
+        {/* Features */}
+        <div className="mt-3 flex flex-wrap gap-2">
+          {venue.hasHeaters && (
+            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700">
+              <Flame className="h-3 w-3" />
+              Heaters
+            </span>
+          )}
+          {venue.hasIndoorSeating && (
+            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700">
+              <Home className="h-3 w-3" />
+              Indoor
+              </span>
+            )}
+            {venue.sunHoursStart && venue.sunHoursEnd && (
+            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-green-50 text-green-700">
+              <Clock className="h-3 w-3" />
+              {venue.sunHoursStart}-{venue.sunHoursEnd}
+              </span>
+            )}
+          </div>
+
+        {/* Loading State */}
+        {isLoading && (
+          <div className="absolute inset-0 bg-white/50 flex items-center justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-500"></div>
+        </div>
+        )}
+      </div>
+    </motion.div>
   );
 }

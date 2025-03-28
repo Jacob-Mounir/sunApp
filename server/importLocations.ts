@@ -1,154 +1,180 @@
-import fs from 'fs';
-import path from 'path';
-import { storage } from './storage';
-import { InsertVenue } from '../shared/schema';
-import { db } from './db';
-import { venues } from '../shared/schema';
-import { count } from 'drizzle-orm';
-import { parse } from 'csv-parse/sync';
+import { Venue } from '../shared/schema';
 
-// Each venue in the CSV has these fields
-interface SwedishLocation {
-  Title: string;
-  Stad: string;
-  Soltimmar: string; 
-  Typ: string;
-  Adress: string;
-  Hemsida: string;
-  Område: string;
-  Värmare: string;
-}
-
-// Map of specific venue coordinates for direct lookup
-// These were extracted directly from the CSV and provided as a fallback
-const venueCoordinates: Record<string, [number, number]> = {
-  "Ölstugan Tullen Kålltorp": [57.71705749999999, 12.0277995],
-  "The Old Beefeater Inn": [57.6973912, 11.9506935],
-  "Restaurang Jesper": [57.70370740000001, 11.9687689],
-  "La Piccola Gondola": [57.7035699, 11.9684089],
-  "Allora": [57.70269099999999, 11.9619678],
-  "Ngon": [57.7106897, 11.9864261],
-  "Armans Coffee": [57.69720829999999, 11.9479289],
-  "Bellora": [57.70169799999999, 11.9739829],
-  "Ostindiska Ölkompaniet": [57.71482870000001, 12.004437]
-};
-
-// Convert venue type from Swedish to English categories
-function convertVenueType(type: string): string {
-  // Extract the venue type string from the format "[\"Restaurant\"]"
-  const cleanType = type.replace(/\[|\]|"|\\|{|}/g, '').toLowerCase();
-  
-  if (cleanType.includes('restaurang')) {
-    return 'restaurant';
-  } else if (cleanType.includes('café') || cleanType.includes('cafe')) {
-    return 'cafe';
-  } else if (cleanType.includes('bar')) {
-    return 'bar';
-  } else if (cleanType.includes('park')) {
-    return 'park';
-  } else {
-    return 'restaurant'; // Default to restaurant if unclear
+// Hardcoded venue data
+const venues = [
+  {
+    name: "Ölstugan Tullen Kålltorp",
+    venueType: "bar",
+    address: "Björcksgatan 39, 416 52 Göteborg, Sverige",
+    location: {
+      type: "Point",
+      coordinates: [12.0277995, 57.71705749999999] // [longitude, latitude]
+    },
+    hasSunnySpot: true,
+    sunHoursStart: "15:00",
+    sunHoursEnd: "18:30",
+    hasHeaters: false,
+    city: "Göteborg",
+    area: "Östra Centrum",
+    website: "https://www.olstugan.se/kalltorp"
+  },
+  {
+    name: "The Old Beefeater Inn",
+    venueType: "bar",
+    address: "Plantagegatan 1, 413 05 Göteborg, Sverige",
+    location: {
+      type: "Point",
+      coordinates: [11.9506935, 57.6973912]
+    },
+    hasSunnySpot: true,
+    sunHoursStart: "11:00",
+    sunHoursEnd: "17:00",
+    hasHeaters: true,
+    city: "Göteborg",
+    area: "Linné",
+    website: "https://www.beefeaterinn.se/"
+  },
+  {
+    name: "Restaurang Jesper",
+    venueType: "restaurant",
+    address: "Kungstorget 13, 411 10 Göteborg, Sverige",
+    location: {
+      type: "Point",
+      coordinates: [11.9687689, 57.70370740000001]
+    },
+    hasSunnySpot: true,
+    sunHoursStart: "12:00",
+    sunHoursEnd: "19:00",
+    hasHeaters: true,
+    city: "Göteborg",
+    area: "Inom Vallgraven",
+    website: "https://restaurangjesper.se/"
+  },
+  {
+    name: "La Piccola Gondola",
+    venueType: "restaurant",
+    address: "Kungstorget 15, 411 10 Göteborg, Sverige",
+    location: {
+      type: "Point",
+      coordinates: [11.9684089, 57.7035699]
+    },
+    hasSunnySpot: true,
+    sunHoursStart: "11:30",
+    sunHoursEnd: "17:30",
+    hasHeaters: true,
+    city: "Göteborg",
+    area: "Inom Vallgraven",
+    website: "http://gondola.se/"
+  },
+  {
+    name: "Allora",
+    venueType: "bar",
+    address: "Kaserntorget 7, 411 18 Göteborg, Sverige",
+    location: {
+      type: "Point",
+      coordinates: [11.9619678, 57.70269099999999]
+    },
+    hasSunnySpot: true,
+    sunHoursStart: "12:00",
+    sunHoursEnd: "19:00",
+    hasHeaters: true,
+    city: "Göteborg",
+    area: "Inom Vallgraven",
+    website: "https://www.instagram.com/alloragbg/"
+  },
+  {
+    name: "Ngon",
+    venueType: "restaurant",
+    address: "Friggagatan 4, 411 01 Göteborg, Sverige",
+    location: {
+      type: "Point",
+      coordinates: [11.9864261, 57.7106897]
+    },
+    hasSunnySpot: true,
+    sunHoursStart: "11:00",
+    sunHoursEnd: "15:00",
+    hasHeaters: false,
+    city: "Göteborg",
+    area: "Östra Centrum",
+    website: "https://ngongbg.se/"
+  },
+  {
+    name: "Armans Coffee",
+    venueType: "cafe",
+    address: "Plantagegatan 17, 413 05 Göteborg, Sverige",
+    location: {
+      type: "Point",
+      coordinates: [11.9479289, 57.69720829999999]
+    },
+    hasSunnySpot: true,
+    sunHoursStart: "09:00",
+    sunHoursEnd: "20:00",
+    hasHeaters: true,
+    city: "Göteborg",
+    area: "Linné",
+    website: "https://www.facebook.com/ARMANs-154786997913625/"
+  },
+  {
+    name: "Bellora",
+    venueType: "restaurant",
+    address: "Kungsportsavenyen 6, 411 38 Göteborg, Sverige",
+    location: {
+      type: "Point",
+      coordinates: [11.9739829, 57.70169799999999]
+    },
+    hasSunnySpot: true,
+    sunHoursStart: "12:00",
+    sunHoursEnd: "21:00",
+    hasHeaters: true,
+    city: "Göteborg",
+    area: "Avenyn",
+    website: "https://www.hotelbellora.se/"
+  },
+  {
+    name: "Ostindiska Ölkompaniet",
+    venueType: "bar",
+    address: "Danska vägen 110, 416 59 Göteborg, Sverige",
+    location: {
+      type: "Point",
+      coordinates: [12.004437, 57.71482870000001]
+    },
+    hasSunnySpot: true,
+    sunHoursStart: "12:00",
+    sunHoursEnd: "18:30",
+    hasHeaters: true,
+    city: "Göteborg",
+    area: "Östra Centrum",
+    website: "https://www.olkompaniet.com/en/danskavagen/"
   }
-}
+];
 
-// Parse sun hours from the format "12:00 - 17:00"
-function parseSunHours(sunHours: string): { start: string, end: string } {
-  if (!sunHours || sunHours === 'N/A') {
-    return { start: '12:00', end: '17:00' }; // Default values
-  }
-  
-  // Handle special case "12:00 - Solnedgång" (sunset)
-  if (sunHours.includes('Solnedgång')) {
-    const start = sunHours.split(' - ')[0];
-    return { start, end: '21:00' }; // Assuming sunset is around 9 PM
-  }
-  
-  const parts = sunHours.split(' - ');
-  if (parts.length !== 2) {
-    return { start: '12:00', end: '17:00' }; // Default values if format is unexpected
-  }
-  
-  return { start: parts[0], end: parts[1] };
-}
-
-// Main function to import Swedish locations from CSV
+// Main function to import Swedish locations
 export async function importSwedishLocations() {
   console.log('Starting Swedish locations import...');
-  
+
   // Check if venues already exist in DB
-  const venueCount = await db.select({ count: count() }).from(venues);
-  if (venueCount[0].count > 0) {
-    console.log(`Skipping import as ${venueCount[0].count} venues already exist in the database.`);
+  const venueCount = await Venue.countDocuments();
+  if (venueCount > 0) {
+    console.log(`Skipping import as ${venueCount} venues already exist in the database.`);
     return;
   }
 
   try {
-    const csvFilePath = path.resolve('./attached_assets/Uteserveringar.csv');
-    const fileContent = fs.readFileSync(csvFilePath, { encoding: 'utf-8' });
-    
-    // Given the complex nature of the CSV, we'll manually process it ourselves
-    // Directly use our hardcoded venue list from before
-    const venues = Object.keys(venueCoordinates);
-    const records = venues.map(venueName => ({ venueName }));
-    
-    console.log(`Found ${records.length} venues to import`);
-    
-    // Process each record
-    for (let i = 0; i < records.length; i++) {
+    // Import each venue
+    for (const venue of venues) {
       try {
-        const record = records[i];
-        const venueName = record.venueName;
-        
-        console.log(`Processing venue: ${venueName}`);
-        
-        // Get coordinates from our direct lookup map
-        const [latitude, longitude] = venueCoordinates[venueName];
-        console.log(`Using coordinates for ${venueName}: ${latitude}, ${longitude}`);
-        
-        // Use default values for all other fields since we have the coordinates
-        // which is the most important part for displaying venues on the map
-        const sunHours = { start: '12:00', end: '17:00' };
-        
-        // Default venue type by name heuristic
-        let venueType = 'restaurant'; 
-        if (venueName.toLowerCase().includes('bar') || venueName.toLowerCase().includes('pub')) {
-          venueType = 'bar';
-        } else if (venueName.toLowerCase().includes('café') || venueName.toLowerCase().includes('coffee')) {
-          venueType = 'cafe';
-        } else if (venueName.toLowerCase().includes('park')) {
-          venueType = 'park';
-        }
-        
-        // Create venue object with the accurate coordinates
-        const venue: InsertVenue = {
-          name: venueName,
-          venueType,
-          address: `${venueName}, Göteborg`,
-          latitude,
-          longitude,
-          city: 'Göteborg',
-          area: '',
-          sunHoursStart: sunHours.start,
-          sunHoursEnd: sunHours.end,
-          hasHeaters: false,
-          website: '',
-          hasSunnySpot: true, // Assuming all venues in Sweden have sunny spots
-          rating: null,
-          sunnySpotDescription: null,
-          imageUrl: null,
-          placeId: null
-        };
-        
-        await storage.createVenue(venue);
-        console.log(`Imported venue: ${venue.name} (${venue.latitude}, ${venue.longitude})`);
+        console.log('Processing venue:', venue.name);
+        const createdVenue = await Venue.create(venue);
+        console.log(`Imported venue: ${venue.name} with coordinates [${venue.location.coordinates[0]}, ${venue.location.coordinates[1]}]`);
       } catch (error) {
-        console.error(`Error importing venue at index ${i}:`, error);
+        console.error(`Error importing venue ${venue.name}:`, error);
       }
     }
-    
-    console.log('Import completed successfully!');
+
+    console.log('Swedish locations import completed successfully');
   } catch (error) {
-    console.error("Error reading or parsing CSV file:", error);
+    console.error('Error during Swedish locations import:', error);
+    throw error;
   }
 }
 

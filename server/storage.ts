@@ -1,39 +1,34 @@
 import {
-  users, 
-  type User, 
+  User,
   type InsertUser,
-  venues,
-  type Venue,
+  Venue,
   type InsertVenue,
-  weatherData,
-  type WeatherData,
+  WeatherData,
   type InsertWeatherData,
-  sunCalculations,
-  type SunCalculation,
+  SunCalculation,
   type InsertSunCalculation
 } from "@shared/schema";
-import { db } from "./db";
-import { eq, and, lte, gte, sql } from "drizzle-orm";
+import { Types } from 'mongoose';
 
 // Interface for storage operations
 export interface IStorage {
   // User operations
-  getUser(id: number): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
+  getUser(id: string): Promise<User | null>;
+  getUserByUsername(username: string): Promise<User | null>;
   createUser(user: InsertUser): Promise<User>;
-  
+
   // Venue operations
   getVenues(latitude: number, longitude: number, radius?: number, venueType?: string): Promise<Venue[]>;
-  getVenue(id: number): Promise<Venue | undefined>;
+  getVenue(id: string): Promise<Venue | null>;
   createVenue(venue: InsertVenue): Promise<Venue>;
-  updateVenue(id: number, venue: Partial<InsertVenue>): Promise<Venue | undefined>;
-  
+  updateVenue(id: string, venue: Partial<InsertVenue>): Promise<Venue | null>;
+
   // Weather operations
-  getWeatherData(latitude: number, longitude: number): Promise<WeatherData | undefined>;
+  getWeatherData(latitude: number, longitude: number): Promise<WeatherData | null>;
   createWeatherData(data: InsertWeatherData): Promise<WeatherData>;
-  
+
   // Sun calculation operations
-  getSunCalculation(venueId: number, date: Date): Promise<SunCalculation | undefined>;
+  getSunCalculation(venueId: string, date: Date): Promise<SunCalculation | null>;
   createSunCalculation(data: InsertSunCalculation): Promise<SunCalculation>;
 }
 
@@ -44,145 +39,114 @@ export class DatabaseStorage implements IStorage {
     const R = 6371; // Earth radius in kilometers
     const dLat = this.deg2rad(lat2 - lat1);
     const dLon = this.deg2rad(lon2 - lon1);
-    const a = 
-      Math.sin(dLat/2) * Math.sin(dLat/2) +
-      Math.cos(this.deg2rad(lat1)) * Math.cos(this.deg2rad(lat2)) * 
-      Math.sin(dLon/2) * Math.sin(dLon/2); 
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(this.deg2rad(lat1)) * Math.cos(this.deg2rad(lat2)) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     const distance = R * c; // Distance in kilometers
     return distance;
   }
 
   private deg2rad(deg: number): number {
-    return deg * (Math.PI/180);
+    return deg * (Math.PI / 180);
   }
 
   // User methods
-  async getUser(id: number): Promise<User | undefined> {
-    const result = await db.select().from(users).where(eq(users.id, id));
-    return result[0];
+  async getUser(id: string): Promise<User | null> {
+    return await User.findById(id);
   }
 
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    const result = await db.select().from(users).where(eq(users.username, username));
-    return result[0];
+  async getUserByUsername(username: string): Promise<User | null> {
+    return await User.findOne({ username });
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const result = await db.insert(users).values(insertUser).returning();
-    return result[0];
+    return await User.create(insertUser);
   }
 
   // Venue methods
   async getVenues(latitude: number, longitude: number, radius = 5000, venueType?: string): Promise<Venue[]> {
     console.log(`getVenues called with: lat=${latitude}, lon=${longitude}, radius=${radius}, type=${venueType || 'any'}`);
-    
-    // First, get all venues or filter by type
-    let query = db.select().from(venues);
-    
-    if (venueType) {
-      console.log(`Filtering by venue type: ${venueType}`);
-      query = db.select().from(venues).where(eq(venues.venueType, venueType));
-    }
-    
-    const allVenues = await query;
-    console.log(`Retrieved ${allVenues.length} venues from database`);
-    
-    // Then filter venues by calculating distance (cannot be done in SQL query easily)
-    const filteredVenues = allVenues.filter(venue => {
-      // Check for valid coordinates
-      if (venue.latitude === null || venue.longitude === null || 
-          isNaN(venue.latitude) || isNaN(venue.longitude)) {
-        console.log(`Skipping venue ${venue.id}: ${venue.name} due to invalid coordinates`);
-        return false;
+
+    // Build the aggregation pipeline
+    const pipeline: any[] = [
+      {
+        $geoNear: {
+          near: {
+            type: 'Point',
+            coordinates: [longitude, latitude]
+          },
+          distanceField: 'distance',
+          maxDistance: radius,
+          spherical: true
+        }
       }
-      
-      const distance = this.calculateDistance(
-        latitude, longitude, 
-        venue.latitude, venue.longitude
-      );
-      
-      // Convert radius from meters to kilometers
-      const isInRange = distance <= (radius / 1000);
-      console.log(`Venue ${venue.id}: ${venue.name} is ${distance.toFixed(2)}km away, radius is ${(radius/1000).toFixed(2)}km, in range: ${isInRange}`);
-      
-      return isInRange;
-    });
-    
-    console.log(`Returning ${filteredVenues.length} venues after distance filtering`);
-    return filteredVenues;
+    ];
+
+    // Add venue type filter if specified
+    if (venueType) {
+      pipeline.push({ $match: { venueType } });
+    }
+
+    console.log('MongoDB pipeline:', JSON.stringify(pipeline, null, 2));
+
+    // Execute the aggregation
+    const venues = await Venue.aggregate(pipeline);
+    console.log(`Retrieved ${venues.length} venues from database`);
+
+    // Transform the results to match the expected format
+    const transformedVenues = venues.map(venue => ({
+      ...venue,
+      id: venue._id.toString(),
+      latitude: venue.location.coordinates[1],
+      longitude: venue.location.coordinates[0]
+    }));
+
+    return transformedVenues;
   }
 
-  async getVenue(id: number): Promise<Venue | undefined> {
-    const result = await db.select().from(venues).where(eq(venues.id, id));
-    return result[0];
+  async getVenue(id: string): Promise<Venue | null> {
+    return await Venue.findById(id);
   }
 
   async createVenue(venueData: InsertVenue): Promise<Venue> {
-    const result = await db.insert(venues).values(venueData).returning();
-    return result[0];
+    return await Venue.create(venueData);
   }
 
-  async updateVenue(id: number, venueData: Partial<InsertVenue>): Promise<Venue | undefined> {
-    const result = await db
-      .update(venues)
-      .set(venueData)
-      .where(eq(venues.id, id))
-      .returning();
-    return result[0];
+  async updateVenue(id: string, venueData: Partial<InsertVenue>): Promise<Venue | null> {
+    return await Venue.findByIdAndUpdate(id, venueData, { new: true });
   }
 
   // Weather methods
-  async getWeatherData(latitude: number, longitude: number): Promise<WeatherData | undefined> {
+  async getWeatherData(latitude: number, longitude: number): Promise<WeatherData | null> {
     // Round to 2 decimal places to find nearby data
     const latRounded = Math.round(latitude * 100) / 100;
     const lonRounded = Math.round(longitude * 100) / 100;
-    
+
     // Find weather data for the rounded coordinates
-    const result = await db
-      .select()
-      .from(weatherData)
-      .where(
-        and(
-          gte(weatherData.latitude, latRounded - 0.01),
-          lte(weatherData.latitude, latRounded + 0.01),
-          gte(weatherData.longitude, lonRounded - 0.01),
-          lte(weatherData.longitude, lonRounded + 0.01)
-        )
-      )
-      .orderBy(sql`${weatherData.timestamp} DESC`)
-      .limit(1);
-    
-    return result[0];
+    return await WeatherData.findOne({
+      latitude: { $gte: latRounded - 0.01, $lte: latRounded + 0.01 },
+      longitude: { $gte: lonRounded - 0.01, $lte: lonRounded + 0.01 }
+    }).sort({ timestamp: -1 });
   }
 
   async createWeatherData(data: InsertWeatherData): Promise<WeatherData> {
-    const result = await db.insert(weatherData).values(data).returning();
-    return result[0];
+    return await WeatherData.create(data);
   }
 
   // Sun calculation methods
-  async getSunCalculation(venueId: number, date: Date): Promise<SunCalculation | undefined> {
+  async getSunCalculation(venueId: string, date: Date): Promise<SunCalculation | null> {
     // Find by venue ID and date
     const dateStr = date.toISOString().split('T')[0];
-    const result = await db
-      .select()
-      .from(sunCalculations)
-      .where(
-        and(
-          eq(sunCalculations.venueId, venueId),
-          sql`DATE(${sunCalculations.date}) = ${dateStr}`
-        )
-      )
-      .orderBy(sql`${sunCalculations.createdAt} DESC`)
-      .limit(1);
-    
-    return result[0];
+    return await SunCalculation.findOne({
+      venueId: new Types.ObjectId(venueId),
+      date: dateStr
+    }).sort({ createdAt: -1 });
   }
 
   async createSunCalculation(data: InsertSunCalculation): Promise<SunCalculation> {
-    const result = await db.insert(sunCalculations).values(data).returning();
-    return result[0];
+    return await SunCalculation.create(data);
   }
 }
 
