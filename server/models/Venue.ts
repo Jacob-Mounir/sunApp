@@ -18,7 +18,16 @@ const venueSchema = new Schema({
 	placeId: { type: String },
 	hasSunnySpot: { type: Boolean, default: true },
 	sunnySpotDescription: { type: String },
-	imageUrl: { type: String },
+	imageUrl: {
+		type: String,
+		default: null,
+		get: function (url: string | null) {
+			return url || null;
+		},
+		set: function (url: string | null) {
+			return url || null;
+		}
+	},
 	city: { type: String },
 	area: { type: String },
 	sunHoursStart: { type: String },
@@ -44,7 +53,9 @@ const venueSchema = new Schema({
 	lastUpdated: { type: Date, default: Date.now },
 	createdAt: { type: Date, default: Date.now }
 }, {
-	timestamps: true // This will automatically manage createdAt and updatedAt
+	timestamps: true, // This will automatically manage createdAt and updatedAt
+	toJSON: { getters: true }, // Enable getters when converting to JSON
+	toObject: { getters: true } // Enable getters when converting to plain objects
 });
 
 // Create geospatial index for location-based queries

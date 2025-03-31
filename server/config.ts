@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { fromZodError } from 'zod-validation-error';
 import dotenv from 'dotenv';
+import path from 'path';
 
 // Load environment variables from .env file
 dotenv.config();
@@ -39,6 +40,54 @@ const envSchema = z.object({
 
 	// Logging
 	LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
+
+	// Backup configuration
+	ENABLE_SCHEDULED_BACKUPS: z.string()
+		.transform((val) => val.toLowerCase() === 'true')
+		.pipe(z.boolean())
+		.default(false),
+	BACKUP_INTERVAL_HOURS: z.string()
+		.transform(Number)
+		.pipe(z.number().positive())
+		.default(24),
+	MAX_BACKUPS: z.string()
+		.transform(Number)
+		.pipe(z.number().positive())
+		.default(5),
+	BACKUP_DIR: z.string().default(path.join(process.cwd(), 'backups')),
+
+	// Google Maps API
+	GOOGLE_MAPS_API_KEY: z.string().optional(),
+
+	// JWT configuration
+	JWT_SECRET: z.string().min(32).default(() => {
+		if (process.env.NODE_ENV === 'production') {
+			throw new Error('JWT_SECRET must be set in production');
+		}
+		return 'your-secret-key';
+	}),
+	JWT_EXPIRES_IN: z.string().default('24h'),
+
+	// Rate limiting
+	RATE_LIMIT_WINDOW: z.string()
+		.transform(Number)
+		.pipe(z.number().positive())
+		.default(15),
+	RATE_LIMIT_MAX: z.string()
+		.transform(Number)
+		.pipe(z.number().positive())
+		.default(100),
+
+	// Cache configuration
+	CACHE_TTL: z.string()
+		.transform(Number)
+		.pipe(z.number().positive())
+		.default(3600), // 1 hour in seconds
+
+	// Cloudinary Configuration
+	CLOUDINARY_CLOUD_NAME: z.string(),
+	CLOUDINARY_API_KEY: z.string(),
+	CLOUDINARY_API_SECRET: z.string(),
 });
 
 // Function to validate and load environment variables
@@ -69,6 +118,13 @@ export const dbConfig = {
 	uri: config.MONGODB_URI,
 };
 
+// Cloudinary configuration
+const cloudinaryConfig = {
+	cloudName: process.env.CLOUDINARY_CLOUD_NAME,
+	apiKey: process.env.CLOUDINARY_API_KEY,
+	apiSecret: process.env.CLOUDINARY_API_SECRET,
+};
+
 // Server configuration
 export const serverConfig = {
 	port: config.PORT,
@@ -76,6 +132,7 @@ export const serverConfig = {
 		origin: config.CORS_ORIGIN,
 		credentials: true,
 	},
+	cloudinary: cloudinaryConfig,
 };
 
 // Weather API configuration

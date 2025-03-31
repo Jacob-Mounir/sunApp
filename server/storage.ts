@@ -9,6 +9,7 @@ import {
   type InsertSunCalculation
 } from "@shared/schema";
 import { Types } from 'mongoose';
+import { MongoErrorHandler } from './utils/mongoErrorHandler';
 
 // Interface for storage operations
 export interface IStorage {
@@ -54,99 +55,220 @@ export class DatabaseStorage implements IStorage {
 
   // User methods
   async getUser(id: string): Promise<User | null> {
-    return await User.findById(id);
+    try {
+      return await User.findById(id);
+    } catch (error) {
+      const { message, code } = MongoErrorHandler.handle(error);
+      throw new Error(`Failed to get user: ${message} (${code})`);
+    }
   }
 
   async getUserByUsername(username: string): Promise<User | null> {
-    return await User.findOne({ username });
+    try {
+      return await User.findOne({ username });
+    } catch (error) {
+      const { message, code } = MongoErrorHandler.handle(error);
+      throw new Error(`Failed to get user by username: ${message} (${code})`);
+    }
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    return await User.create(insertUser);
+    try {
+      const user = new User(insertUser);
+      await user.save();
+      return user;
+    } catch (error) {
+      const { message, code } = MongoErrorHandler.handle(error);
+      throw new Error(`Failed to create user: ${message} (${code})`);
+    }
   }
 
   // Venue methods
   async getVenues(latitude: number, longitude: number, radius = 5000, venueType?: string): Promise<Venue[]> {
-    console.log(`getVenues called with: lat=${latitude}, lon=${longitude}, radius=${radius}, type=${venueType || 'any'}`);
-
-    // Build the aggregation pipeline
-    const pipeline: any[] = [
-      {
-        $geoNear: {
-          near: {
-            type: 'Point',
-            coordinates: [longitude, latitude]
-          },
-          distanceField: 'distance',
-          maxDistance: radius,
-          spherical: true
+    try {
+      // Build the aggregation pipeline
+      const pipeline: any[] = [
+        {
+          $geoNear: {
+            near: {
+              type: 'Point',
+              coordinates: [longitude, latitude]
+            },
+            distanceField: 'distance',
+            maxDistance: radius,
+            spherical: true
+          }
+        },
+        {
+          $project: {
+            _id: 1,
+            name: 1,
+            venueType: 1,
+            address: 1,
+            location: 1,
+            rating: 1,
+            hasSunnySpot: 1,
+            sunnySpotDescription: 1,
+            imageUrl: 1,
+            city: 1,
+            area: 1,
+            sunHoursStart: 1,
+            sunHoursEnd: 1,
+            hasHeaters: 1,
+            distance: 1
+          }
         }
+      ];
+
+      // Add venue type filter if specified
+      if (venueType) {
+        pipeline.push({ $match: { venueType } });
       }
-    ];
 
-    // Add venue type filter if specified
-    if (venueType) {
-      pipeline.push({ $match: { venueType } });
+      // Add sorting by distance
+      pipeline.push({ $sort: { distance: 1 } });
+
+      // Execute the aggregation
+      const venues = await Venue.aggregate(pipeline);
+
+      // Transform the results
+      return venues.map(venue => ({
+        ...venue,
+        id: venue._id.toString(),
+        latitude: venue.location.coordinates[1],
+        longitude: venue.location.coordinates[0]
+      }));
+    } catch (error) {
+      const { message, code } = MongoErrorHandler.handle(error);
+      throw new Error(`Failed to get venues: ${message} (${code})`);
     }
-
-    console.log('MongoDB pipeline:', JSON.stringify(pipeline, null, 2));
-
-    // Execute the aggregation
-    const venues = await Venue.aggregate(pipeline);
-    console.log(`Retrieved ${venues.length} venues from database`);
-
-    // Transform the results to match the expected format
-    const transformedVenues = venues.map(venue => ({
-      ...venue,
-      id: venue._id.toString(),
-      latitude: venue.location.coordinates[1],
-      longitude: venue.location.coordinates[0]
-    }));
-
-    return transformedVenues;
   }
 
   async getVenue(id: string): Promise<Venue | null> {
-    return await Venue.findById(id);
+    try {
+      return await Venue.findById(new Types.ObjectId(id));
+    } catch (error) {
+      const { message, code } = MongoErrorHandler.handle(error);
+      throw new Error(`Failed to get venue: ${message} (${code})`);
+    }
   }
 
   async createVenue(venueData: InsertVenue): Promise<Venue> {
-    return await Venue.create(venueData);
+    try {
+      const venue = new Venue(venueData);
+      await venue.save();
+      return venue;
+    } catch (error) {
+      const { message, code } = MongoErrorHandler.handle(error);
+      throw new Error(`Failed to create venue: ${message} (${code})`);
+    }
   }
 
-  async updateVenue(id: string, venueData: Partial<InsertVenue>): Promise<Venue | null> {
-    return await Venue.findByIdAndUpdate(id, venueData, { new: true });
+  async updateVenue(id: string, updateData: Partial<InsertVenue>): Promise<Venue> {
+    try {
+      console.log('Raw update data received:', JSON.stringify(updateData, null, 2));
+
+      // Find the venue first
+      const venue = await Venue.findById(id);
+
+      if (!venue) {
+        throw new Error('Venue not found');
+      }
+
+      console.log('Before update - venue imageUrl:', venue.imageUrl);
+      console.log('Update data imageUrl:', updateData.imageUrl);
+
+      // IMPORTANT: Deal with undefined vs null for imageUrl
+      // If imageUrl is explicitly set to null or a string in updateData, use that value
+      // If it's undefined, don't modify it
+      if ('imageUrl' in updateData) {
+        venue.imageUrl = updateData.imageUrl || null;
+      }
+
+      // Update all other fields using spread
+      // BUT exclude imageUrl as we handled it separately
+      const { imageUrl, ...otherFields } = updateData;
+      Object.assign(venue, {
+        ...otherFields,
+        lastUpdated: new Date()
+      });
+
+      console.log('Before save - imageUrl:', venue.imageUrl);
+
+      // Save the venue to trigger setters
+      await venue.save();
+      console.log('After save - venue imageUrl:', venue.imageUrl);
+
+      // Need to get a fresh copy after save to ensure everything is reflected correctly
+      const updatedVenue = await Venue.findById(id);
+      if (!updatedVenue) {
+        throw new Error('Venue not found after update');
+      }
+
+      // Manual transformation to ensure all fields are included
+      const result = {
+        ...updatedVenue.toObject({ getters: true, virtuals: true }),
+        id: updatedVenue._id.toString(),
+        latitude: updatedVenue.location?.coordinates[1],
+        longitude: updatedVenue.location?.coordinates[0],
+        // Explicitly include imageUrl from the venue document
+        imageUrl: updatedVenue.imageUrl
+      };
+
+      console.log('Final result:', JSON.stringify(result, null, 2));
+      return result;
+    } catch (error) {
+      console.error('Error updating venue:', error);
+      throw new MongoErrorHandler(error);
+    }
   }
 
   // Weather methods
   async getWeatherData(latitude: number, longitude: number): Promise<WeatherData | null> {
-    // Round to 2 decimal places to find nearby data
-    const latRounded = Math.round(latitude * 100) / 100;
-    const lonRounded = Math.round(longitude * 100) / 100;
+    try {
+      const latRounded = Math.round(latitude * 100) / 100;
+      const lonRounded = Math.round(longitude * 100) / 100;
 
-    // Find weather data for the rounded coordinates
-    return await WeatherData.findOne({
-      latitude: { $gte: latRounded - 0.01, $lte: latRounded + 0.01 },
-      longitude: { $gte: lonRounded - 0.01, $lte: lonRounded + 0.01 }
-    }).sort({ timestamp: -1 });
+      return await WeatherData.findOne({
+        latitude: { $gte: latRounded - 0.01, $lte: latRounded + 0.01 },
+        longitude: { $gte: lonRounded - 0.01, $lte: lonRounded + 0.01 }
+      }).sort({ timestamp: -1 });
+    } catch (error) {
+      const { message, code } = MongoErrorHandler.handle(error);
+      throw new Error(`Failed to get weather data: ${message} (${code})`);
+    }
   }
 
   async createWeatherData(data: InsertWeatherData): Promise<WeatherData> {
-    return await WeatherData.create(data);
+    try {
+      return await WeatherData.create(data);
+    } catch (error) {
+      const { message, code } = MongoErrorHandler.handle(error);
+      throw new Error(`Failed to create weather data: ${message} (${code})`);
+    }
   }
 
   // Sun calculation methods
   async getSunCalculation(venueId: string, date: Date): Promise<SunCalculation | null> {
-    // Find by venue ID and date
-    const dateStr = date.toISOString().split('T')[0];
-    return await SunCalculation.findOne({
-      venueId: new Types.ObjectId(venueId),
-      date: dateStr
-    }).sort({ createdAt: -1 });
+    try {
+      const dateStr = date.toISOString().split('T')[0];
+      return await SunCalculation.findOne({
+        venueId: new Types.ObjectId(venueId),
+        date: dateStr
+      }).sort({ createdAt: -1 });
+    } catch (error) {
+      const { message, code } = MongoErrorHandler.handle(error);
+      throw new Error(`Failed to get sun calculation: ${message} (${code})`);
+    }
   }
 
   async createSunCalculation(data: InsertSunCalculation): Promise<SunCalculation> {
-    return await SunCalculation.create(data);
+    try {
+      return await SunCalculation.create(data);
+    } catch (error) {
+      const { message, code } = MongoErrorHandler.handle(error);
+      throw new Error(`Failed to create sun calculation: ${message} (${code})`);
+    }
   }
 }
 

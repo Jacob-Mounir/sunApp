@@ -373,3 +373,4 @@
 {"level":"info","message":"Swedish locations import complete or skipped","service":"sunspotter-api","timestamp":"2025-03-28T10:39:41.502Z"}
 {"ip":"127.0.0.1","level":"info","message":"Incoming request","method":"GET","query":{"latitude":"57.69422","longitude":"11.94474","radius":"10000"},"service":"sunspotter-api","timestamp":"2025-03-28T10:39:45.235Z","url":"/api/venues?latitude=57.69422&longitude=11.94474&radius=10000","userAgent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36"}
 {"duration":"16ms","level":"info","message":"Request completed","method":"GET","responseSize":"5350","service":"sunspotter-api","statusCode":200,"timestamp":"2025-03-28T10:39:45.251Z","url":"/api/venues?latitude=57.69422&longitude=11.94474&radius=10000"}
+{"level":"info","message":"Connected to MongoDB","service":"sunspotter-api","timestamp":"2025-03-28T15:17:28.043Z"}

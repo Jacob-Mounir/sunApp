@@ -12,56 +12,55 @@ import { apiLimiter } from "./middleware/rateLimit";
 import { log } from "./utils/logger";
 import { serverConfig, dbConfig } from "./config";
 import mongoose from 'mongoose';
+import { config } from './config';
+import { Scheduler } from './utils/scheduler';
 
 const app = express();
 
-// Apply CORS middleware before other middleware
+// Apply middleware
 app.use(corsMiddleware);
-
-// Apply request logging
-app.use(requestLogger);
-
-// Apply rate limiting to all routes
-app.use(apiLimiter);
-
-// Other middleware
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(requestLogger);
+app.use('/api', apiLimiter);
+
+// Serve static files from public directory
 app.use('/images', express.static(path.join(process.cwd(), 'public/images')));
 
-(async () => {
+// Error handling middleware
+app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+  const status = err.status || err.statusCode || 500;
+  const message = err.message || "Internal Server Error";
+
+  log.error('Error handling request', {
+    error: err,
+    status,
+    message,
+    stack: err.stack,
+  });
+
+  res.status(status).json({ message });
+});
+
+async function startServer() {
   try {
     // Connect to MongoDB
-    await mongoose.connect(dbConfig.uri);
+    await mongoose.connect(dbConfig.uri, {
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
+    });
     log.info('Connected to MongoDB');
 
+    // Register routes after MongoDB connection
     const server = await registerRoutes(app);
 
-    app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-      const status = err.status || err.statusCode || 500;
-      const message = err.message || "Internal Server Error";
-
-      log.error('Error handling request', {
-        error: err,
-        status,
-        message,
-        stack: err.stack,
-      });
-
-      res.status(status).json({ message });
-      throw err;
-    });
-
-    // importantly only setup vite in development and after
-    // setting up all the other routes so the catch-all route
-    // doesn't interfere with the other routes
+    // Setup Vite or serve static files
     if (app.get("env") === "development") {
       await setupVite(app, server);
     } else {
       serveStatic(app);
     }
 
-    // Use port from config
+    // Start server
     const port = serverConfig.port;
     server.listen({
       port,
@@ -74,9 +73,49 @@ app.use('/images', express.static(path.join(process.cwd(), 'public/images')));
       importSwedishLocations()
         .then(() => log.info('Swedish locations import complete or skipped'))
         .catch(err => log.error('Error importing Swedish locations', { error: err }));
+
+      // Start scheduled backups
+      if (config.ENABLE_SCHEDULED_BACKUPS) {
+        Scheduler.startScheduledBackups(24); // Daily backups
+      }
     });
+
+    // Handle graceful shutdown
+    process.on('SIGTERM', async () => {
+      log.info('SIGTERM received. Shutting down gracefully...');
+
+      // Stop scheduled backups
+      Scheduler.stopScheduledBackups();
+
+      // Close database connection
+      await mongoose.connection.close();
+
+      // Close server
+      server.close(() => {
+        log.info('Server closed');
+        process.exit(0);
+      });
+    });
+
+    // Handle MongoDB connection errors
+    mongoose.connection.on('error', (err) => {
+      log.error('MongoDB connection error:', err);
+    });
+
+    mongoose.connection.on('disconnected', () => {
+      log.warn('MongoDB disconnected. Attempting to reconnect...');
+      setTimeout(() => {
+        mongoose.connect(dbConfig.uri).catch(err => {
+          log.error('Failed to reconnect to MongoDB:', err);
+        });
+      }, 5000);
+    });
+
   } catch (error) {
-    log.error('Failed to start server', { error });
+    log.error('Failed to start server:', error);
     process.exit(1);
   }
-})();
+}
+
+// Start the server
+startServer();

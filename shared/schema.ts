@@ -113,7 +113,33 @@ export const insertVenueSchema = z.object({
     type: z.literal('Point'),
     coordinates: z.tuple([z.number(), z.number()]) // [longitude, latitude]
   }),
-  // ... add other fields as needed
+  imageUrl: z.string().nullable().optional(),
+  hasSunnySpot: z.boolean().default(true),
+  hasHeaters: z.boolean().default(false),
+  sunnySpotDescription: z.string().nullable().optional(),
+  city: z.string().nullable().optional(),
+  area: z.string().nullable().optional(),
+  sunHoursStart: z.string().nullable().optional(),
+  sunHoursEnd: z.string().nullable().optional(),
+  website: z.string().nullable().optional(),
+  rating: z.number().optional(),
+  placeId: z.string().optional(),
+  hours: z.object({
+    monday: z.string().optional(),
+    tuesday: z.string().optional(),
+    wednesday: z.string().optional(),
+    thursday: z.string().optional(),
+    friday: z.string().optional(),
+    saturday: z.string().optional(),
+    sunday: z.string().optional()
+  }).optional(),
+  contact: z.object({
+    phoneNumber: z.string().optional(),
+    email: z.string().optional(),
+    instagramUrl: z.string().optional(),
+    facebookUrl: z.string().optional()
+  }).optional(),
+  isVerified: z.boolean().default(false)
 });
 
 export const insertReviewSchema = z.object({

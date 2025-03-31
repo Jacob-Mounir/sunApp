@@ -1,6 +1,7 @@
 // Types for venue data
 export interface Venue {
-  id: number;
+  id: string;
+  _id?: string; // MongoDB ID
   name: string;
   venueType: string;
   address: string;
@@ -9,16 +10,17 @@ export interface Venue {
   rating?: number;
   placeId?: string;
   hasSunnySpot: boolean;
-  sunnySpotDescription?: string;
-  imageUrl?: string;
-  city?: string;
-  area?: string;
-  sunHoursStart?: string;
-  sunHoursEnd?: string;
+  sunnySpotDescription?: string | null;
+  imageUrl?: string | null;
+  city?: string | null;
+  area?: string | null;
+  sunHoursStart?: string | null;
+  sunHoursEnd?: string | null;
   hasHeaters?: boolean;
-  website?: string;
+  website?: string | null;
   distance?: number; // Calculated on client side
-  
+  location?: { type: string; coordinates: number[] }; // MongoDB GeoJSON format
+
   // Operating hours
   mondayHours?: string;
   tuesdayHours?: string;
@@ -27,7 +29,7 @@ export interface Venue {
   fridayHours?: string;
   saturdayHours?: string;
   sundayHours?: string;
-  
+
   // Contact information
   phoneNumber?: string;
   email?: string;

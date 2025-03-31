@@ -1,5 +1,6 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Venue, VenueSearch } from '@/types';
+import { apiRequest } from '@/lib/queryClient';
 
 // Function to calculate distances for venues
 function calculateDistances(venues: Venue[], userLat: number, userLng: number): Venue[] {
@@ -91,12 +92,15 @@ export function useVenues(params: VenueSearch) {
 }
 
 // Hook to fetch a specific venue
-export function useVenue(id: number) {
+export function useVenue(id: string) {
   return useQuery<Venue>({
     queryKey: ['/api/venues', id],
     queryFn: async () => {
       const response = await fetch(`/api/venues/${id}`);
       if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error('Venue not found');
+        }
         if (response.status === 429) {
           throw new Error('Rate limit exceeded');
         }
@@ -111,6 +115,9 @@ export function useVenue(id: number) {
       if (error.message === 'Rate limit exceeded') {
         return failureCount < 3;
       }
+      if (error.message === 'Venue not found') {
+        return false; // Don't retry if venue doesn't exist
+      }
       return failureCount < 2;
     },
     retryDelay: (attemptIndex) => {
@@ -120,5 +127,23 @@ export function useVenue(id: number) {
     },
     // Use stale data while revalidating
     placeholderData: (previousData) => previousData
+  });
+}
+
+// Hook to update a venue
+export function useUpdateVenue() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (venue: Partial<Venue>) =>
+      apiRequest(`/api/venues/${venue._id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(venue),
+      }),
+    onSuccess: (_, variables) => {
+      // Invalidate both the venues list and the specific venue
+      queryClient.invalidateQueries({ queryKey: ['/api/venues'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/venues', variables._id] });
+    },
   });
 }

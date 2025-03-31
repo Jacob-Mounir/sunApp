@@ -8,6 +8,9 @@ import fetch from "node-fetch";
 import { SunCalculationService } from "./sunCalculationService";
 import { weatherConfig } from "./config";
 import { weatherLimiter, searchLimiter, venueDetailsLimiter } from "./middleware/rateLimit";
+import { Types } from 'mongoose';
+import uploadRouter from './routes/upload';
+import { Image } from './models/Image';
 
 // Cache for sun position calculations (in-memory for development)
 const sunPositionCache = new Map<string, { position: any, timestamp: number }>();
@@ -28,6 +31,9 @@ console.log("Environment variables check:", {
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Register the upload router first
+  app.use('/api', uploadRouter);
+
   // API routes
   const apiRouter = app.route("/api");
 
@@ -71,8 +77,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get specific venue
   app.get("/api/venues/:id", venueDetailsLimiter, async (req: Request, res: Response) => {
     try {
-      const venueId = parseInt(req.params.id);
-      if (isNaN(venueId)) {
+      const venueId = req.params.id;
+      if (!venueId || !Types.ObjectId.isValid(venueId)) {
         return res.status(400).json({ error: "Invalid venue ID" });
       }
 
@@ -81,8 +87,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Venue not found" });
       }
 
-      res.json(venue);
+      // Transform the venue data to match the frontend expected format
+      const transformedVenue = {
+        ...venue.toObject(),
+        id: venue._id.toString(),
+        latitude: venue.location.coordinates[1],
+        longitude: venue.location.coordinates[0]
+      };
+
+      res.json(transformedVenue);
     } catch (error) {
+      console.error("Error fetching venue:", error);
       res.status(500).json({ error: "Failed to get venue" });
     }
   });
@@ -106,28 +121,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Update venue
   app.patch("/api/venues/:id", async (req: Request, res: Response) => {
     try {
-      const venueId = parseInt(req.params.id);
-      if (isNaN(venueId)) {
+      const venueId = req.params.id;
+      if (!venueId || !Types.ObjectId.isValid(venueId)) {
         return res.status(400).json({ error: "Invalid venue ID" });
       }
 
-      const venueData = insertVenueSchema.partial().parse({
-        ...req.body,
-        imageUrl: req.body.imageUrl || "https://image.piccola-gondola.jpg" // Default elegent indoor image
-      });
+      console.log('Request headers:', req.headers);
+      console.log('Raw request body as string:', JSON.stringify(req.body));
+      console.log('Does req.body include imageUrl?', 'imageUrl' in req.body);
+      console.log('Updating venue with data:', req.body);
+
+      // Parse and validate the update data
+      const venueData = insertVenueSchema.partial().parse(req.body);
+
+      console.log('After zod parsing, data:', venueData);
+      console.log('After zod parsing, imageUrl included?', 'imageUrl' in venueData);
+
+      // Update the venue
       const venue = await storage.updateVenue(venueId, venueData);
 
       if (!venue) {
+        console.log('Venue not found:', venueId);
         return res.status(404).json({ error: "Venue not found" });
       }
 
+      console.log('Venue updated successfully:', venue);
+
+      // The venue is already transformed in the storage layer
       res.json(venue);
     } catch (error) {
+      console.error("Error updating venue:", error);
+
       if (error instanceof ZodError) {
         const validationError = fromZodError(error);
+        console.error("Validation error:", validationError.message);
         res.status(400).json({ error: validationError.message });
       } else {
-        res.status(500).json({ error: "Failed to update venue" });
+        const errorMessage = error instanceof Error ? error.message : "Failed to update venue";
+        res.status(500).json({ error: errorMessage });
       }
     }
   });
@@ -243,12 +274,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get sunshine data for a specific venue
   app.get("/api/venues/:id/sunshine", weatherLimiter, async (req: Request, res: Response) => {
     try {
-      const venueId = parseInt(req.params.id);
-      const date = req.query.date ? new Date(req.query.date as string) : new Date();
-
-      if (isNaN(venueId)) {
+      const venueId = req.params.id;
+      if (!venueId || !Types.ObjectId.isValid(venueId)) {
         return res.status(400).json({ error: "Invalid venue ID" });
       }
+
+      const date = req.query.date ? new Date(req.query.date as string) : new Date();
 
       if (isNaN(date.getTime())) {
         return res.status(400).json({ error: "Invalid date format" });
@@ -266,7 +297,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Create a cache key for current real-time data
       const roundedDate = new Date(Math.round(date.getTime() / 60000) * 60000);
-      const cacheKey = `${venue.latitude},${venue.longitude},${roundedDate.toISOString()}`;
+      const cacheKey = `${venue.location.coordinates[1]},${venue.location.coordinates[0]},${roundedDate.toISOString()}`;
 
       // Get current sun position from cache or calculate
       let currentSunPosition;
@@ -274,7 +305,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (cached && (Date.now() - cached.timestamp) < CACHE_DURATION) {
         currentSunPosition = cached.position;
       } else {
-        currentSunPosition = SunCalculationService.getSunPosition(venue.latitude, venue.longitude, new Date(), false);
+        currentSunPosition = SunCalculationService.getSunPosition(
+          venue.location.coordinates[1], // latitude
+          venue.location.coordinates[0], // longitude
+          new Date(),
+          false
+        );
         sunPositionCache.set(cacheKey, {
           position: currentSunPosition,
           timestamp: Date.now()
@@ -283,11 +319,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // If we don't have sun calculation data for this date, calculate and store it
       if (!sunCalculation) {
-        // Calculate new sun data for the venue
-        const { latitude, longitude } = venue;
-
         // Get sun times for the day
-        const sunTimes = SunCalculationService.getSunTimes(latitude, longitude, date);
+        const sunTimes = SunCalculationService.getSunTimes(
+          venue.location.coordinates[1], // latitude
+          venue.location.coordinates[0], // longitude
+          date
+        );
 
         // Format date for database (just the date part, no time)
         const dateStr = date.toISOString().split('T')[0];
@@ -321,13 +358,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get multi-day sunshine forecast for a venue
   app.get("/api/venues/:id/sunshine/forecast", async (req: Request, res: Response) => {
     try {
-      const venueId = parseInt(req.params.id);
-      const days = parseInt(req.query.days as string) || 7; // Default to 7-day forecast
-      const startDate = req.query.startDate ? new Date(req.query.startDate as string) : new Date();
-
-      if (isNaN(venueId)) {
+      const venueId = req.params.id;
+      if (!venueId || !Types.ObjectId.isValid(venueId)) {
         return res.status(400).json({ error: "Invalid venue ID" });
       }
+
+      const days = parseInt(req.query.days as string) || 7; // Default to 7-day forecast
+      const startDate = req.query.startDate ? new Date(req.query.startDate as string) : new Date();
 
       if (isNaN(startDate.getTime())) {
         return res.status(400).json({ error: "Invalid start date format" });
@@ -343,7 +380,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Venue not found" });
       }
 
-      const { latitude, longitude } = venue;
+      const latitude = venue.location.coordinates[1];
+      const longitude = venue.location.coordinates[0];
 
       // Example building data (simplified approximation)
       // In a real app, this would come from a buildings database or API
