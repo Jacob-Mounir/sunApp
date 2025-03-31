@@ -8,7 +8,12 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+// Check if we're building for GitHub Pages
+const isGitHubPages = process.env.GITHUB_PAGES === 'true';
+
 export default defineConfig({
+  // Set the base path for GitHub Pages
+  base: isGitHubPages ? '/sunApp/' : '/',
   plugins: [
     react(),
     runtimeErrorOverlay(),

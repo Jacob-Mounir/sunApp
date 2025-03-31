@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { WeatherData } from '@/types';
+import config from '../config';
 
 // Round to 5 decimal places for API requests (~1.1m precision)
 const roundForRequest = (coord: number) => Math.round(coord * 100000) / 100000;
@@ -62,64 +63,42 @@ const getGridCells = (bounds: MapBounds): GridCell[] => {
   return cells;
 };
 
-export function useWeather(
-  latitude: number,
-  longitude: number,
-  mapBounds?: MapBounds
-) {
-  // If we have map bounds, find the nearest grid cell center
-  const cacheKey = mapBounds
-    ? {
-      cell: {
-        lat: roundToGrid((mapBounds.north + mapBounds.south) / 2, mapBounds.zoom),
-        lon: roundToGrid((mapBounds.east + mapBounds.west) / 2, mapBounds.zoom)
-      },
-      zoom: mapBounds.zoom,
-      gridSize: getGridSize(mapBounds.zoom)
-    }
-    : {
-      lat: roundForRequest(latitude),
-      lon: roundForRequest(longitude)
-    };
+export const useWeather = (latitude: number, longitude: number) => {
+  const roundedLat = Math.round(latitude * 10000) / 10000;
+  const roundedLon = Math.round(longitude * 10000) / 10000;
 
-  // Use precise coordinates for the actual API request
-  const requestLat = roundForRequest(latitude);
-  const requestLon = roundForRequest(longitude);
-
-  return useQuery<WeatherData>({
-    queryKey: ['/api/weather', cacheKey],
+  return useQuery({
+    queryKey: ['weather', roundedLat, roundedLon],
     queryFn: async () => {
-      const response = await fetch(`/api/weather?latitude=${requestLat}&longitude=${requestLon}`);
-      if (!response.ok) {
-        if (response.status === 429) {
-          throw new Error('Weather API rate limit exceeded');
+      try {
+        const requestLat = latitude;
+        const requestLon = longitude;
+        const response = await fetch(`${config.apiBaseUrl}/weather?latitude=${requestLat}&longitude=${requestLon}`);
+
+        if (!response.ok) {
+          if (response.status === 429) {
+            throw new Error('Weather API rate limit exceeded, please try again later');
+          }
+          throw new Error('Failed to fetch weather data');
         }
-        throw new Error('Failed to fetch weather data');
+
+        const data = await response.json();
+        return processWeatherData(data);
+      } catch (error) {
+        console.error('Error fetching weather data:', error);
+        throw error;
       }
-      return response.json();
     },
-    enabled: !!(latitude && longitude),
-    staleTime: 60 * 60 * 1000, // 1 hour
-    gcTime: 3 * 60 * 60 * 1000, // 3 hours
+    enabled: !!(latitude && longitude && latitude !== 0 && longitude !== 0),
+    staleTime: 10 * 60 * 1000, // 10 minutes
     retry: (failureCount, error) => {
-      if (error.message === 'Weather API rate limit exceeded') {
-        return failureCount < 5;
+      if (error.message.includes('rate limit')) {
+        return failureCount < 2;
       }
-      return failureCount < 2;
+      return failureCount < 3;
     },
-    retryDelay: (attemptIndex) => {
-      const baseDelay = 2000 * Math.pow(3, attemptIndex);
-      const jitter = Math.random() * 2000;
-      return Math.min(baseDelay + jitter, 60000);
-    },
-    refetchInterval: (data) => {
-      if (!data) return false;
-      const jitter = Math.random() * 300000; // Up to 5 minutes
-      return 60 * 60 * 1000 + jitter; // Base interval of 1 hour plus jitter
-    },
-    placeholderData: (previousData) => previousData
   });
-}
+};
 
 // Enhanced weather condition checking
 export function isSunnyWeather(weatherCondition?: string, icon?: string): boolean {

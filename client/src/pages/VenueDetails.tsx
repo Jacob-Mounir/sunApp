@@ -26,6 +26,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { apiRequest } from '@/lib/queryClient';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { VenueImageUpload } from '@/components/VenueImageUpload';
+import config from '../config';
 
 export default function VenueDetails() {
   const [, navigate] = useLocation();
@@ -73,7 +74,7 @@ export default function VenueDetails() {
       // Check if the imageUrl is in the JSON string
       console.log('Does JSON include imageUrl?', jsonString.includes('imageUrl'));
 
-      const response = await fetch(`/api/venues/${venue._id}`, {
+      const response = await fetch(`${config.apiBaseUrl}/venues/${venue._id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -172,7 +173,7 @@ export default function VenueDetails() {
       const formData = new FormData();
       formData.append('image', file);
 
-      const uploadResponse = await fetch('/api/upload', {
+      const uploadResponse = await fetch(`${config.apiBaseUrl}/upload`, {
         method: 'POST',
         body: formData,
       });

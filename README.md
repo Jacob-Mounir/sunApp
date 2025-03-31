@@ -11,6 +11,13 @@ A web application that helps users find sunny outdoor dining spots in Göteborg.
 - ⏰ Time-based sun exposure information
 - 🌡️ Information about venues with outdoor heaters
 
+## Live Demo
+
+Check out the live demo of the frontend application on GitHub Pages:
+[https://jacob-mounir.github.io/sunApp/](https://jacob-mounir.github.io/sunApp/)
+
+Note: The GitHub Pages deployment only includes the frontend static files. For full functionality, you'll need to deploy the backend API separately.
+
 ## Tech Stack
 
 ### Frontend
@@ -90,6 +97,36 @@ sunApp/
 - `GET /api/venues/:id` - Get venue by ID
 - `GET /api/venues/nearby` - Get venues near coordinates
 - `GET /api/sun/position` - Get sun position for given time and location
+
+## Deployment
+
+### GitHub Pages (Frontend Only)
+
+To deploy the frontend to GitHub Pages:
+
+1. Make sure your changes are committed and pushed to GitHub
+2. Run the deploy script:
+
+   ```bash
+   npm run deploy
+   ```
+
+This will:
+
+1. Build the project with the GitHub Pages base path
+2. Push the built files to the `gh-pages` branch
+3. Deploy the website to GitHub Pages
+
+### Backend Deployment
+
+For a fully functional application, you'll need to deploy the backend separately. Consider using services like:
+
+- Heroku
+- Render
+- Railway
+- AWS, Google Cloud, or Azure
+
+Remember to update the `apiBaseUrl` in `client/src/config.ts` to point to your deployed backend API.
 
 ## Testing
 

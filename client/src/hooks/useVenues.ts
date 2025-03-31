@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Venue, VenueSearch } from '@/types';
 import { apiRequest } from '@/lib/queryClient';
+import config from '../config';
 
 // Function to calculate distances for venues
 function calculateDistances(venues: Venue[], userLat: number, userLng: number): Venue[] {
@@ -41,10 +42,9 @@ export function useVenues(params: VenueSearch) {
   const roundedLat = Math.round(latitude * 100000) / 100000;
   const roundedLon = Math.round(longitude * 100000) / 100000;
 
-  return useQuery<Venue[]>({
-    queryKey: ['/api/venues', { latitude: roundedLat, longitude: roundedLon, radius, venueType }],
-    queryFn: async () => {
-      let url = `/api/venues?latitude=${roundedLat}&longitude=${roundedLon}`;
+  const fetchVenues = async () => {
+    try {
+      let url = `${config.apiBaseUrl}/venues?latitude=${roundedLat}&longitude=${roundedLon}`;
 
       if (radius) {
         url += `&radius=${radius}`;
@@ -64,7 +64,15 @@ export function useVenues(params: VenueSearch) {
 
       const venues = await response.json();
       return calculateDistances(venues, latitude, longitude);
-    },
+    } catch (error) {
+      console.error('Error fetching venues:', error);
+      throw error;
+    }
+  };
+
+  return useQuery<Venue[]>({
+    queryKey: ['venues', { latitude: roundedLat, longitude: roundedLon, radius, venueType }],
+    queryFn: fetchVenues,
     enabled: !!(latitude && longitude),
     staleTime: 15 * 60 * 1000, // 15 minutes
     gcTime: 30 * 60 * 1000, // 30 minutes
@@ -94,19 +102,19 @@ export function useVenues(params: VenueSearch) {
 // Hook to fetch a specific venue
 export function useVenue(id: string) {
   return useQuery<Venue>({
-    queryKey: ['/api/venues', id],
+    queryKey: ['venue', id],
     queryFn: async () => {
-      const response = await fetch(`/api/venues/${id}`);
-      if (!response.ok) {
-        if (response.status === 404) {
-          throw new Error('Venue not found');
+      try {
+        const response = await fetch(`${config.apiBaseUrl}/venues/${id}`);
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to fetch venue');
         }
-        if (response.status === 429) {
-          throw new Error('Rate limit exceeded');
-        }
-        throw new Error('Failed to fetch venue');
+        return response.json();
+      } catch (error) {
+        console.error('Error fetching venue:', error);
+        throw error;
       }
-      return response.json();
     },
     enabled: !!id,
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -136,14 +144,14 @@ export function useUpdateVenue() {
 
   return useMutation({
     mutationFn: (venue: Partial<Venue>) =>
-      apiRequest(`/api/venues/${venue._id}`, {
+      apiRequest(`${config.apiBaseUrl}/venues/${venue._id}`, {
         method: 'PATCH',
         body: JSON.stringify(venue),
       }),
     onSuccess: (_, variables) => {
       // Invalidate both the venues list and the specific venue
-      queryClient.invalidateQueries({ queryKey: ['/api/venues'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/venues', variables._id] });
+      queryClient.invalidateQueries({ queryKey: ['venues'] });
+      queryClient.invalidateQueries({ queryKey: ['venue', variables._id] });
     },
   });
 }
