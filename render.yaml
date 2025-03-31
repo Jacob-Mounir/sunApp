@@ -4,8 +4,8 @@ services:
     name: sunspotter-api
     runtime: node
     plan: free
-    buildCommand: npm install && npm run build
-    startCommand: node server/render.js
+    buildCommand: npm ci && npm run build
+    startCommand: node dist/index.js
     envVars:
       - key: NODE_ENV
         value: production
@@ -29,7 +29,7 @@ services:
   - type: web
     name: sunspotter-web
     runtime: static
-    buildCommand: npm install && npm run build
+    buildCommand: npm ci && npm run build
     staticPublishPath: ./dist/public
     routes:
       - type: rewrite
