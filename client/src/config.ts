@@ -7,8 +7,8 @@ const isGitHubPages = import.meta.env.BASE_URL.includes('github.io');
 let apiBaseUrl = '/api';
 
 if (isProduction && isGitHubPages) {
-	// This should be replaced with your actual deployed API endpoint
-	apiBaseUrl = 'https://your-deployed-api.com/api';
+	// Replace with your actual Render deployed API endpoint
+	apiBaseUrl = 'https://sunspotter-api.onrender.com/api';
 }
 
 export const config = {

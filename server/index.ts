@@ -15,33 +15,34 @@ import mongoose from 'mongoose';
 import { config } from './config';
 import { Scheduler } from './utils/scheduler';
 
-const app = express();
+// Create a function that can be called to start the server
+export async function createServer() {
+  const app = express();
 
-// Apply middleware
-app.use(corsMiddleware);
-app.use(express.json());
-app.use(requestLogger);
-app.use('/api', apiLimiter);
+  // Apply middleware
+  app.use(corsMiddleware);
+  app.use(express.json());
+  app.use(requestLogger);
+  app.use('/api', apiLimiter);
 
-// Serve static files from public directory
-app.use('/images', express.static(path.join(process.cwd(), 'public/images')));
+  // Serve static files from public directory
+  app.use('/images', express.static(path.join(process.cwd(), 'public/images')));
 
-// Error handling middleware
-app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-  const status = err.status || err.statusCode || 500;
-  const message = err.message || "Internal Server Error";
+  // Error handling middleware
+  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+    const status = err.status || err.statusCode || 500;
+    const message = err.message || "Internal Server Error";
 
-  log.error('Error handling request', {
-    error: err,
-    status,
-    message,
-    stack: err.stack,
+    log.error('Error handling request', {
+      error: err,
+      status,
+      message,
+      stack: err.stack,
+    });
+
+    res.status(status).json({ message });
   });
 
-  res.status(status).json({ message });
-});
-
-async function startServer() {
   try {
     // Connect to MongoDB
     await mongoose.connect(dbConfig.uri, {
@@ -111,11 +112,14 @@ async function startServer() {
       }, 5000);
     });
 
+    return server;
   } catch (error) {
     log.error('Failed to start server:', error);
     process.exit(1);
   }
 }
 
-// Start the server
-startServer();
+// Start the server if this file is run directly
+if (import.meta.url === `file://${process.argv[1]}`) {
+  createServer();
+}

@@ -487,6 +487,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Health check route for monitoring (used by Render)
+  app.get("/api/health", (req: Request, res: Response) => {
+    res.status(200).json({ status: "ok", message: "Server is running" });
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
