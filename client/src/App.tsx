@@ -13,6 +13,7 @@ import About from "@/pages/About";
 import VenueDetails from "@/pages/VenueDetails";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { AdminDashboard } from "@/pages/AdminDashboard";
+import { AuthProvider } from "@/contexts/AuthContext";
 
 function Router() {
   const [location] = useLocation();
@@ -39,8 +40,10 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <Router />
-        <Toaster />
+        <AuthProvider>
+          <Router />
+          <Toaster />
+        </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );

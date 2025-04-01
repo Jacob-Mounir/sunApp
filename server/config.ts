@@ -15,6 +15,13 @@ const envSchema = z.object({
 	// API Keys
 	OPENWEATHER_API_KEY: z.string().min(1),
 
+	// Google OAuth
+	GOOGLE_CLIENT_ID: z.string().optional(),
+	GOOGLE_CLIENT_SECRET: z.string().optional(),
+
+	// API Base URL
+	API_BASE_URL: z.string().default('http://localhost:3000'),
+
 	// Server
 	NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
 	PORT: z.string().transform(Number).pipe(z.number().positive()).default('5000'),
@@ -116,6 +123,13 @@ export const isTest = config.NODE_ENV === 'test';
 // Database configuration
 export const dbConfig = {
 	uri: config.MONGODB_URI,
+};
+
+// Authentication configuration
+export const authConfig = {
+	sessionSecret: config.SESSION_SECRET,
+	jwtSecret: config.JWT_SECRET,
+	jwtExpiresIn: config.JWT_EXPIRES_IN
 };
 
 // Cloudinary configuration

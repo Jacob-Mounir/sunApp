@@ -10,23 +10,59 @@ import { corsMiddleware } from "./middleware/cors";
 import { requestLogger } from "./middleware/logging";
 import { apiLimiter } from "./middleware/rateLimit";
 import { log } from "./utils/logger";
-import { serverConfig, dbConfig } from "./config";
+import { serverConfig, dbConfig, authConfig } from "./config";
 import mongoose from 'mongoose';
 import { config } from './config';
 import { Scheduler } from './utils/scheduler';
+import session from 'express-session';
+import passport from 'passport';
+import { configurePassport } from './config/passport';
+import authRouter from './routes/auth';
+import MemoryStore from 'memorystore';
 
 // Create a function that can be called to start the server
 export async function createServer() {
   const app = express();
 
+  // Set up session store
+  const SessionStore = MemoryStore(session);
+
+  // Determine if we're in production
+  const isProduction = app.get('env') === 'production';
+
+  // Configure sessions
+  app.use(session({
+    secret: authConfig.sessionSecret,
+    resave: false,
+    saveUninitialized: false,
+    store: new SessionStore({
+      checkPeriod: 86400000 // prune expired entries every 24h
+    }),
+    cookie: {
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
+      secure: isProduction, // Only use secure cookies in production
+      httpOnly: true, // Prevent client-side JS from reading the cookie
+      sameSite: isProduction ? 'strict' : 'lax' // Mitigate CSRF but allow development cross-origin
+    }
+  }));
+
   // Apply middleware
   app.use(corsMiddleware);
   app.use(express.json());
+
+  // Initialize Passport and restore authentication state from session
+  const passportInstance = configurePassport();
+  app.use(passport.initialize());
+  app.use(passport.session());
+
   app.use(requestLogger);
   app.use('/api', apiLimiter);
 
   // Serve static files from public directory
   app.use('/images', express.static(path.join(process.cwd(), 'public/images')));
+
+  // Register auth routes
+  app.use('/api/auth', authRouter);
 
   // Error handling middleware
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
