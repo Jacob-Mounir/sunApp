@@ -33,10 +33,10 @@ const envSchema = z.object({
 		.transform((val) => val.toLowerCase() === 'true')
 		.pipe(z.boolean())
 		.default('true'),
-	CACHE_DURATION_MINUTES: z.string()
-		.transform(Number)
-		.pipe(z.number().positive())
-		.default('30'),
+	CACHE_DURATION_MINUTES: z.coerce
+		.number()
+		.positive()
+		.default(30),
 
 	// Logging
 	LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
@@ -45,14 +45,14 @@ const envSchema = z.object({
 	ENABLE_SCHEDULED_BACKUPS: z.string()
 		.transform((val) => val.toLowerCase() === 'true')
 		.pipe(z.boolean())
-		.default(false),
-	BACKUP_INTERVAL_HOURS: z.string()
-		.transform(Number)
-		.pipe(z.number().positive())
+		.default('false'),
+	BACKUP_INTERVAL_HOURS: z.coerce
+		.number()
+		.positive()
 		.default(24),
-	MAX_BACKUPS: z.string()
-		.transform(Number)
-		.pipe(z.number().positive())
+	MAX_BACKUPS: z.coerce
+		.number()
+		.positive()
 		.default(5),
 	BACKUP_DIR: z.string().default(path.join(process.cwd(), 'backups')),
 
@@ -69,19 +69,19 @@ const envSchema = z.object({
 	JWT_EXPIRES_IN: z.string().default('24h'),
 
 	// Rate limiting
-	RATE_LIMIT_WINDOW: z.string()
-		.transform(Number)
-		.pipe(z.number().positive())
+	RATE_LIMIT_WINDOW: z.coerce
+		.number()
+		.positive()
 		.default(15),
-	RATE_LIMIT_MAX: z.string()
-		.transform(Number)
-		.pipe(z.number().positive())
+	RATE_LIMIT_MAX: z.coerce
+		.number()
+		.positive()
 		.default(100),
 
 	// Cache configuration
-	CACHE_TTL: z.string()
-		.transform(Number)
-		.pipe(z.number().positive())
+	CACHE_TTL: z.coerce
+		.number()
+		.positive()
 		.default(3600), // 1 hour in seconds
 
 	// Cloudinary Configuration
