@@ -14,6 +14,7 @@ import VenueDetails from "@/pages/VenueDetails";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { AdminDashboard } from "@/pages/AdminDashboard";
 import { AuthProvider } from "@/contexts/AuthContext";
+import LandingPage from "@/pages/LandingPage";
 
 function Router() {
   const [location] = useLocation();
@@ -30,7 +31,8 @@ function Router() {
       <Route path="/about" component={About} />
       <Route path="/venue/:id" component={VenueDetails} />
       <Route path="/admin" component={AdminDashboard} />
-      <Route path="/" component={Home} />
+      <Route path="/home" component={Home} />
+      <Route path="/" component={LandingPage} />
       <Route component={NotFound} />
     </Switch>
   );
