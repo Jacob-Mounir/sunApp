@@ -11,40 +11,40 @@
   .no-scrollbar::-webkit-scrollbar {
     display: none;  /* Chrome, Safari and Opera */
   }
-  
+
   /* Custom text shadows for headings */
   .text-shadow-sm {
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   }
-  
+
   .text-shadow-md {
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
   }
-  
+
   /* Gradient text for emphasis */
   .text-gradient {
     @apply bg-clip-text text-transparent bg-gradient-to-r from-amber-500 to-amber-600;
   }
-  
+
   /* Styled scrollbar for non-mobile devices */
   .styled-scrollbar {
     scrollbar-width: thin;
     scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
   }
-  
+
   .styled-scrollbar::-webkit-scrollbar {
     width: 5px;
   }
-  
+
   .styled-scrollbar::-webkit-scrollbar-track {
     background: transparent;
   }
-  
+
   .styled-scrollbar::-webkit-scrollbar-thumb {
     background-color: rgba(0, 0, 0, 0.1);
     border-radius: 20px;
   }
-  
+
   /* Custom blur effects */
   .backdrop-blur-xs {
     backdrop-filter: blur(2px);
@@ -290,7 +290,7 @@ html, body {
     /* Account for bottom navigation on mobile */
     height: calc(100% - 60px);
   }
-  
+
   /* Reduce number of elements on mobile for better performance */
   .rain-drop, .snow-flake, .cloud, .fog-patch {
     opacity: 0.7; /* Slightly reduce opacity for better visibility */
@@ -467,7 +467,7 @@ html, body {
   left: 0;
   width: 200%;
   height: 100%;
-  background: linear-gradient(to right, 
+  background: linear-gradient(to right,
     rgba(255, 255, 255, 0.05),
     rgba(255, 255, 255, 0.3),
     rgba(255, 255, 255, 0.05)
@@ -652,7 +652,7 @@ html, body {
   .map-container-wrapper {
     min-height: 250px;
   }
-  
+
   .leaflet-control-zoom {
     display: none; /* Hide zoom controls on small screens */
   }
@@ -717,7 +717,7 @@ html, body {
     font-size: 11px !important;
     padding: 4px 8px !important;
   }
-  
+
   .sun-icon-container svg {
     width: 14px !important;
     height: 14px !important;
@@ -729,11 +729,11 @@ html, body {
   .xs\:hidden {
     display: none;
   }
-  
+
   .xs\:inline {
     display: inline;
   }
-  
+
   .xs\:block {
     display: block;
   }
@@ -745,13 +745,13 @@ html, body {
   .bottom-nav-container {
     padding: 0.5rem 0;
   }
-  
+
   .bottom-nav-icon {
     width: 2rem;
     height: 2rem;
     margin-bottom: 0.25rem;
   }
-  
+
   .bottom-nav-label {
     font-size: 0.65rem;
   }
@@ -800,7 +800,7 @@ html, body {
     --ring: 39 100% 50%;
     --radius: 0.5rem;
   }
-  
+
   .dark {
     --background: 240 10% 3.9%;
     --foreground: 0 0% 98%;
@@ -920,4 +920,37 @@ html, body {
   100% {
     transform: translateX(100%);
   }
+}
+
+/* Login page animations */
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse-slow {
+  0% {
+    opacity: 0.8;
+    transform: scale(0.95);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 0.8;
+    transform: scale(0.95);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 12s linear infinite;
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 3s ease-in-out infinite;
 }
