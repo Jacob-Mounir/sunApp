@@ -1,6 +1,9 @@
 import cors from 'cors';
 import { serverConfig } from '../config';
 
+// Parse comma-separated CORS_ORIGIN environment variable
+const corsOriginsFromEnv = serverConfig.cors.origin.split(',').map(origin => origin.trim());
+
 // Configure CORS middleware to allow specific origins
 const allowedOrigins = [
 	'http://localhost:3000',
@@ -11,7 +14,8 @@ const allowedOrigins = [
 	'https://sunspotter-web.onrender.com', // Render frontend domain
 	'https://sunspotter-api.onrender.com', // Render API domain
 	'http://sunspotter-web.onrender.com',
-	'http://sunspotter-api.onrender.com'
+	'http://sunspotter-api.onrender.com',
+	...corsOriginsFromEnv // Add origins from environment variable
 ];
 
 // CORS configuration
