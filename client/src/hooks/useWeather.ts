@@ -63,6 +63,19 @@ const getGridCells = (bounds: MapBounds): GridCell[] => {
   return cells;
 };
 
+// Process OpenWeather API response data into our WeatherData format
+const processWeatherData = (data: any): WeatherData => {
+  return {
+    id: data.id || Math.floor(Math.random() * 1000000),
+    latitude: data.coord?.lat || 0,
+    longitude: data.coord?.lon || 0,
+    temperature: data.main?.temp,
+    weatherCondition: data.weather?.[0]?.main || '',
+    icon: data.weather?.[0]?.icon || '',
+    timestamp: new Date().toISOString()
+  };
+};
+
 export const useWeather = (latitude: number, longitude: number) => {
   const roundedLat = Math.round(latitude * 10000) / 10000;
   const roundedLon = Math.round(longitude * 10000) / 10000;
